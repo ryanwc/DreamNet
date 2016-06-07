@@ -1,0 +1,37 @@
+<DOCTYPE !html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8">
+		<link type="text/css" rel="stylesheet" href="/stylesheets/styles.css">
+		<title>
+			Signin Page
+		</title>
+	</head>
+
+	<body>
+
+		<h1>Signin to the Dream Multiblog</h1>
+
+		<form action="/signin" method="post">
+
+			<p>Enter username:</p>
+			<input type="text" label="Enter name:" name="name" placeholder="Name" {% if values %}value="{{values['name']}}"{% endif %}>{% if messages %}<span class="{{messages['name']['validity']}}">{{messages['name']['message']}}</span>{% endif %}
+			<br>
+
+			<p>Enter password:</p>
+			<input type="password" name="password" placeholder="Password" {% if values %}value="{{values['password']}}"{% endif %}>{% if messages %}<span class="{{messages['password']['validity']}}">{{messages['password']['message']}}</span>{% endif %}
+			<br>		
+
+			<p>Verify password:</p>
+			<input type="password" name="verifypassword" placeholder="Verify password" {% if values %}value="{{values['verifypassword']}}"{% endif %}>{% if messages %}<span class="{{messages['verifypassword']['validity']}}">{{messages['verifypassword']['message']}}</span>{% endif %}
+			<br>	
+
+			<p>Enter email:</p>
+			<input type="text" name="email" placeholder="Email" {% if values %}value="{{values['email']}}"{% endif %}>{% if messages %}<span class="{{messages['email']['validity']}}">{{messages['email']['message']}}</span>{% endif %}
+			<br>
+
+			<br>
+			<input type="submit">
+		</form>
+	</body>
+</html>

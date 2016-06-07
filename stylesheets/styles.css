@@ -1,0 +1,11 @@
+.invalid {
+	color: red;
+}
+
+.valid {
+	color: green;
+}
+
+body {
+	background-color: lightblue;
+}

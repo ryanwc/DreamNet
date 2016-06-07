@@ -1,0 +1,24 @@
+<DOCTYPE !html>
+<html>
+	<head>
+		<title>
+			Multiblog Homepage
+		</title>
+	</head>
+
+	<body>
+		{% if username %}
+			<h1>Knock knock, {{username}}...</h1>
+		{% endif %}
+
+		<p><a href="{{authentication['link']}}">{{authentication['linkText']}}</a>
+
+		<p><a href="{{url_for('newdream')}}">Post a dream</a>
+
+		<!-- will change later 
+
+		get the blog homepage stuff -->
+		<h1>hi!</h1>
+
+	</body>
+</html>
