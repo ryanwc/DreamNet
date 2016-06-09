@@ -1,0 +1,38 @@
+<DOCTYPE !html>
+<html lang="en-US">
+	<head>
+		<meta charset="UTF-8">
+		<link type="text/css" rel="stylesheet" href="/stylesheets/home.css">
+		<title>
+			View Dream
+		</title>
+	</head>
+
+	<body>
+
+		{% if username == dream.username %}
+			<div class="ownership">
+				<p>This is your dream.</p>
+				<p><a class="dreamaction" href="{{url_for('editdream', dream.key().id()|string)}}">Edit dream</a> | <a class="dreamaction" href="{{url_for('deletedream', dream.key().id()|string)}}">Delete dream</a></p>
+			</div>
+		{% endif %}
+
+		<div class="dream">
+			<h1 class="title">{dream.title}}</h2>
+			<p class="genres">Genres: {% for genre in dream.genres %}<span class="genre">{{genre}} | </span>{% endfor %}</p>
+			<p class="dateposted">Date posted: {{dream.date_posted}}</p>
+			<p class="datedreamt">Date dreamt: {{dream.date_dreamt}}</p>
+			<p class="places">Places involved: {% for place in dream.places %}<span class="place">{{place}} | </span>{% endfor %}</p>
+			<p class="people">People involved: {% for person in dream.people %}<span class="person">{{person}} | </span>{% endfor %}</p>
+			<p class="emotionsduring">Emotions during dream: {% for emotion in dream.emotions_during %}<span class="emotion">{{emotion}} | </span>{% endfor %}</p>
+			<p class="emotionsremembering">Emotions remembering dream: {% for emotion in dream.emotions_remembering %}<span class="emotion">{{emotion}} | </span>{% endfor %}</p>
+			<p class="lucidity">Lucidity: {{dream.lucidity}}</p>
+			<p class="lucidreason">Lucid reason: {{dream.lucid_reason}}</p>
+			<p class="control">Control: {{dream.control}}</p>
+			<p class="enjoyability">Enjoyability: {{dream.enjoyability}}</p>
+			<p class="awarenesslevel">This dream has increased the awareness of of {{dream.awareness_level}} dreamers</p>
+			<p class="view"><a href="{{url_for('viewdream', dream.key().id()|string)}}'">View dream</a></p>
+		</div>
+
+	</body>
+</html>

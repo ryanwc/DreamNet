@@ -2,7 +2,7 @@
 <html lang="en-US">
 	<head>
 		<meta charset="UTF-8">
-		<link type="text/css" rel="stylesheet" href="/stylesheets/styles.css">
+		<link type="text/css" rel="stylesheet" href="/stylesheets/forms.css">
 		<title>
 			Create and Post a New Dream
 		</title>
@@ -14,8 +14,8 @@
 
 		<form action="/dream/new" method="post">
 
-			<p>Enter subject:</p>
-			<input type="text" name="subject" placeholder="Subject" {% if values %}value="{{dreamDict['subject']}}"{% endif %}>{% if messages %}<span class="{{messages['subject']['validity']}}">{{messages['subject']['message']}}</span>{% endif %}
+			<p>Enter title:</p>
+			<input type="text" name="title" placeholder="Title" {% if values %}value="{{dreamDict['subject']}}"{% endif %}>{% if messages %}<span class="{{messages['subject']['validity']}}">{{messages['subject']['message']}}</span>{% endif %}
 			<br>
 
 			<p>Enter content:</p>

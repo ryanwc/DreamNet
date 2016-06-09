@@ -2,18 +2,80 @@
 <html lang="en-US">
 	<head>
 		<meta charset="UTF-8">
-		<link type="text/css" rel="stylesheet" href="/stylesheets/styles.css">
+    	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    	<script src="/js/bootstrap.min.js"></script>
+       	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.css">
+		<link type="text/css" rel="stylesheet" href="/stylesheets/dream.css">
 		<title>
 			View Dream
 		</title>
 	</head>
 
 	<body>
+		<!-- start bootstrap container -->
+		<div class="container">
 
-		<h1>Dream ID: {{dream.id}}</h1>
+			{% if username == dream.username %}
+				<div class="row ownership">
+					<div class="col-xs-12">
+						<p>This is your dream.</p>
+						<p><a class="dreamaction" href="{{url_for('editdream', id=dream.key().id()|string)}}">Edit dream</a> | <a class="dreamaction" href="{{url_for('deletedream', id=dream.key().id()|string)}}">Delete dream</a></p>
+					</div>
+				</div>
+			{% endif %}
 
-		<p>Subject: {{dream.subject}}</p>
-		<p>Content: {{dream.content}}</p>
+			<div class="dream">
+				<div class="row">
+					<div class="col-xs-12">
+						<h1 class="title">Dream: {{dream.title}}</h1>
+					</div>
+				</div>
 
+				<div class="row">
+					<div class="col-xs-12">
+						<p class="content">{{dream.content}}</p>
+						<span class="awarenesslevel"><span id="awarenessnumber">{{dream.awareness_level}}</span> dreamers are now more aware</span>
+					</div>
+				</div>
+
+				<div class="row dreamstats">
+					<div class="col-xs-12">
+						<ul>
+							<li class="genres">Genres: {% for genre in dream.genres %}<span class="genre">{{genre}} | </span>{% endfor %}</li>
+							<li class="dateposted">Date posted: {{dream.date_posted}}</li>
+							<li class="datedreamt">Date dreamt: {{dream.date_dreamt}}</li>
+							<li class="places">Places involved: {% for place in dream.places %}<span class="place">{{place}} | </span>{% endfor %}</li>
+							<li class="people">People involved: {% for person in dream.people %}<span class="person">{{person}} | </span>{% endfor %}</li>
+							<li class="emotionsduring">Emotions during dream: {% for emotion in dream.emotions_during %}<span class="emotion">{{emotion}} | </span>{% endfor %}</li>
+							<li class="emotionsremembering">Emotions remembering dream: {% for emotion in dream.emotions_remembering %}<span class="emotion">{{emotion}} | </span>{% endfor %}</li>
+							<li class="lucidity">Lucidity: {{dream.lucidity}}</li>
+							<li class="lucidreason">Lucid reason: {{dream.lucid_reason}}</li>
+							<li class="control">Control: {{dream.control}}</li>
+							<li class="enjoyability">Enjoyability: {{dream.enjoyability}}</li>
+						</ul>
+					</div>
+				</div>
+
+			</div>
+
+			<div id="menu">
+				<div class="row" id="authentication">
+					<div class="col-xs-12">
+						{% if username %}
+							<p><a href="{{url_for('logout')}}">Sign out</a></p>
+						{% else %}
+							<p><a href="{{url_for('register')}}">Register a new account</a> | <a href="{{url_for('signin')}}">Sign in to an existing account</a>
+						{% endif %}
+					</div>
+				</div>
+				<div class="row" id="about">
+					<div class="col-xs-12">
+						<p><a href="{{url_for('about')}}">About Dream Blog</a></p>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<!-- end bootstrap container -->
 	</body>
 </html>

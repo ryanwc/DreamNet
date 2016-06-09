@@ -1,24 +1,53 @@
 <DOCTYPE !html>
 <html>
 	<head>
+		<meta charset="UTF-8">
+		<link type="text/css" rel="stylesheet" href="/stylesheets/home.css">
 		<title>
-			Multiblog Homepage
+			Dreamblog Homepage
 		</title>
 	</head>
 
 	<body>
-		{% if username %}
-			<h1>Knock knock, {{username}}...</h1>
-		{% endif %}
 
-		<p><a href="{{authentication['link']}}">{{authentication['linkText']}}</a>
+		<div id="menu">
+			<div id="authentication">
+				{% if username %}
+					<h1 id="welcome-message">Knock knock, {{username}}...</h1>
+					<p><a href="{{url_for('logout')}}">Sign out</a></p>
+				{% else %}
+					<p><a href="{{url_for('register')}}">Register a new account</a>
+					<p><a href="{{url_for('signin')}}">Sign in to an existing account</a>
+				{% endif %}
+			</div>
+			<p><a href="{{url_for('about')}}">About Dream Blog</a></p>
+		<div>
 
 		<p><a href="{{url_for('newdream')}}">Post a dream</a>
 
 		<!-- will change later 
 
 		get the blog homepage stuff -->
-		<h1>hi!</h1>
+		{% for dream in dreams %}
+			<div class="dream">
+				<h2 class="subject">Dream: {dream.title}}</h2>
+				<ul>
+					<li class="genres">Genres: {% for genre in dream.genres %}<span class="genre">{{genre}} | </span>{% endfor %}</li>
+					<li class="dateposted">Date posted: {{dream.date_posted}}</li>
+					<li class="datedreamt">Date dreamt: {{dream.date_dreamt}}</li>
+					<li class="places">Places involved: {% for place in dream.places %}<span class="place">{{place}} | </span>{% endfor %}</li>
+					<li class="people">People involved: {% for person in dream.people %}<span class="person">{{person}} | </span>{% endfor %}</li>
+					<li class="emotionsduring">Emotions during dream: {% for emotion in dream.emotions_during %}<span class="emotion">{{emotion}} | </span>{% endfor %}</li>
+					<li class="emotionsremembering">Emotions remembering dream: {% for emotion in dream.emotions_remembering %}<span class="emotion">{{emotion}} | </span>{% endfor %}</li>
+					<li class="lucidity">Lucidity: {{dream.lucidity}}</li>
+					<li class="lucidreason">Lucid reason: {{dream.lucid_reason}}</li>
+					<li class="control">Control: {{dream.control}}</li>
+					<li class="enjoyability">Enjoyability: {{dream.enjoyability}}</li>
+					<li class="awarenesslevel">This dream has increased the awareness of of {{dream.awareness_level}} dreamers</li>
+					<li class="view"><a href="{{url_for('viewdream', id=dream.key().id()|string)}}'">View dream</a></li>
+				</ul>
+			</div>
+		{% endfor %}
 
 	</body>
 </html>
