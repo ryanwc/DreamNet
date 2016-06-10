@@ -1,3 +1,5 @@
+/* globals */
+
 body {
 	background-color: #8080ff;
 	color: white;
@@ -9,6 +11,17 @@ a {
 	color: white;
 }
 
+.dreamlink {
+	text-decoration: underline;
+}
+
+.dreamheader {
+	border-top: 2px solid white;
+	padding-top: 5px;
+}
+
+/* content */
+
 .content {
 	max-height: 500px;
 	overflow-y: scroll;
@@ -18,8 +31,18 @@ a {
 	padding: 5px;
 }
 
+@media screen and (max-width: 499px) {
+	.content {
+		max-height: 300px;
+	}
+}
+
+/* awareness */
+
 .awarenesslevel {
 	font-family: "Courier";
+	max-width: 300px;
+	min-height: 60px;
 	color: green;
 	font-weight: bold;
 	background-color: black;
@@ -34,6 +57,27 @@ a {
 }
 
 #awarenessicon {
-	max-height: 30px;
-	max-width: 30px;
+	float: left;
+	max-height: 50px;
+	max-width: 50px;
+}
+
+#awarenessupvote {
+	color: green;
+	font-weight: bold;
+}
+
+#likedream {
+	color: green;
+}
+
+#likedream:hover {
+	color: white;
+	font-weight: normal;
+}
+
+/* others */
+
+.dreamstatslist {
+	padding-left: 20px;
 }

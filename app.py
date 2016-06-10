@@ -33,8 +33,8 @@ class User(db.Model):
 
 class Dream(db.Model):
 	#required = true
-	username = db.ReferenceProperty(User,
-									collection_name = "dreams")
+	user = db.ReferenceProperty(User,
+							 	collection_name = "dreams")
 	title = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
 	#should be datetime
@@ -163,21 +163,30 @@ class Home(Handler):
 
 class NewDream(Handler):
 	def get(self):
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+
+		if not username:
+			return redirect_to("signin")
 
 		self.render("newdream.html", dreamDict=None, messages=None)
 
 	def post(self):
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		users = User.all()
+		users.filter("username =", username)
+		user = users.get()
+
+		if not username:
+			return redirect_to("signin")
 
 		dreamDict = {}
 		# to change
+		dreamDict["user"] = user
 		dreamDict["title"] = self.request.get("title")
 		dreamDict["content"] = self.request.get("content")
-
-		dreamDict["subject"] = ""
 		dreamDict["genres"] = []
 		dreamDict["date_dreamt"] = "test"
 		dreamDict["date_posted"] = "test"
-		dreamDict["genres"] = []
 		dreamDict["places"] = []
 		dreamDict["people"] = []
 		dreamDict["emotions_during"] = []
@@ -199,10 +208,10 @@ class NewDream(Handler):
 									   "validity": "invalid"}		
 		else:
 			messages["title"] = {"message": "Please provide a title",
-								   "validity": "invalid"}
+								 "validity": "invalid"}
 
 		if dreamDict["content"]:
-			if len(dreamDict["content"]) < 10000:
+			if len(dreamDict["content"]) < 50000:
 				messages["content"] = {"message": "Content OK",
 						 			   "validity": "valid"}
 			else:
@@ -212,8 +221,8 @@ class NewDream(Handler):
 			messages["content"] = {"message": "Please provide content",
 								   "validity": "invalid"}
 
-		messages["subject"] = {"message": "OK",
-							    "validity": "valid"}
+		messages["user"] = {"message": "OK",
+							"validity": "valid"}
 		messages["date_dreamt"] = {"message": "OK",
 							    "validity": "valid"}
 		messages["date_posted"] = {"message": "OK",
@@ -431,18 +440,20 @@ class ViewDream(Handler):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
+		print username
+		print dream.user.username
+
 		self.render("viewdream.html", dream=dream, username=username)
 
 class EditDream(Handler):
 	def get(self, id=None):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		dream = Dream.get_by_id(int(id))
 
 		if not username:
 			return redirect_to("signin")
 		elif username != dream.username:
 			return redirect_to("home")
-
-		dream = Dream.get_by_id(int(id))
 
 		self.render("editdream.html", dream=dream)
 
@@ -453,19 +464,30 @@ class EditDream(Handler):
 class DeleteDream(Handler):
 	def get(self, id=None):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		dream = Dream.get_by_id(int(id))
 
 		if not username:
 			return redirect_to("signin")
 		elif username != dream.username:
 			return redirect_to("home")
 
-		dream = Dream.get_by_id(int(id))
-
 		self.render("deletedream.html", dream=dream)
 
 	def post(self, id=None):
 
 		self.render("deletedream.html", dream=dream)
+
+class LikeDream(Handler):
+	def get(self, id=None):
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		dream = Dream.get_by_id(int(id))
+
+		if not username:
+			return redirect_to("signin")
+
+		dream.awareness_level += 1
+
+		return redirect_to("viewdream", id=id)
 
 class About(Handler):
 	def get(self):
@@ -488,6 +510,7 @@ app = webapp2.WSGIApplication(
 		 webapp2.Route("/signin", handler=Signin, name="signin"),
 		 webapp2.Route("/logout", handler=Logout, name="logout"),
 		 webapp2.Route("/dream/view/<id>", handler=ViewDream, name="viewdream"),
+		 webapp2.Route("/dream/like/<id>", handler=LikeDream, name="likedream"),
 		 webapp2.Route("/dream/edit/<id>", handler=EditDream, name="editdream"),
 		 webapp2.Route("/dream/delete/<id>", handler=DeleteDream, name="deletedream"),
 		 webapp2.Route("/dream/new", handler=NewDream, name="newdream")],
