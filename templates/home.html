@@ -30,7 +30,7 @@
 		get the blog homepage stuff -->
 		{% for dream in dreams %}
 			<div class="dream">
-				<h2 class="subject">Dream: {dream.title}}</h2>
+				<h2 class="subject">Dream: {{dream.title}}</h2>
 				<ul>
 					<li class="genres">Genres: {% for genre in dream.genres %}<span class="genre">{{genre}} | </span>{% endfor %}</li>
 					<li class="dateposted">Date posted: {{dream.date_posted}}</li>
@@ -44,7 +44,7 @@
 					<li class="control">Control: {{dream.control}}</li>
 					<li class="enjoyability">Enjoyability: {{dream.enjoyability}}</li>
 					<li class="awarenesslevel">This dream has increased the awareness of of {{dream.awareness_level}} dreamers</li>
-					<li class="view"><a href="{{url_for('viewdream', id=dream.key().id()|string)}}'">View dream</a></li>
+					<li class="view"><a href="{{url_for('viewdream', id=dream.key().id()|string)}}">View dream</a></li>
 				</ul>
 			</div>
 		{% endfor %}

@@ -1,4 +1,5 @@
-import os, webapp2, jinja2, re, hashlib, hmac, random, string, random
+import os, webapp2, jinja2, re, hashlib, hmac, random
+import string, random, cPickle as pickle
 from webapp2 import redirect_to
 from google.appengine.ext import db
 #import bleach third party lib?
@@ -30,6 +31,7 @@ class User(db.Model):
 	#birthdate = db.DateProperty(required = True)
 	#nationality = db.StringProperty(required = True)
 	email = db.StringProperty(required = True)
+	useful_dreams = db.StringProperty(required = True, multiline = True)
 
 class Dream(db.Model):
 	#required = true
@@ -53,6 +55,7 @@ class Dream(db.Model):
 	control = db.IntegerProperty(required = True)
 	enjoyability = db.IntegerProperty(required = True)
 	awareness_level = db.IntegerProperty(required = True)
+	aware_users = db.StringProperty(required = True, multiline = True)
 
 	## maybe not right, idea is to render \n as HTML breaks
 	def render(self):
@@ -153,9 +156,12 @@ class Home(Handler):
 
 		self.response.set_cookie("visits", visit_cookie_val)
 
-		dreamQ = Dream.all().order("date_posted")
+		dreamQ = Dream.all()
+		print dreamQ
 		dreams = []
-		for dream in dreamQ.run():
+		for dream in dreamQ:
+			print "adding "
+			print dream
 			dreams.append(dream)
 
 		self.render("home.html", username=username,
@@ -196,6 +202,10 @@ class NewDream(Handler):
 		dreamDict["control"] = 0
 		dreamDict["enjoyability"] = 0
 		dreamDict["awareness_level"] = 0
+
+		aware_users = {}
+
+		dreamDict["aware_users"] = pickle.dumps(aware_users)
 
 		messages = {}
 
@@ -247,6 +257,8 @@ class NewDream(Handler):
 							    "validity": "valid"}
 		messages["awareness_level"] = {"message": "OK",
 							    	   "validity": "valid"}
+		messages["aware_users"] = {"message": "OK",
+							       "validity": "valid"}
 
 		for attr in dreamDict:
 			if messages[attr]["validity"] == "invalid":
@@ -336,7 +348,10 @@ class Register(Handler):
 
 		saltedpasshash = make_pw_hash(name, password)
 
-		user = User(username=name, password=saltedpasshash, email=email)
+		useful_dreams = {}
+
+		user = User(username=name, password=saltedpasshash, 
+					email=email, useful_dreams=pickle.dumps(useful_dreams))
 		user.put()
 
 		# if more than one with this email or user name, delete this one
@@ -480,12 +495,33 @@ class DeleteDream(Handler):
 class LikeDream(Handler):
 	def get(self, id=None):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		users = User.all()
+		user = users.filter("username =", username).get()
+
 		dream = Dream.get_by_id(int(id))
 
 		if not username:
-			return redirect_to("signin")
+			return redirect_to("viewdream", id=id)
 
-		dream.awareness_level += 1
+		if user.key().id() == dream.user.key().id():
+			return redirect_to("viewdream", id=id)
+
+		aware_users = pickle.loads(str(dream.aware_users))
+		useful_dreams = pickle.loads(str(user.useful_dreams))
+
+		if (not user.key().id() in aware_users and 
+			not long(id) in useful_dreams):
+
+			dream.awareness_level += 1
+
+			aware_users[user.key().id()] = True
+			dream.aware_users = pickle.dumps(aware_users)
+			dream.put()
+
+			useful_dreams[long(id)] = True
+			user.useful_dreams = pickle.dumps(useful_dreams)
+			user.put()
+
 
 		return redirect_to("viewdream", id=id)
 

@@ -80,18 +80,15 @@
 					</div>
 				</div>
 
-				<div class="row" id="authentication">
+				<div class="row">
 					<div class="col-xs-12">
-						{% if username %}
-							<p><a class="dreamlink" href="{{url_for('logout')}}">Sign out</a></p>
-						{% else %}
-							<p><a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a href="{{url_for('signin')}}">Sign in to an existing account</a>
-						{% endif %}
-					</div>
-				</div>
-				<div class="row" id="about">
-					<div class="col-xs-12">
-						<p><a class="dreamlink" href="{{url_for('about')}}">About Dream Blog</a></p>
+						<p>
+							{% if username %}
+								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
+							{% else %}
+								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a href="{{url_for('signin')}}">Sign in to an existing account</a>
+							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About Dream Blog</a>
+						</p>
 					</div>
 				</div>
 			</div>
