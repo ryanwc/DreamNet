@@ -32,3 +32,8 @@ a {
 	text-decoration: underline;
 	text-shadow: 0 0;
 }
+
+#awarenessicon {
+	max-height: 30px;
+	max-width: 30px;
+}
