@@ -2,10 +2,10 @@
 <html lang="en-US">
 	<head>
 		<meta charset="UTF-8">
-		<!--
+		<!-- not needed right now
     	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
     	<script src="/js/bootstrap.min.js"></script> -->
-       	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.css">
+       	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
 		<link type="text/css" rel="stylesheet" href="/stylesheets/dream.css">
 		<title>
 			View Dream
@@ -72,7 +72,7 @@
 
 			</div>
 
-			<div>
+			<div class="nondream">
 
 				<div class="row">
 					<div class="col-xs-12">
@@ -83,14 +83,16 @@
 				<div class="row">
 					<div class="col-xs-12">
 						<p>
+							<a class="dreamlink" href="{{url_for('index')}}">Home</a> | 
 							{% if username %}
 								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
 							{% else %}
 								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a href="{{url_for('signin')}}">Sign in to an existing account</a>
-							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About Dream Blog</a>
+							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
 						</p>
 					</div>
 				</div>
+
 			</div>
 
 		</div>

@@ -14,7 +14,7 @@
 
 		<form action="/dream/new" method="post">
 
-			<p>Enter title:</p>
+			<p>What title would you give the dream?</p>
 			<input type="text" name="title" placeholder="Title" {% if values %}value="{{dreamDict['subject']}}"{% endif %}>{% if messages %}<span class="{{messages['subject']['validity']}}">{{messages['subject']['message']}}</span>{% endif %}
 			<br>
 
@@ -25,5 +25,174 @@
 			<br>
 			<input type="submit">
 		</form>
+
+
+date_dreamt = date type
+
+"we haven't seen this phrase yet -- is it a theme, person, place, feeling, or thing?"
+
+"we tag each dream with themes, people, places, things, and feelings.  just type a phrase that comes to mind.  see below for examples of each category."
+
+'''
+themes: flying, nightmare, futuristic, missed/late to appointment/event
+people: mother, son-in-law, boss/manager, best friend, person from childhood
+places: foreign country, kitchen, house, hospital, alien world
+feelings: happiness, terror, courage, envy, hatred, love
+things: 
+'''
+
+Themes:
+flying
+falling
+nudity
+sex
+nightmare
+being chased
+paralysis
+trapped
+difficult to move
+food/eating
+death
+violence
+school/classroom/exam
+water
+demonic
+aliens
+animals
+religious
+angelic
+ghosts/vampires/other fantasy creatures
+missed/late to appointment/event
+travel
+futuristic
+in the past
+light
+darkness
+
+People:
+mother
+father
+brother
+sister
+cousin
+aunt
+uncle
+son
+daughter
+neice
+nephew
+cousin
+grandfather
+grandmother
+grandson
+granddaughter
+mother-in-law
+father-in-law
+brother-in-law
+sister-in-law
+son-in-law
+daughter-in-law
+boss/manager
+direct report
+employee
+coworker
+wife
+girlfriend
+husband
+boyfriend
+best friend
+friend
+aquaintance
+business partner
+crush
+person from childhood
+person from highschool
+person from college
+teacher/professor
+
+Places:
+foreign country
+countryside
+kitchen
+bedroom
+livingroom
+bathroom
+hallway
+ruins
+military base
+heaven
+hell
+beach
+house
+road/highway
+ocean
+lake
+river
+swamp
+desert
+glacier
+rainforest
+forest
+boat
+cave
+office building
+abandoned building
+stadium
+open field
+farm
+mountain
+airport
+school
+classroom
+hospital
+doctor's office
+science facility
+outer space
+spaceship
+alien world
+
+feelings:
+happiness
+ecstacy
+sadness
+sorrow/grief
+depression
+fear
+terror
+disgust
+anger
+indignation
+hatred
+love
+anxiety
+relief
+shame
+pride
+envy
+goodwill
+confusion
+clarity
+pain (physical)
+pleasure (physical)
+stress
+relaxation
+caution
+rashness
+kindness
+pity
+cruelty
+courage
+cowardice
+wonder
+boredom
+
+
+
+	lucidity = db.IntegerProperty(required = True)
+	lucid_reason = db.StringProperty()
+	control = db.IntegerProperty(required = True)
+	enjoyability = db.IntegerProperty(required = True)
+	awareness_level = db.IntegerProperty(required = True)
+	aware_users = db.StringProperty(required = True, multiline = True)
 	</body>
 </html>

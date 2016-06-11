@@ -38,14 +38,14 @@ class Dream(db.Model):
 	user = db.ReferenceProperty(User,
 							 	collection_name = "dreams")
 	title = db.StringProperty(required = True)
-	content = db.TextProperty(required = True)
+	content = db.TextProperty(required = True, multiline=True)
 	#should be datetime
 	# auto now add
 	# what other properties do we want to keep? location? language?
 	# need to balance easy to do form but get info
 	date_dreamt = db.TextProperty(required = True)
-	date_posted = db.TextProperty(required = True)
-	genres = db.StringListProperty(required = True)
+	date_posted = db.TextProperty(required = True, auto_now_add=True)
+	themes = db.StringListProperty(required = True)
 	places = db.StringListProperty(required = True)
 	people = db.StringListProperty(required = True)
 	emotions_during = db.StringListProperty(required = True)
@@ -128,18 +128,8 @@ def getUserFromSecureCookie(username_cookie_val):
 
 # define template servers
 class Home(Handler):
-	def get(self):
+	def get(self, page=1):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
-
-		# set some vars based on username
-		authentication = {}
-		if username:
-			# todo: implement signout
-			authentication["link"] = "#"
-			authentication["linkText"] = "Sign out"
-		else:
-			authentication["link"] = webapp2.uri_for("register")
-			authentication["linkText"] = "Sign in or create profile"
 
 		# get/set a cookie that tracks number of visits
 		visits = 0
@@ -157,15 +147,13 @@ class Home(Handler):
 		self.response.set_cookie("visits", visit_cookie_val)
 
 		dreamQ = Dream.all()
-		print dreamQ
+		#dreamQ.order("date_posted")
 		dreams = []
-		for dream in dreamQ:
-			print "adding "
-			print dream
+		start = (page-1)*10
+		for dream in dreamQ.run(offset=start, limit=start+10):
 			dreams.append(dream)
 
-		self.render("home.html", username=username,
-			authentication=authentication, dreams=dreams)
+		self.render("home.html", username=username, dreams=dreams)
 
 class NewDream(Handler):
 	def get(self):
@@ -190,7 +178,7 @@ class NewDream(Handler):
 		dreamDict["user"] = user
 		dreamDict["title"] = self.request.get("title")
 		dreamDict["content"] = self.request.get("content")
-		dreamDict["genres"] = []
+		dreamDict["themes"] = []
 		dreamDict["date_dreamt"] = "test"
 		dreamDict["date_posted"] = "test"
 		dreamDict["places"] = []
@@ -237,7 +225,7 @@ class NewDream(Handler):
 							    "validity": "valid"}
 		messages["date_posted"] = {"message": "OK",
 							    "validity": "valid"}
-		messages["genres"] = {"message": "OK",
+		messages["themes"] = {"message": "OK",
 							    "validity": "valid"}
 		messages["places"] = {"message": "OK",
 							    "validity": "valid"}
@@ -540,7 +528,8 @@ class Logout(Handler):
 # To get the ID of an entity you just created: obj.key().id()
 
 app = webapp2.WSGIApplication(
-		[webapp2.Route("/home", handler=Home, name="home"),
+		[webapp2.Route("/home", handler=Home, name="index"),
+		 webapp2.Route("/home/<page>", handler=Home, name="home"),
 		 webapp2.Route("/about", handler=About, name="about"),
 		 webapp2.Route("/register", handler=Register, name="register"),
 		 webapp2.Route("/signin", handler=Signin, name="signin"),
