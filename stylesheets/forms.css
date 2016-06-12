@@ -1,3 +1,23 @@
+body {
+	background-color: #8080ff;
+	text-shadow: 1px 1px #000000;
+	color: white;
+	font-family: "Garamond";
+}
+
+h1 {
+	border-bottom: 2px solid white;
+	margin-bottom: 10px;
+}
+
+.encouragement {
+	font-size: 120%;
+	background-color: lightgrey;
+	color: black;
+	text-shadow: none;
+	padding: 5px;
+}
+
 .invalid {
 	color: red;
 }
@@ -6,6 +26,116 @@
 	color: green;
 }
 
-body {
+.prompt {
+	font-size: 110%;
+}
+
+.input {
+	color: black;
+	font-family: "Courier";
+}
+
+#description {
+	width: 50%;
+	min-width: 260px;
+	overflow-y: scroll;
+}
+
+#content {
+	width: 100%;
+	overflow-y: scroll;
+}
+
+/* tags */
+
+fieldset {
+    border: solid 1px #000;
+    padding:10px;
+    display:block;
+    clear:both;
+    margin:5px 0px;
+}
+
+.hint {
+	text-shadow: 1px 1px #000000;
+	color: white;
+	font-family: "Garamond";
+}
+
+legend {
+    padding:0px 10px;
+    background:black;
+    color:#FFF;
+}
+
+.tag {
+	color: black;
+}
+
+.taglegend {
+	display: inline-block;
+	padding-bottom: 5px;
+	border-bottom: 1px solid black;
+	margin-bottom: 5px;
+}
+
+.taglegendtag {
+	display: inline-block;
+	padding: 5px;
+	text-shadow: none;
+}
+
+.tagtiptext {
+    visibility: hidden;
+    max-width: 240px;
+    background-color: black;
+    color: white;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+}
+
+.taglegendtag:hover {
+	border: 1px dotted #000;
+}
+
+.taglegendtag:hover .tagtiptext {
+    visibility: visible;
+}
+
+.tag {
+    margin:5px;
+}
+
+.remove {
+    margin:5px;
+}
+
+.removetext {
+	color: #b30000;
+}
+
+.type {
 	background-color: lightblue;
+}
+
+.person {
+	background-color: lightgreen;
+}
+
+.place {
+	background-color: yellow;
+}
+
+.thing {
+	background-color: orange;
+}
+
+.emotion {
+	background-color: violet;
+}
+
+.sensation {
+	background-color: #9f1aff;
 }

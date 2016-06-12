@@ -38,13 +38,13 @@ class Dream(db.Model):
 	user = db.ReferenceProperty(User,
 							 	collection_name = "dreams")
 	title = db.StringProperty(required = True)
-	content = db.TextProperty(required = True, multiline=True)
+	content = db.TextProperty(required = True)
 	#should be datetime
 	# auto now add
 	# what other properties do we want to keep? location? language?
 	# need to balance easy to do form but get info
-	date_dreamt = db.TextProperty(required = True)
-	date_posted = db.TextProperty(required = True, auto_now_add=True)
+	date_dreamt = db.DateProperty(required = True)
+	date_posted = db.DateTimeProperty(auto_now_add=True)
 	themes = db.StringListProperty(required = True)
 	places = db.StringListProperty(required = True)
 	people = db.StringListProperty(required = True)

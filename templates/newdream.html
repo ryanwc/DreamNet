@@ -2,6 +2,9 @@
 <html lang="en-US">
 	<head>
 		<meta charset="UTF-8">
+    	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    	<script src="/js/bootstrap.min.js"></script>
+       	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
 		<link type="text/css" rel="stylesheet" href="/stylesheets/forms.css">
 		<title>
 			Create and Post a New Dream
@@ -10,38 +13,133 @@
 
 	<body>
 
-		<h1>Tell us about your dream</h1>
+		<div class="container">
 
-		<form action="/dream/new" method="post">
+			<div class="row">
+				<div class="col-xs-12">
+					<h1>Remember and record a dream</h1>
+				</div>
+			</div>
 
-			<p>What title would you give the dream?</p>
-			<input type="text" name="title" placeholder="Title" {% if values %}value="{{dreamDict['subject']}}"{% endif %}>{% if messages %}<span class="{{messages['subject']['validity']}}">{{messages['subject']['message']}}</span>{% endif %}
-			<br>
+			<div class="row">
+				<div class="col-xs-12">
+					<p class="encouragement">We sympathize... remembering a dream can be challenging!  So, we'll start with simple questions and build up to the full story.<br>If you can't remember much (maybe just a feeling), that's fine!  With practice, you'll be surprised how much you can remember.</p>
+				</div>
+			</div>
 
-			<p>Enter content:</p>
-			<textarea name="content" placeholder="Content" {% if values %}value="{{dreamDict['content']}}"{% endif %}></textarea>{% if messages %}<span class="{{messages['content']['validity']}}">{{messages['content']['message']}}</span>{% endif %}
-			<br>		
+			<div class="row" id="formrow">
+				<div class="col-xs-12 formcol">
+					<form role="form" action="/dream/new" method="post">
 
-			<br>
-			<input type="submit">
-		</form>
+						<div class="row">
+							<div class="col-xs-12 prompt">
+								<p>What day did you have the dream?</p>
+							</div>
+							<div class="col-xs-12 input">
+								<input type="date">
+							</div>
+						</div>
+						<br>
+
+						<div class="row">
+							<div class="col-xs-12 prompt">
+								<p>If the dream was a story, what would its title be?</p>
+							</div>
+							<div class="col-xs-12 input">
+								<input type="text" name="title" size="30" placeholder="Title" {% if values %}value="{{dreamDict['subject']}}"{% endif %}>{% if messages %}<span class="{{messages['subject']['validity']}}">{{messages['subject']['message']}}</span>{% endif %}
+							</div>
+						</div>
+						<br>
+
+						<div class="row">
+							<div class="col-xs-12 prompt">
+								<p>What's a one or two sentence description of the dream?</p>
+							</div>
+							<div class="col-xs-12 input">
+								<textarea id="description" name="description" rows="3" cols="40" placeholder="Description" {% if values %}value="{{dreamDict['description']}}"{% endif %}></textarea>{% if messages %}<span class="{{messages['description']['validity']}}">{{messages['description']['message']}}</span>{% endif %}
+							</div>
+						</div>
+						<br>		
+
+						<div class="row">
+							<div class="col-xs-12 prompt">
+							    <p>Dream tags*: Tag the dream with types, people, places, things, and emotions:</p>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-xs-12 input">
+							    <input type="text" id="tagname" placeholder="Dream tag">
+							    <select id="tagtype">
+							    	<option value="type">type</option>
+							      	<option value="place">place</option>
+							      	<option value="person">person</option>
+							      	<option value="thing">thing</option>
+							      	<option value="emotion">emotion</option>
+							      	<option value="sensation">sensation</option>
+							    </select>
+								<input type="button" value="Add tag" class="input add" id="add">
+								<br>
+								<span class="hint">* mouse over the colored icons below for examples of each kind of tag</span>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-xs-12 enteredtags">
+								<fieldset id="tags">
+								    <legend>Dream tags</legend>
+								    <div class="taglegend">
+									    <div class="tag taglegendtag type">type<span class="tagtiptext">A "type" tag indicates an important theme that describes the dream.  Examples include "flying", "nightmare", "futuristic", "missed/late to appointment/event", and "past".</span></div>
+									    <div class="tag taglegendtag person">person<span class="tagtiptext">A "person" tag identifies a person who appeared in the dream.  Examples include "mother", "son-in-law", "boss/manager", "best friend", and "person from childhood". (Note: No real names!)</span></div>
+									    <div class="tag taglegendtag place">place<span class="tagtiptext">A "place" tag identifies a place from the dream.  Examples include "kitchen", "foreign country", "house", "forest", and "alien world"</span></div>
+									    <div class="tag taglegendtag thing">thing<span class="tagtiptext">A "thing" tag identifies an object or creature that appeared in the dream.  Examples include "bowl", "door", "hat", "ghost", and "caterpillar".</span></div>
+									    <div class="tag taglegendtag emotion">emotion<span class="tagtiptext">An "emotion" tag identifies an emotion felt during the dream.  Examples include "happiness", "terror", "courage", "anxiety", and "love".</span></div>
+									    <div class="tag taglegendtag sensation">sensation<span class="tagtiptext">A "sensation" tag identifies a physical sensation perceived during the dream.  Examples include "pain", "pleasure", "cold", "blue", and "sour".</span></div>
+								    </div>
+								    <br>
+								</fieldset>
+							</div>
+						</div>
+						<br>
+
+						<div class="row">
+							<div class="col-xs-12 prompt">
+								<p>With as much detail as you can remember, what happened in the dream?</p>
+							</div>
+							<div class="col-xs-12 input">
+								<textarea name="content" id="content" rows="10" placeholder="Content" {% if values %}value="{{dreamDict['content']}}"{% endif %}></textarea>{% if messages %}<span class="{{messages['content']['validity']}}">{{messages['content']['message']}}</span>{% endif %}
+							</div>
+						</div>
+						<br>	
+
+						<div class="row">
+							<div class="col-xs-12 submit">
+								<span class="sparkle">&#10024&nbsp;&nbsp;</span><input type="submit" class="input" value="Submit Dream"><span class="sparkle">&#10024</span>
+							</div>
+						</div>
+
+					</form>
+				</div>
+			</div>
+
+		</div>
 
 
 date_dreamt = date type
 
-"we haven't seen this phrase yet -- is it a theme, person, place, feeling, or thing?"
+"we haven't seen this phrase yet -- is it a type, person, place, feeling, or thing?"
 
-"we tag each dream with themes, people, places, things, and feelings.  just type a phrase that comes to mind.  see below for examples of each category."
+"we tag each dream with types, people, places, things, and feelings.  just type a phrase that comes to mind when you think about the dream, and it will be added to the dream tags [to the right].  if you're confused see below for examples of each category."
 
 '''
-themes: flying, nightmare, futuristic, missed/late to appointment/event
+types: flying, nightmare, futuristic, missed/late to appointment/event
 people: mother, son-in-law, boss/manager, best friend, person from childhood
 places: foreign country, kitchen, house, hospital, alien world
 feelings: happiness, terror, courage, envy, hatred, love
 things: 
 '''
 
-Themes:
+types:
 flying
 falling
 nudity
@@ -111,6 +209,7 @@ person from college
 teacher/professor
 
 Places:
+vaccuum/emptiness
 foreign country
 countryside
 kitchen
@@ -194,5 +293,6 @@ boredom
 	enjoyability = db.IntegerProperty(required = True)
 	awareness_level = db.IntegerProperty(required = True)
 	aware_users = db.StringProperty(required = True, multiline = True)
+	<script src="/js/forms.js"></script>
 	</body>
 </html>
