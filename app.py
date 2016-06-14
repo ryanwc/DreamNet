@@ -45,12 +45,14 @@ class Dream(db.Model):
 	# need to balance easy to do form but get info
 	date_dreamt = db.DateProperty(required = True)
 	date_posted = db.DateTimeProperty(auto_now_add=True)
-	themes = db.StringListProperty(required = True)
+	types = db.StringListProperty(required = True)
 	places = db.StringListProperty(required = True)
 	people = db.StringListProperty(required = True)
-	emotions_during = db.StringListProperty(required = True)
-	emotions_remembering = db.StringListProperty(required = True)
-	lucidity = db.IntegerProperty(required = True)
+	things = db.StringListProperty(required = True)
+	emotions = db.StringListProperty(required = True)
+	sensations = db.StringListProperty(required = True)
+	lucidity = db.BooleanProperty(required = True)
+	lucid_length = db.StringProperty()
 	lucid_reason = db.StringProperty()
 	control = db.IntegerProperty(required = True)
 	enjoyability = db.IntegerProperty(required = True)
@@ -178,6 +180,7 @@ class NewDream(Handler):
 		dreamDict["user"] = user
 		dreamDict["title"] = self.request.get("title")
 		dreamDict["content"] = self.request.get("content")
+		dreamDict["description"] = self.request.get("description")
 		dreamDict["themes"] = []
 		dreamDict["date_dreamt"] = "test"
 		dreamDict["date_posted"] = "test"
@@ -225,7 +228,7 @@ class NewDream(Handler):
 							    "validity": "valid"}
 		messages["date_posted"] = {"message": "OK",
 							    "validity": "valid"}
-		messages["themes"] = {"message": "OK",
+		messages["types"] = {"message": "OK",
 							    "validity": "valid"}
 		messages["places"] = {"message": "OK",
 							    "validity": "valid"}

@@ -35,6 +35,44 @@ h1 {
 	font-family: "Courier";
 }
 
+.inputlabel {
+	color: white;
+}
+
+select {
+	max-width: 300px;
+}
+
+option {
+	max-width: 300px;
+}
+
+.sliderbox {
+	position: relative;
+	width: 300px;
+}
+
+.slider {
+	width: 100%;
+}
+
+.leftlabel {
+	position: absolute;
+	left: 0;
+	padding-left: 15px;
+}
+
+.centerandrightlabelbox {
+	margin: 0 auto;
+	text-align: center;
+}
+
+.rightlabel {
+	position: absolute;
+	right: 0;
+	padding-right: 15px;
+}
+
 #description {
 	width: 50%;
 	min-width: 260px;
@@ -70,7 +108,10 @@ legend {
 
 .tag {
 	color: black;
+	margin: 5px;
 }
+
+/* tag legend with tips */
 
 .taglegend {
 	display: inline-block;
@@ -81,19 +122,65 @@ legend {
 
 .taglegendtag {
 	display: inline-block;
+	position: relative;
 	padding: 5px;
 	text-shadow: none;
 }
 
 .tagtiptext {
-    visibility: hidden;
-    max-width: 240px;
+	visibility: hidden;
+    width: 200px;
     background-color: black;
     color: white;
     border-radius: 6px;
     padding: 5px;
     position: absolute;
+    top: 120%;
     z-index: 1;
+}
+
+/* .visible must come after .tagtiptext */
+
+.visible {
+	visibility: visible;
+}
+
+/**/
+
+#typetagtip {
+    left: -10px;
+}
+
+#persontagtip {
+    left: -40px;
+}
+
+#placetagtip {
+    left: -80px;
+}
+
+#thingtagtip {
+    left: -120px;
+}
+
+#emotiontagtip {
+    left: -10px;
+}
+
+@media screen and (min-width: 325px) {
+	#emotiontagtip {
+    	left: -120px;
+	}
+}
+
+#sensationtagtip {
+    left: -10px;
+}
+
+@media screen and (min-width: 400px) {
+	#sensationtagtip {
+    	left: -120px;
+	}
 }
 
 .taglegendtag:hover {
@@ -102,10 +189,6 @@ legend {
 
 .taglegendtag:hover .tagtiptext {
     visibility: visible;
-}
-
-.tag {
-    margin:5px;
 }
 
 .remove {
@@ -138,4 +221,8 @@ legend {
 
 .sensation {
 	background-color: #9f1aff;
+}
+
+.displaynone {
+	display: none !important;
 }
