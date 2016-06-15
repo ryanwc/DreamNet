@@ -1,4 +1,4 @@
-import os, webapp2, jinja2, re, hashlib, hmac, random
+import os, webapp2, jinja2, re, hashlib, hmac, random, datetime
 import string, random, cPickle as pickle
 from webapp2 import redirect_to
 from google.appengine.ext import db
@@ -34,23 +34,14 @@ class User(db.Model):
 	useful_dreams = db.StringProperty(required = True, multiline = True)
 
 class Dream(db.Model):
-	#required = true
+	# what other properties do we want to keep? 
+	# current country? country of origin? primary language? gender? age?
 	user = db.ReferenceProperty(User,
 							 	collection_name = "dreams")
 	title = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
-	#should be datetime
-	# auto now add
-	# what other properties do we want to keep? location? language?
-	# need to balance easy to do form but get info
 	date_dreamt = db.DateProperty(required = True)
 	date_posted = db.DateTimeProperty(auto_now_add=True)
-	types = db.StringListProperty(required = True)
-	places = db.StringListProperty(required = True)
-	people = db.StringListProperty(required = True)
-	things = db.StringListProperty(required = True)
-	emotions = db.StringListProperty(required = True)
-	sensations = db.StringListProperty(required = True)
 	lucidity = db.BooleanProperty(required = True)
 	lucid_length = db.StringProperty()
 	lucid_reason = db.StringProperty()
@@ -64,6 +55,69 @@ class Dream(db.Model):
 		self._render_text = self.content.replace("\n", "<br>")
 		return render_str(self._render_text)
 
+class Tag(db.Model):
+	# types, places, people, things, emotions, sensations
+	name = db.StringProperty(required = True)
+	group = db.StringProperty(required = True)
+	dream = db.ReferenceProperty(Dream,
+								 collection_name = "tags")
+
+### some helpful globals
+### these could be a separate entity instead
+# need to resolve collisions by asking user is it this or this
+# need to say "havent seen that yet"
+# need to say "what the fuck is that crazy person behind me laughing at"
+tags = {}
+
+types = ["flying", "falling", "nudity", "sex", "nightmare", "being chased",
+		 "paralysis", "trapped", "difficult to move", "eating", "death",
+		 "violence", "school/classroom/exam", "aquatic", "demonic",
+		 "religious", "angelic", "fantasy", "sci-fi", "romantic", "comedy",
+		 "missed/late to appointment/event", "travel", "futuristic", 
+		 "in the past", "light", "darkness"]
+
+people = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
+		  "son", "daughter", "neice", "nephew", "cousin", "grandfather",
+		  "grandmother", "grandson", "granddaughter", "mother-in-law",
+		  "father-in-law", "brother-in-law", "sister-in-law", "son-in-law",
+		  "daughter-in-law", "boss/manager", "direct report", "employee", 
+		  "coworker", "wife", "girlfriend", "husband", "boyfriend", 
+		  "best friend", "friend", "aquaintance", "business partner", "crush",
+		  "person from childhood", "person from highschool", 
+		  "person from college", "teacher/professor"]
+
+places = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
+		  "bedroom", "livingroom", "bathroom", "hallway", "ruins", 
+		  "military base", "heaven", "hell", "beach", "house", "road/highway",
+		  "ocean", "lake", "river", "swamp", "desert", "glacier", "rainforest",
+		  "forest", "boat", "cave", "office building", "abandoned building",
+		  "stadium", "open field", "farm", "mountain", "airport", "school",
+		  "classroom", "hospital", "doctor's office", "science facility",
+		  "outer space", "spaceship", "alien world"]
+
+things = ["bowl", "door", "hat", "ghost", "caterpillar", "dog", "chair",
+		  "watch", "clock", "staircase", "flag", "gun", "knife", "car",
+		  "boat", "airplane", "spoon", "fork", "table", "wall", "present",
+		  "strawberry", "food", "blueberry"]
+
+emotions = ["happiness", "ecstacy", "sadness", "sorrow/grief", "depression",
+			"fear", "terror", "disgust", "anger", "indignation", "hatred",
+			"love", "anxiety", "relief", "shame", "pride", "envy", "goodwill", 
+			"confusion", "clarity", "stress", "relaxation", "caution", 
+			"rashness", "kindness", "pity", "cruelty", "courage", "cowardice",
+			"wonder", "boredom"]
+
+sensations = ["pain", "discomfort", "pleasure", "orgasm", "taste", "color",
+			  "red", "yellow", "green", "blue", "white", "black", "violet", 
+			  "orange", "pink", "brown", "purple", "sour", "sweet", "salty",
+			  "bitter", "umami", "comfort", "heat" "cold", "numbness"]
+
+tags['types'] = types
+tags['people'] = people
+tags['places'] = places
+tags['things'] = things
+tags['emotions'] = emotions
+tags['sensations'] = sensations
 
 ### helper functions
 
@@ -133,6 +187,24 @@ class Home(Handler):
 	def get(self, page=1):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
+		'''
+		originalUser = User(username="Original User", password="originalpass",
+			email="original@user.com", useful_dreams="none")
+		originalUser.put()
+
+		originalDream = Dream(user=originalUser, title="Original Dream",
+			content="nothing", date_dreamt=datetime.date.today(),
+			date_posted=datetime.datetime.now(), lucidity=False,
+			lucid_length="none", lucid_reason="none", control=0, enjoyability=10,
+			awareness_level=0, aware_users="none")
+		originalDream.put()
+
+		for group in tags:
+			for tagname in tags[group]:
+				tag = Tag(name=tagname, group=group, dream=originalDream)
+				tag.put()
+		'''
+
 		# get/set a cookie that tracks number of visits
 		visits = 0
 		visit_cookie_val = self.request.cookies.get("visits")
@@ -151,7 +223,7 @@ class Home(Handler):
 		dreamQ = Dream.all()
 		#dreamQ.order("date_posted")
 		dreams = []
-		start = (page-1)*10
+		start = (int(page)-1)*10
 		for dream in dreamQ.run(offset=start, limit=start+10):
 			dreams.append(dream)
 
@@ -164,7 +236,15 @@ class NewDream(Handler):
 		if not username:
 			return redirect_to("signin")
 
-		self.render("newdream.html", dreamDict=None, messages=None)
+		existingTagsQ = Tag.all()
+		existingTagsQ.order("name")
+		existingTags = []
+
+		for existingTag in existingTagsQ:
+			existingTags.append(existingTag)
+
+		self.render("newdream.html", dreamDict=None, 
+					messages=None, existingTags=existingTags)
 
 	def post(self):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
@@ -241,7 +321,7 @@ class NewDream(Handler):
 		messages["lucidity"] = {"message": "OK",
 							    "validity": "valid"}
 		messages["lucid_reason"] = {"message": "OK",
-							    "validity": "valid"}
+							        "validity": "valid"}
 		messages["control"] = {"message": "OK",
 							    "validity": "valid"}
 		messages["enjoyability"] = {"message": "OK",
@@ -378,7 +458,7 @@ class Register(Handler):
 
 		username_cookie_val = make_secure_val(user.username)
 
-		response = redirect_to("home")
+		response = redirect_to("home", page=1)
 		response.set_cookie("username", username_cookie_val)
 		return response
 
@@ -437,7 +517,7 @@ class Signin(Handler):
 
 		username_cookie_val = make_secure_val(user.username)
 
-		response = redirect_to("home")
+		response = redirect_to("home", page=1)
 		response.set_cookie("username", username_cookie_val)
 		return response
 
@@ -459,7 +539,7 @@ class EditDream(Handler):
 		if not username:
 			return redirect_to("signin")
 		elif username != dream.username:
-			return redirect_to("home")
+			return redirect_to("home", page=1)
 
 		self.render("editdream.html", dream=dream)
 
@@ -475,7 +555,7 @@ class DeleteDream(Handler):
 		if not username:
 			return redirect_to("signin")
 		elif username != dream.username:
-			return redirect_to("home")
+			return redirect_to("home", page=1)
 
 		self.render("deletedream.html", dream=dream)
 
@@ -526,6 +606,17 @@ class Logout(Handler):
 		response = redirect_to("signin")
 		response.set_cookie("username", "")
 		return response
+
+# Ajax handlers
+
+class TagHandler(Handler):
+    def post(self):
+		existingTagsQ = Tag.all()
+		existingTagsQ.order("name")
+		existingTags = []
+
+		for existingTag in existingTagsQ:
+			existingTags.append(existingTag)
 
 
 # To get the ID of an entity you just created: obj.key().id()
