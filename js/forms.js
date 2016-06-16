@@ -1,58 +1,136 @@
-$(document).ready(function() {
+function readyTags(tagNameToGroup, tagGroupToName) {
 
     // set up the tag area
     $("#add").click(function() {
 
-        // do more validation here -- only alphabetic, hyphen, spaces
-        // only one hyphen in a row, only one space in a row, must have alphabetic
-        // must start and end with alphabetic
+        var newtag = false;
+
+        // if the #newtagquestion is displayed, the user already tried to enter a tag, but
+        // it wasn't in our system yet, so prompted them to tell us more about the tag,
+        // then click "add" again.
+        // if this condition is false, it might be set to true in the code below if it is a tag
+        // we do not have in the system.
+        if (!$("#newtagquestion").hasClass("displaynone")) {
+
+            newtag = true;
+            toggleDisplay($("#newtagquestion"));
+        }
+        // keep rest of validation in case user tries to insert weird stuff when newtag=true
+
         var inputTag = $("#tagname").val().toLowerCase();
+        var dreamTags = $(".dreamtag");
 
         if (inputTag.length > 0) {
 
             // to try to accomodate other languages, do not do something like "[^a-zA-Z ]"
-            if (inputTag.match(/[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:[]\{\}\|_]/)) {
+            if (inputTag.match(/[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:\[\]\{\}\|_\\]/)) {
 
                 addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("Tag name contains an illegal character. Try using only letters, spaces, hyphens, and apostrophes.");
+                $("#tagnamemessage").html("<br> Tag name contains an illegal character. Try using only letters, spaces, hyphens, and apostrophes. ");
                 return;
             }
 
             if (inputTag.match(/  /)) {
 
                 addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("Tag name cannot contain more than one space in a row.");
+                $("#tagnamemessage").html("<br> Tag name cannot contain more than one space in a row. ");
                 return;
             }
 
             if (inputTag.match(/''/)) {
 
                 addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("Tag name cannot contain more than one apostrophe in a row.");
+                $("#tagnamemessage").html("<br> Tag name cannot contain more than one apostrophe in a row. ");
                 return;
             }
 
             if (inputTag.match(/--/)) {
 
                 addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("Tag name cannot contain more than one hypen in a row.");
+                $("#tagnamemessage").html("<br> Tag name cannot contain more than one hypen in a row. ");
                 return;
             }
 
-            var id = "tag" + $("#tags").length;
-            var type = $("#tagtype").val();
-            var removeTagButton = $("<button id=\""+id+"\" class=\"tag remove "+type+"\" value=\""+inputTag+" "+type+"\">"+inputTag+" <span class=\"removetext\">(remove)</span></button>");
+            var type;
+
+            // should verify on backend to that no tags repeated
+            var alreadyHave = false;
+            dreamTags.each(function() {
+
+                if ($(this).html() == inputTag) {
+
+                    alreadyHave = true;
+                    return false;
+                }
+            });
+
+            if (alreadyHave) {
+                addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+                $("#tagnamemessage").html("<br> You already added that tag. ");
+                return;
+            }
+
+            console.log("wait why");
+
+            if (tagNameToGroup[inputTag]) {
+
+                type = tagNameToGroup[inputTag];
+            }
+            else if (newtag == false){
+                
+                toggleDisplay($("#newtagquestion"));
+                return;
+            }
+            else {
+
+                type = $("#tagtype").val();
+            }
+
+            var id = inputTag+"Button";
+
+            var removeTagButton = $("<button id=\""+id+"\" class=\"tag remove "+type+"\" value=\""+inputTag+"|"+type+"\"><span class=\"dreamtag\">"+inputTag+"</span> <span class=\"removetext\">(remove)</span></button>");
             
             removeTagButton.click(function() {
 
-              $(this).remove();
+
+                $("#tagnamemessage").html("<br> Removed '" + type + ": " +  inputTag + "' tag ");
+                $(this).remove();
+                $("#tagname").focus();
+            });
+
+            // ensure only clicking the button can remove it
+            removeTagButton.keyup(function(event) {
+                
+                if (event.keyCode == 13) {
+
+                    event.preventDefault();
+                    console.log("culprit up");
+                }
+            });
+            removeTagButton.keydown(function(event) {
+
+                if (event.keyCode == 13) {
+
+                    event.preventDefault();
+                    console.log("culprit down");
+                }
+            });
+            removeTagButton.keypress(function(event) {
+
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    console.log("culprit press");
+                }
             });
             
             $("#tags").append(removeTagButton);
             addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
-            $("#tagnamemessage").html("Added tag " + tagname )
+            $("#tagnamemessage").html("<br> Added the '" + type + ": " + inputTag + "' tag ");
             $("#tagname").val("");
+            $("#tagname").focus();
         }
+
+
     });
 
     // add tag with pressing enter
@@ -62,6 +140,7 @@ $(document).ready(function() {
 
             event.preventDefault();
             document.getElementById("add").click();
+            console.log("culprit up add");
         }
     });
     document.getElementById("tagname").addEventListener("keydown", function(event) {
@@ -69,6 +148,7 @@ $(document).ready(function() {
         if (event.keyCode == 13) {
 
             event.preventDefault();
+            console.log("culprit down add");
         }
     });
     document.getElementById("tagname").addEventListener("keypress", function(event) {
@@ -78,17 +158,29 @@ $(document).ready(function() {
             event.preventDefault();
         }
     });
-});
+}
 
-function toggleTagtipDisplay(tagtip) {
+function toggleDisplay(element) {
 
-    if (!tagtip.hasClass("visible")) {
+    if (element.hasClass("displaynone")) {
 
-        tagtip.addClass("visible");
+        element.removeClass("displaynone");
     }
     else {
 
-        tagtip.removeClass("visible");
+        element.addClass("displaynone");
+    }
+}
+
+function toggleVisible(element) {
+
+    if (!element.hasClass("visible")) {
+
+        element.addClass("visible");
+    }
+    else {
+
+        element.removeClass("visible");
     }
 }
 
@@ -139,22 +231,17 @@ function addAndRemoveClasses(element, classToAdd, classToRemove) {
 }
 
 
-/*
-function checkTag(inputTag){
+function getTags(){
 
     $.ajax({
         type: "POST",
-        url: "/vote/",
+        url: "/tags/JSON",
         dataType: 'json',
-        data: JSON.stringify({ "storyKey": storyKey})
-    })
-    .done(function( data ) {
+        success: function (data, status) {
 
-        alert( "Vote Cast!!! Count is : " + data['story']['vote_count'] );
-        $('.voteCount').text(data['story']['vote_count']);
-
+            alert(data);
+        }
     });
 };
-*/
 
 

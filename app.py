@@ -1,4 +1,4 @@
-import os, webapp2, jinja2, re, hashlib, hmac, random, datetime
+import os, webapp2, jinja2, re, hashlib, hmac, random, datetime, json
 import string, random, cPickle as pickle
 from webapp2 import redirect_to
 from google.appengine.ext import db
@@ -55,12 +55,20 @@ class Dream(db.Model):
 		self._render_text = self.content.replace("\n", "<br>")
 		return render_str(self._render_text)
 
-class Tag(db.Model):
+class TagGroup(db.Model):
 	# types, places, people, things, emotions, sensations
 	name = db.StringProperty(required = True)
-	group = db.StringProperty(required = True)
+
+class TagName(db.Model):
+	name = db.StringProperty(required = True)
+	group = db.ReferenceProperty(TagGroup,
+							     collection_name = "tag_names")
+
+class Tag(db.Model):
 	dream = db.ReferenceProperty(Dream,
 								 collection_name = "tags")
+	name = db.ReferenceProperty(TagName,
+						    	collection_name = "tags")
 
 ### some helpful globals
 ### these could be a separate entity instead
@@ -112,12 +120,12 @@ sensations = ["pain", "discomfort", "pleasure", "orgasm", "taste", "color",
 			  "orange", "pink", "brown", "purple", "sour", "sweet", "salty",
 			  "bitter", "umami", "comfort", "heat" "cold", "numbness"]
 
-tags['types'] = types
-tags['people'] = people
-tags['places'] = places
-tags['things'] = things
-tags['emotions'] = emotions
-tags['sensations'] = sensations
+tags['type'] = types
+tags['person'] = people
+tags['place'] = places
+tags['thing'] = things
+tags['emotion'] = emotions
+tags['sensation'] = sensations
 
 ### helper functions
 
@@ -198,10 +206,14 @@ class Home(Handler):
 			lucid_length="none", lucid_reason="none", control=0, enjoyability=10,
 			awareness_level=0, aware_users="none")
 		originalDream.put()
+		'''
 
+		'''
 		for group in tags:
-			for tagname in tags[group]:
-				tag = Tag(name=tagname, group=group, dream=originalDream)
+			group = TagGroup(name=group)
+			group.put()
+			for tagname in tags[group.name]:
+				tag = TagName(name=tagname, group=group)
 				tag.put()
 		'''
 
@@ -236,15 +248,22 @@ class NewDream(Handler):
 		if not username:
 			return redirect_to("signin")
 
-		existingTagsQ = Tag.all()
-		existingTagsQ.order("name")
-		existingTags = []
+		tagsQ = TagName.all()
+		tagsQ.order("name")
+		groupsQ = TagGroup.all()
+		tagGroupToNames = {}
+		tagNameToGroup = {}
 
-		for existingTag in existingTagsQ:
-			existingTags.append(existingTag)
+		for tagGroup in groupsQ:
+			tagGroupToNames[tagGroup.name] = []
+
+		for tag in tagsQ:
+			tagNameToGroup[tag.name] = tag.group.name
+			tagGroupToNames[tag.group.name].append(tag.name)
 
 		self.render("newdream.html", dreamDict=None, 
-					messages=None, existingTags=existingTags)
+					messages=None, tagGroupToNames=json.dumps(tagGroupToNames),
+					tagNameToGroup=json.dumps(tagNameToGroup))
 
 	def post(self):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
@@ -617,6 +636,7 @@ class TagHandler(Handler):
 
 		for existingTag in existingTagsQ:
 			existingTags.append(existingTag)
+		return self.write(json.dumps(existingTags))
 
 
 # To get the ID of an entity you just created: obj.key().id()

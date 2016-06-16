@@ -195,12 +195,29 @@ legend {
     visibility: visible;
 }
 
+#tagnamemessage {
+	background-color: black;
+}
+
 .remove {
     margin:5px;
 }
 
 .removetext {
 	color: #b30000;
+}
+
+#newtagquestion {
+	border: 2px dotted red;
+	background-color: lightgrey;
+	padding: 5px;
+	color: #000000;
+	text-shadow: none;
+}
+
+#newtagquestion .hint {
+	color: #000000;
+	text-shadow: none;
 }
 
 .type {

@@ -148,17 +148,27 @@
 						<div class="row">
 							<div class="col-xs-12 input">
 							    <input type="text" id="tagname" autocomplete="off" placeholder="Dream tag">
-							    <select id="tagtype">
+								<input type="button" value="Add tag" class="input add" id="add"><span id="tagnamemessage"></span>
+								<br>
+								<span class="hint">* hover over or click on the colored icons below for examples of each kind of tag</span>
+							</div>
+						</div>
+
+						<div class="row displaynone" id="newtagquestion">
+							<div class="col-xs-12 prompt">
+							    <p>We haven't seen this dream tag yet.  What kind of tag is it?</p>
+							</div>
+							<div class="col-xs-12 input">
+								<select id="tagtype" onclick="$('#tagname').focus();">
 							    	<option value="type">type</option>
-							      	<option value="place">place</option>
 							      	<option value="person">person</option>
+							      	<option value="place">place</option>
 							      	<option value="thing">thing</option>
 							      	<option value="emotion">emotion</option>
 							      	<option value="sensation">sensation</option>
 							    </select>
-								<input type="button" value="Add tag" class="input add" id="add"><span id="tagnamemessage"></span>
-								<br>
-								<span class="hint">* hover over or click on the colored icons below for examples of each kind of tag</span>
+							    <br>
+							    <span class="hint">(After, making a selection, click the "Add tag" button above again.  Remember, you can click on or hover-over the colored boxes below for examples of each kind of tag.)</span>
 							</div>
 						</div>
 
@@ -167,12 +177,12 @@
 								<fieldset id="tags">
 								    <legend>Dream tags</legend>
 								    <div class="taglegend">
-									    <div id="taglegendtype" class="tag taglegendtag type" onclick="toggleTagtipDisplay($('#typetagtip'));">type<span id="typetagtip" class="tagtiptext">A "type" tag identifies "what kind of dream it was."  Examples include "flying", "nightmare", "futuristic", "missed/late to appointment/event", and "sex". Note that a dream can have many types.</span></div>
-									    <div id="taglegendperson" class="tag taglegendtag person" onclick="toggleTagtipDisplay($('#persontagtip'));">person<span id="persontagtip" class="tagtiptext">A "person" tag identifies a person who appeared in the dream.  Examples include "mother", "son-in-law", "boss/manager", "best friend", and "person from childhood". (Note: No real names!)</span></div>
-									    <div id="taglegendplace" class="tag taglegendtag place" onclick="toggleTagtipDisplay($('#placetagtip'));">place<span id="placetagtip" class="tagtiptext">A "place" tag identifies a place or setting in which some portion of the dream occurred.  Examples include "kitchen", "foreign country", "house", "forest", and "alien world".</span></div>
-									    <div id="taglegendthing" class="tag taglegendtag thing" onclick="toggleTagtipDisplay($('#thingtagtip'));">thing<span id="thingtagtip" class="tagtiptext">A "thing" tag identifies an object or creature that appeared in the dream.  Examples include "bowl", "door", "hat", "ghost", and "caterpillar".</span></div>
-									    <div id="taglegendemotion" class="tag taglegendtag emotion" onclick="toggleTagtipDisplay($('#emotiontagtip'));">emotion<span id="emotiontagtip" class="tagtiptext">An "emotion" tag identifies an emotion felt during the dream.  Examples include "happiness", "terror", "courage", "anxiety", and "love".</span></div>
-									    <div id="taglegendsensation" class="tag taglegendtag sensation" onclick="toggleTagtipDisplay($('#sensationtagtip'));">sensation<span id="sensationtagtip" class="tagtiptext">A "sensation" tag identifies a physical sensation perceived during the dream.  Examples include "pain", "pleasure", "cold", "blue", and "sour".</span></div>
+									    <div id="taglegendtype" class="tag taglegendtag type" onclick="toggleVisible($('#typetagtip'));">type<span id="typetagtip" class="tagtiptext">A "type" tag identifies "what kind of dream it was."  Examples include "flying", "nightmare", "futuristic", "missed/late to appointment/event", and "sex". Note that a dream can have many types.</span></div>
+									    <div id="taglegendperson" class="tag taglegendtag person" onclick="toggleVisible($('#persontagtip'));">person<span id="persontagtip" class="tagtiptext">A "person" tag identifies a person who appeared in the dream.  Examples include "mother", "son-in-law", "boss/manager", "best friend", and "person from childhood". (Note: No real names!)</span></div>
+									    <div id="taglegendplace" class="tag taglegendtag place" onclick="toggleVisible($('#placetagtip'));">place<span id="placetagtip" class="tagtiptext">A "place" tag identifies a place or setting in which some portion of the dream occurred.  Examples include "kitchen", "foreign country", "house", "forest", and "alien world".</span></div>
+									    <div id="taglegendthing" class="tag taglegendtag thing" onclick="toggleVisible($('#thingtagtip'));">thing<span id="thingtagtip" class="tagtiptext">A "thing" tag identifies an object or creature that appeared in the dream.  Examples include "bowl", "door", "hat", "ghost", and "caterpillar".</span></div>
+									    <div id="taglegendemotion" class="tag taglegendtag emotion" onclick="toggleVisible($('#emotiontagtip'));">emotion<span id="emotiontagtip" class="tagtiptext">An "emotion" tag identifies an emotion felt during the dream.  Examples include "happiness", "terror", "courage", "anxiety", and "love".</span></div>
+									    <div id="taglegendsensation" class="tag taglegendtag sensation" onclick="toggleVisible($('#sensationtagtip'));">sensation<span id="sensationtagtip" class="tagtiptext">A "sensation" tag identifies a physical sensation perceived during the dream.  Examples include "pain", "pleasure", "cold", "blue", and "sour".</span></div>
 								    </div>
 								    <br>
 								</fieldset>
@@ -202,8 +212,9 @@
 
 		</div>
 
-"we haven't seen this phrase yet -- is it a type, person, place, feeling, or thing?"
-
 	<script src="/js/forms.js"></script>
+	<script>
+		readyTags({{tagNameToGroup|safe}}, {{tagGroupToNames|safe}});
+	</script>
 	</body>
 </html>
