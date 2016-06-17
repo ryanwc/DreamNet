@@ -220,6 +220,14 @@ legend {
 	text-shadow: none;
 }
 
+#newtagquestion .inputlabel {
+	color: #000000;
+}
+
+#newtagquestion .inputlabel .newtaglabelkind {
+	font-weight: bold;
+}
+
 .type {
 	background-color: lightblue;
 }

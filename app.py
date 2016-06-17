@@ -2,7 +2,7 @@ import os, webapp2, jinja2, re, hashlib, hmac, random, datetime, json
 import string, random, cPickle as pickle
 from webapp2 import redirect_to
 from google.appengine.ext import db
-#import bleach third party lib?
+# import bleach third party lib?
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
@@ -196,19 +196,6 @@ class Home(Handler):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
 		'''
-		originalUser = User(username="Original User", password="originalpass",
-			email="original@user.com", useful_dreams="none")
-		originalUser.put()
-
-		originalDream = Dream(user=originalUser, title="Original Dream",
-			content="nothing", date_dreamt=datetime.date.today(),
-			date_posted=datetime.datetime.now(), lucidity=False,
-			lucid_length="none", lucid_reason="none", control=0, enjoyability=10,
-			awareness_level=0, aware_users="none")
-		originalDream.put()
-		'''
-
-		'''
 		for group in tags:
 			group = TagGroup(name=group)
 			group.put()
@@ -281,9 +268,11 @@ class NewDream(Handler):
 		dreamDict["content"] = self.request.get("content")
 		dreamDict["description"] = self.request.get("description")
 		dreamDict["themes"] = []
-		dreamDict["date_dreamt"] = "test"
-		dreamDict["date_posted"] = "test"
-		dreamDict["places"] = []
+		dreamDict["date_dreamt"] = self.request.get("date_dreamt")
+		dreamDict["date_posted"] = date.datetime.now()
+
+		dreamTags = self.request.get
+		dreamDict["places"] = 
 		dreamDict["people"] = []
 		dreamDict["emotions_during"] = []
 		dreamDict["emotions_remembering"] = []
@@ -302,10 +291,10 @@ class NewDream(Handler):
 		if dreamDict["title"]:
 			if len(dreamDict["title"]) < 30:
 				messages["title"] = {"message": "title OK",
-							 		   "validity": "valid"}
+							 		 "validity": "valid"}
 			else:
 				messages["title"] = {"message": "title invalid",
-									   "validity": "invalid"}		
+									 "validity": "invalid"}		
 		else:
 			messages["title"] = {"message": "Please provide a title",
 								 "validity": "invalid"}

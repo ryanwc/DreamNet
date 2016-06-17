@@ -29,14 +29,16 @@
 
 			<div class="row" id="formrow">
 				<div class="col-xs-12 formcol">
-					<form role="form" action="/dream/new" method="post">
+					<form role="form" action="/dream/new" method="post" onsubmit="return validateDream();">
 
 						<div class="row">
 							<div class="col-xs-12 prompt">
 								<p>What day did you have the dream?</p>
 							</div>
 							<div class="col-xs-12 input">
-								<input type="date">
+								<input type="date" id="datedreamt" {% if values %}value="{{dreamDict['date_dreamt']}}"{% endif %}>{% if messages %}<span id="datedreamtmessage" class="{{messages['date_dreamt']['validity']}}">{{messages['date_dreamt']['message']}}</span>{% endif %}
+								<br>
+								<span class="hint">(use mm/dd/yyyy format)</span>
 							</div>
 						</div>
 						<br>
@@ -46,9 +48,10 @@
 								<p>Were you aware that you were dreaming at any time during the dream?</p>
 							</div>
 							<div class="col-xs-12 input">
-								<input type="radio" name="lucidity" value="False" onclick="toggleLucidQuestions();" checked> <span class="inputlabel"> No</span>
+								<input type="radio" name="lucidity" value="False" onclick="toggleLucidQuestions();" {% if values %}{% if dreamDict['subject'] == "False" %}checked{% endif %}{% endif %}> <span class="inputlabel"> No</span>
 								<br>
-								<input type="radio" name="lucidity" value="True" onclick="toggleLucidQuestions();"> <span class="inputlabel">Yes</span>
+								<input type="radio" name="lucidity" value="True" onclick="toggleLucidQuestions();" {% if values %}{% if dreamDict['subject'] == "True" %}checked{% endif %}{% endif %}> <span class="inputlabel">Yes</span>
+								{% if messages %}<br><span id="titlemessage" class="{{messages['subject']['validity']}}">{{messages['subject']['message']}}</span>{% endif %}
 							</div>
 						</div>
 						<br>
@@ -59,14 +62,14 @@
 							</div>
 							<div class="col-xs-12 input">
 								<select id="lucidreasoninput" onChange="displaySomethingElse();">
-									<option value="-1">-Make a selection-</option>
+									<option value="-1" {% if values %}{% if dreamDict['lucid_reason'] == "-1" %}selected="selected"{% endif %}{% endif %}>
+								<br>>-Make a selection-</option>
 									<option value="0">I kept awareness as I feel asleep</option>
 									<option value="1">I did a "reality check" and it failed</option>
 									<option value="2">I recognized one of my "dream signs"</option>
 									<option value="3">Something just seemed "off"</option>
 									<option value="4">Something else (write it below)</option>
 								</select>
-								<br>
 								<textarea id="somethingelse" class="displaynone" rows="2" cols="30" type="text" name="somethingelse" placeholder="Reason you became aware you were dreaming"></textarea>
 							</div>
 						</div>
@@ -77,7 +80,7 @@
 								<p>After you became aware that you were dreaming, how long did you *remain* aware that you were dreaming?</p>
 							</div>
 							<div class="col-xs-12 input">
-								<select>
+								<select id="lucidlength">
 									<option value="-1">-Make a selection-</option>
 									<option value="0">I forgot I was dreaming almost immediately</option>
 									<option value="1">I forgot I was dreaming after some time</option>
@@ -92,7 +95,7 @@
 								<p>What level of control did it feel like you had over your actions and your surroundings during the dream?</p>
 							</div>
 							<div class="col-xs-12 input sliderbox">
-								<input class="slider" type="range" name="control" min="0" max="10">
+								<input id="control" class="slider" type="range" name="control" min="0" max="10">
 								<br>
 								<span class="hint leftlabel">None</span>
 								<div class="hint centerandrightlabelbox">
@@ -108,7 +111,7 @@
 								<p>How enjoyable was the dream?</p>
 							</div>
 							<div class="col-xs-12 sliderbox input">
-								<input class="slider" type="range" name="enjoyability" min="0" max="10">
+								<input id="enjoyability" class="slider" type="range" name="enjoyability" min="0" max="10">
 								<br>
 								<span class="hint leftlabel">Unenjoyable</span>
 								<div class="hint centerandrightlabelbox">
@@ -124,7 +127,7 @@
 								<p>If the dream was a story, what would its title be?</p>
 							</div>
 							<div class="col-xs-12 input">
-								<input type="text" name="title" size="30" autocomplete="off" placeholder="Title" {% if values %}value="{{dreamDict['subject']}}"{% endif %}>{% if messages %}<span class="{{messages['subject']['validity']}}">{{messages['subject']['message']}}</span>{% endif %}
+								<input id="title" type="text" name="title" size="30" autocomplete="off" placeholder="Title" {% if values %}value="{{dreamDict['subject']}}"{% endif %}>{% if messages %}<span id="titlemessage" class="{{messages['subject']['validity']}}">{{messages['subject']['message']}}</span>{% endif %}
 							</div>
 						</div>
 						<br>
@@ -148,27 +151,31 @@
 						<div class="row">
 							<div class="col-xs-12 input">
 							    <input type="text" id="tagname" autocomplete="off" placeholder="Dream tag">
-								<input type="button" value="Add tag" class="input add" id="add"><span id="tagnamemessage"></span>
+								<input type="button" value="Add tag" class="input add" id="add">
+
+								<div class="row displaynone" id="newtagquestion">
+									<div class="col-xs-12 prompt">
+									    <p>We haven't seen this dream tag yet.  What kind of tag is it?</p>
+									</div>
+									<div class="col-xs-12 input">
+										<input type="radio" name="tagtype" value="type" onclick="$('#tagname').focus();" checked><span class="inputlabel"> <span class="newtaglabelkind">type</span> of dream</span>
+										<br>
+										<input type="radio" name="tagtype" value="person" onclick="$('#tagname').focus();" checked><span class="inputlabel"> <span class="newtaglabelkind">person</span> in the dream</span>
+										<br>
+										<input type="radio" name="tagtype" value="place" onclick="$('#tagname').focus();" checked><span class="inputlabel"> <span class="newtaglabelkind">place</span> from the dream</span>
+										<br>
+										<input type="radio" name="tagtype" value="thing" onclick="$('#tagname').focus();" checked><span class="inputlabel"> <span class="newtaglabelkind">thing</span> in the dream</span>
+										<br>
+										<input type="radio" name="tagtype" value="emotion" onclick="$('#tagname').focus();" checked><span class="inputlabel"> <span class="newtaglabelkind">emotion</span> felt in the dream</span>
+										<br>
+										<input type="radio" name="tagtype" value="sensation" onclick="$('#tagname').focus();" checked><span class="inputlabel"> <span class="newtaglabelkind">sensation</span> felt in the dream</span>
+									    <br>
+									    <span class="hint">(After, making a selection, click the "Add tag" button above again.  Remember, you can click on or hover-over the colored boxes below for examples of each kind of tag.)</span>
+									</div>
+								</div>
+								<span id="tagnamemessage"></span>
 								<br>
 								<span class="hint">* hover over or click on the colored icons below for examples of each kind of tag</span>
-							</div>
-						</div>
-
-						<div class="row displaynone" id="newtagquestion">
-							<div class="col-xs-12 prompt">
-							    <p>We haven't seen this dream tag yet.  What kind of tag is it?</p>
-							</div>
-							<div class="col-xs-12 input">
-								<select id="tagtype" onclick="$('#tagname').focus();">
-							    	<option value="type">type</option>
-							      	<option value="person">person</option>
-							      	<option value="place">place</option>
-							      	<option value="thing">thing</option>
-							      	<option value="emotion">emotion</option>
-							      	<option value="sensation">sensation</option>
-							    </select>
-							    <br>
-							    <span class="hint">(After, making a selection, click the "Add tag" button above again.  Remember, you can click on or hover-over the colored boxes below for examples of each kind of tag.)</span>
 							</div>
 						</div>
 
@@ -177,10 +184,10 @@
 								<fieldset id="tags">
 								    <legend>Dream tags</legend>
 								    <div class="taglegend">
-									    <div id="taglegendtype" class="tag taglegendtag type" onclick="toggleVisible($('#typetagtip'));">type<span id="typetagtip" class="tagtiptext">A "type" tag identifies "what kind of dream it was."  Examples include "flying", "nightmare", "futuristic", "missed/late to appointment/event", and "sex". Note that a dream can have many types.</span></div>
+									    <div id="taglegendtype" class="tag taglegendtag type" onclick="toggleVisible($('#typetagtip'));">type<span id="typetagtip" class="tagtiptext">A "type" tag helps answer the question "what kind of dream is this?"  Examples include "flying", "nightmare", "futuristic", "missed/late to appointment/event", and "sex". Note that a dream can have many types.</span></div>
 									    <div id="taglegendperson" class="tag taglegendtag person" onclick="toggleVisible($('#persontagtip'));">person<span id="persontagtip" class="tagtiptext">A "person" tag identifies a person who appeared in the dream.  Examples include "mother", "son-in-law", "boss/manager", "best friend", and "person from childhood". (Note: No real names!)</span></div>
 									    <div id="taglegendplace" class="tag taglegendtag place" onclick="toggleVisible($('#placetagtip'));">place<span id="placetagtip" class="tagtiptext">A "place" tag identifies a place or setting in which some portion of the dream occurred.  Examples include "kitchen", "foreign country", "house", "forest", and "alien world".</span></div>
-									    <div id="taglegendthing" class="tag taglegendtag thing" onclick="toggleVisible($('#thingtagtip'));">thing<span id="thingtagtip" class="tagtiptext">A "thing" tag identifies an object or creature that appeared in the dream.  Examples include "bowl", "door", "hat", "ghost", and "caterpillar".</span></div>
+									    <div id="taglegendthing" class="tag taglegendtag thing" onclick="toggleVisible($('#thingtagtip'));">thing<span id="thingtagtip" class="tagtiptext">A "thing" tag identifies an object or creature that appeared in the dream.  Examples include "bowl", "door", "hat", "vampire", and "caterpillar".</span></div>
 									    <div id="taglegendemotion" class="tag taglegendtag emotion" onclick="toggleVisible($('#emotiontagtip'));">emotion<span id="emotiontagtip" class="tagtiptext">An "emotion" tag identifies an emotion felt during the dream.  Examples include "happiness", "terror", "courage", "anxiety", and "love".</span></div>
 									    <div id="taglegendsensation" class="tag taglegendtag sensation" onclick="toggleVisible($('#sensationtagtip'));">sensation<span id="sensationtagtip" class="tagtiptext">A "sensation" tag identifies a physical sensation perceived during the dream.  Examples include "pain", "pleasure", "cold", "blue", and "sour".</span></div>
 								    </div>

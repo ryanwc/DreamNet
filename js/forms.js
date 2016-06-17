@@ -70,8 +70,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
                 return;
             }
 
-            console.log("wait why");
-
             if (tagNameToGroup[inputTag]) {
 
                 type = tagNameToGroup[inputTag];
@@ -79,11 +77,13 @@ function readyTags(tagNameToGroup, tagGroupToName) {
             else if (newtag == false){
                 
                 toggleDisplay($("#newtagquestion"));
+                addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
+                $("#tagnamemessage").html("<br> Gathering information about the new '" + inputTag + "' dream tag... ");
                 return;
             }
             else {
 
-                type = $("#tagtype").val();
+                type = $("input:radio[name=tagtype]:checked").val();
             }
 
             var id = inputTag+"Button";
@@ -91,7 +91,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
             var removeTagButton = $("<button id=\""+id+"\" class=\"tag remove "+type+"\" value=\""+inputTag+"|"+type+"\"><span class=\"dreamtag\">"+inputTag+"</span> <span class=\"removetext\">(remove)</span></button>");
             
             removeTagButton.click(function() {
-
 
                 $("#tagnamemessage").html("<br> Removed '" + type + ": " +  inputTag + "' tag ");
                 $(this).remove();
@@ -104,7 +103,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
                 if (event.keyCode == 13) {
 
                     event.preventDefault();
-                    console.log("culprit up");
                 }
             });
             removeTagButton.keydown(function(event) {
@@ -230,18 +228,321 @@ function addAndRemoveClasses(element, classToAdd, classToRemove) {
     }
 }
 
+function validateDream() {
 
-function getTags(){
+    console.log("validating");
 
-    $.ajax({
-        type: "POST",
-        url: "/tags/JSON",
-        dataType: 'json',
-        success: function (data, status) {
+    var date_dreamt = $("#datedreamt").val();
+    console.log(date_dreamt);
+    var lucidity = $("input:radio[name=lucidity]:checked").val();
+    var lucid_reason = $("#lucidreasoninput").val();
+    var lucid_length = $("#lucidlength").val();
+    var control = $("#control").val();
+    var enjoyability = $("#enjoyability").val();
+    var title = $("#title").val();
+    var description = $("#description").val();
+    var tagsdiv = $(".dreamtag");
+    var content = $("#content").val();
 
-            alert(data);
+    var containsError = false;
+
+    if (!validateDate(date_dreamt)) {
+
+         containsError = true;
+    }
+
+    if (!validateLucidity(lucidity)) {
+
+         containsError = true;
+    }
+
+    if (lucidity == "True") {
+
+        var lucid_reason = $("#lucidreasoninput").val();
+        var lucid_length = $("#lucidlength").val();
+
+        if (!validateLucidReason(lucid_reason)) {
+
+            containsError = true;
+        }
+
+        if (!validateLucidLength(lucid_length)) {
+
+            containsError = true;
+        }
+    }
+
+    if (!validateControl(control)) {
+
+        containsError = true;
+    }
+
+    if (!validateEnjoyability(enjoyability)) {
+
+        containsError = true;
+    }
+
+    if (!validateTitle(title)) {
+
+        containsError = true;
+    }
+
+    if (!validateDescription(description)) {
+
+        containsError = true;
+    }
+
+
+    if (!validateTags(tagsdiv)) {
+
+        containsError = true;
+    }
+
+    if (!validateContent(content)) {
+
+        containsError = true;
+    }
+
+    if (containsError) {
+
+        window.alert("One of the values you entered is in the wrong format or contains an error.  Please look for red text near each question for guidance, then revise and re-submit.");
+        return false;
+    }
+
+    return true;
+}
+
+function validateDate(date) {
+
+    if (date.length < 1) {
+
+        return false;
+    }
+
+    if (!Date.parse(date)) {
+
+        return false;
+    }
+
+    return true;
+}
+
+function validateLucidity(lucidity) {
+
+    if (lucidity.length < 1) {
+
+        return false;
+    }
+
+    if (lucidity != "False" && lucidity != "True") {
+
+        return false;
+    }
+
+    return true;
+}
+
+function validateLucidReason(lucid_reason) {
+
+    if (lucid_reason.length < 1) {
+
+        return false;
+    }
+
+    if (lucid_reason == "-1") {
+
+        return false;
+    }
+
+    if (lucid_reason != "0" && lucid_reason != "1" && lucid_reason != "2" &&
+        lucid_reason != "3" && lucid_reason != "4") {
+
+        return false;
+    }
+
+    if (lucid_reason == "4") {
+
+        var somethingElse = $("#somethingelse").val();
+
+        if (!validateSomethingElse(somethingElse)) {
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function validateSomethingElse(somethingElse) {
+
+    if (somethingElse.length < 1) {
+
+        return false;
+    } 
+
+    if (somethingElse.length < 300) {
+
+        return false;
+    }
+
+    return true;
+}
+
+function validateLucidLength(lucid_length) {
+
+
+    if (lucid_length.length < 1) {
+
+        return false;
+    }
+
+    if (lucid_length == "-1") {
+
+        return false;
+    }
+
+    if (lucid_length != "0" && lucid_length != "1" && lucid_length != "2") {
+
+        return false;
+    }
+
+    return true;
+}
+
+function validateControl(control) {
+
+
+    if (control.length < 1) {
+
+        return false;
+    }
+
+    if (control != "0" && control != "1" && control != "2" && control != "3" && 
+        control != "4" && control != "5" && control != "6" && control != "7" && 
+        control != "8" && control != "9" && control != "10") {
+
+        return false;
+    }
+
+    return true;
+}
+
+// could be same function as validateControl
+// but then could generalize that further to "validate slider"
+// that takes val and ranges and steps
+// like "for choice in range; step++; {if val return true} if complete return false"
+function validateEnjoyability(enjoyability) {
+
+    if (enjoyability.length < 1) {
+
+        return false;
+    }
+
+    if (enjoyability != "0" && enjoyability != "1" && enjoyability != "2" && 
+        enjoyability != "3" && enjoyability != "4" && enjoyability != "5" && 
+        enjoyability != "6" && enjoyability != "7" && enjoyability != "8" && 
+        enjoyability != "9" && enjoyability != "10") {
+
+        return false;
+    }
+
+    return true;
+}
+
+function validateTitle(title) {
+
+    if (title.length < 1) {
+
+        return false;
+    }
+
+    if (title.length > 50) {
+
+        return false;
+    }
+
+    return true;
+}
+
+function validateDescription(description) {
+
+    if (description.length < 1) {
+
+        return false;
+    }
+
+    if (description.length > 300) {
+
+        return false;
+    }
+
+    return true;
+}
+
+function validateTags(tagsdiv) {
+
+    tagsdiv.each(function() {
+
+        tagtext = $(this).html();
+
+        if (tagtext.length < 1) {
+
+            addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+            $("#tagnamemessage").html("<br> There is an empty tag. Remove it and try again. ");
+            return false;       
+        }
+
+        if (tagtext.length > 50) {
+
+            addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' is too long. Remove it and try again. ");
+            return false;
+        }
+
+        if (tagtext.match(/[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:\[\]\{\}\|_\\]/)) {
+
+            addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' contains an illegal character. Try using only letters, spaces, hyphens, and apostrophes. ");
+            return false;
+        }
+
+        if (tagtext.match(/  /)) {
+
+            addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' cannot contain more than one space in a row. Remove it and try again. ");
+            return false;
+        }
+
+        if (tagtext.match(/''/)) {
+
+            addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' cannot contain more than one apostrophe in a row. Remove it and try again. ");
+            return false;
+        }
+
+        if (tagtext.match(/--/)) {
+
+            addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' cannot contain more than one hypen in a row. Remove it and try again. ");
+            return false;
         }
     });
-};
+  
+    return true;
+}
 
+function validateContent(content) {
+
+    if (content.length < 1) {
+
+        return false;
+    }
+
+    if (content.length > 50000) {
+
+        return false;
+    }
+
+    return true;
+}
 
