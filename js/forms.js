@@ -86,42 +86,8 @@ function readyTags(tagNameToGroup, tagGroupToName) {
                 type = $("input:radio[name=tagtype]:checked").val();
             }
 
-            var id = inputTag+"Button";
-
-            var removeTagButton = $("<button id=\""+id+"\" class=\"tag remove "+type+"\" value=\""+inputTag+"|"+type+"\"><span class=\"dreamtag\">"+inputTag+"</span> <span class=\"removetext\">(remove)</span></button>");
+            createAndAppendTagButton(inputTag, type);
             
-            removeTagButton.click(function() {
-
-                $("#tagnamemessage").html("<br> Removed '" + type + ": " +  inputTag + "' tag ");
-                $(this).remove();
-                $("#tagname").focus();
-            });
-
-            // ensure only clicking the button can remove it
-            removeTagButton.keyup(function(event) {
-                
-                if (event.keyCode == 13) {
-
-                    event.preventDefault();
-                }
-            });
-            removeTagButton.keydown(function(event) {
-
-                if (event.keyCode == 13) {
-
-                    event.preventDefault();
-                    console.log("culprit down");
-                }
-            });
-            removeTagButton.keypress(function(event) {
-
-                if (event.keyCode == 13) {
-                    event.preventDefault();
-                    console.log("culprit press");
-                }
-            });
-            
-            $("#tags").append(removeTagButton);
             addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
             $("#tagnamemessage").html("<br> Added the '" + type + ": " + inputTag + "' tag ");
             $("#tagname").val("");
@@ -138,7 +104,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
 
             event.preventDefault();
             document.getElementById("add").click();
-            console.log("culprit up add");
         }
     });
     document.getElementById("tagname").addEventListener("keydown", function(event) {
@@ -146,7 +111,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
         if (event.keyCode == 13) {
 
             event.preventDefault();
-            console.log("culprit down add");
         }
     });
     document.getElementById("tagname").addEventListener("keypress", function(event) {
@@ -156,6 +120,22 @@ function readyTags(tagNameToGroup, tagGroupToName) {
             event.preventDefault();
         }
     });
+}
+
+function createAndAppendTagButton(tagname, type) {
+
+    id = tagname+"Button";
+
+    var removeTagButton = $("<button id=\""+id+"\" class=\"tag remove "+type+"\" value=\""+tagname+"|"+type+"\"><span class=\"dreamtag\">"+tagname+"</span> <span class=\"removetext\">(remove)</span></button>");
+
+    removeTagButton.click(function() {
+
+        $("#tagnamemessage").html("<br> Removed '" + type + ": " +  tagname + "' tag ");
+        $(this).remove();
+        $("#tagname").focus();
+    });
+
+    $("#tags").append(removeTagButton);
 }
 
 function toggleDisplay(element) {
@@ -293,7 +273,7 @@ function validateDream() {
     }
 
 
-    if (!validateTags(tagsdiv)) {
+    if (!validateTagsAndSetHiddenVal(tagsdiv)) {
 
         containsError = true;
     }
@@ -479,7 +459,9 @@ function validateDescription(description) {
     return true;
 }
 
-function validateTags(tagsdiv) {
+function validateTagsAndSetHiddenVal(tagsdiv) {
+
+    $("#dreamtags").val("");
 
     tagsdiv.each(function() {
 
@@ -526,6 +508,8 @@ function validateTags(tagsdiv) {
             $("#tagnamemessage").html("<br> Tag '"+tagtext+"' cannot contain more than one hypen in a row. Remove it and try again. ");
             return false;
         }
+
+        $("#dreamtags").val() = $("#dreamtags").val() + $(this).val() + ",";
     });
   
     return true;

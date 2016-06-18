@@ -75,7 +75,7 @@ class Tag(db.Model):
 # need to resolve collisions by asking user is it this or this
 # need to say "havent seen that yet"
 # need to say "what the fuck is that crazy person behind me laughing at"
-tags = {}
+TAGS = {}
 
 types = ["flying", "falling", "nudity", "sex", "nightmare", "being chased",
 		 "paralysis", "trapped", "difficult to move", "eating", "death",
@@ -120,12 +120,12 @@ sensations = ["pain", "discomfort", "pleasure", "orgasm", "taste", "color",
 			  "orange", "pink", "brown", "purple", "sour", "sweet", "salty",
 			  "bitter", "umami", "comfort", "heat" "cold", "numbness"]
 
-tags['type'] = types
-tags['person'] = people
-tags['place'] = places
-tags['thing'] = things
-tags['emotion'] = emotions
-tags['sensation'] = sensations
+TAGS['type'] = types
+TAGS['person'] = people
+TAGS['place'] = places
+TAGS['thing'] = things
+TAGS['emotion'] = emotions
+TAGS['sensation'] = sensations
 
 ### helper functions
 
@@ -196,10 +196,10 @@ class Home(Handler):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
 		'''
-		for group in tags:
+		for group in TAGS:
 			group = TagGroup(name=group)
 			group.put()
-			for tagname in tags[group.name]:
+			for tagname in TAGS[group.name]:
 				tag = TagName(name=tagname, group=group)
 				tag.put()
 		'''
@@ -262,82 +262,213 @@ class NewDream(Handler):
 			return redirect_to("signin")
 
 		dreamDict = {}
-		# to change
-		dreamDict["user"] = user
-		dreamDict["title"] = self.request.get("title")
-		dreamDict["content"] = self.request.get("content")
-		dreamDict["description"] = self.request.get("description")
-		dreamDict["themes"] = []
-		dreamDict["date_dreamt"] = self.request.get("date_dreamt")
-		dreamDict["date_posted"] = date.datetime.now()
-
-		dreamTags = self.request.get
-		dreamDict["places"] = 
-		dreamDict["people"] = []
-		dreamDict["emotions_during"] = []
-		dreamDict["emotions_remembering"] = []
-		dreamDict["lucidity"] = 0
-		dreamDict["lucid_reason"] = ""
-		dreamDict["control"] = 0
-		dreamDict["enjoyability"] = 0
-		dreamDict["awareness_level"] = 0
-
-		aware_users = {}
-
-		dreamDict["aware_users"] = pickle.dumps(aware_users)
-
 		messages = {}
 
-		if dreamDict["title"]:
-			if len(dreamDict["title"]) < 30:
-				messages["title"] = {"message": "title OK",
-							 		 "validity": "valid"}
-			else:
-				messages["title"] = {"message": "title invalid",
-									 "validity": "invalid"}		
-		else:
-			messages["title"] = {"message": "Please provide a title",
-								 "validity": "invalid"}
+		dreamDict["user"] = user
 
+		dreamDict["date_dreamt"] = self.request.get("date_dreamt")
+		## change for international versions?
+		if dreamDict["date_dreamt"]:
+			date_dreamt_string = dreamDict["date_dreamt"]
+			date_dreamt_array = date_dreamt_string.split("[^0-9]")
+
+			year = date_dreamt_array[2]
+			month = date_dreamt_array[0]
+			day = date_dreamt_array[1]
+
+			date_dreamt = None
+
+			try:
+				date_dreamt = datetime.date(year, month, day)
+			except ValueError:
+				messages["date_dreamt"] = {"message": "Please fix the date formatting (mm/dd/yyyy)",
+							 	 	       "validity": "invalid"}
+
+			if date_dreamt:
+				dreamDict["date_dreamt"] = date_dreamt
+		else:
+			messages["date_dreamt"] = {"message": "Please provide the day you had the dream",
+							 	 	   "validity": "invalid"}		
+
+		dreamDict["date_posted"] = date.datetime.now()
+
+		dreamDict["lucidity"] = self.request.get("lucidity")
+		if dreamDict["lucidity"]:
+			
+			if (dreamDict["lucidity"] != "True" and 
+				dreamDict["lucidity"] != "False"):
+
+				messages["lucidity"] = {"message": "Answer 'Yes' or 'No'",
+							 	 	    "validity": "invalid"}
+			else:
+				messages["lucidity"] = {"message": "Lucidity answer OK",
+							 	 	    "validity": "valid"}				
+
+			if dreamDict["lucidity"] == "True":
+
+				dreamDict["lucid_reason"] = self.request.get("lucidreason")
+
+				if (dreamDict["lucid_reason"] == "-1" or 
+					dreamDict["lucid_reason"] == None or
+					dreamDict["lucid_reason"] == ""):
+
+					messages["lucid_reason"] = {"message": "Please enter how you became aware you were dreaming",
+							 	 	    		"validity": "invalid"}	
+				elif (dreamDict["lucid_reason"] == "0" or 
+					  dreamDict["lucid_reason"] == "1" or
+					  dreamDict["lucid_reason"] == "2" or
+					  dreamDict["lucid_reason"] == "3" or
+					  dreamDict["lucid_reason"] == "4"):
+
+					messages["lucid_reason"] = {"message": "Reasons for awareness OK",
+							 	 	    		"validity": "valid"}	
+
+					if dreamDict["lucid_reason"] == "4":
+
+						dreamDict["something_else"] = self.request.get("somethingelse")
+
+						if dreamDict["something_else"]:
+							if len(dreamDict["something_else"]) < 301:
+								messages["something_else"] = {"message": "Custom reason for awareness OK",
+								 	 	    			  	  "validity": "valid"}			
+							else:
+								messages["something_else"] = {"message": "Custom reason for awareness is too long (300 char max)",
+								 	 	    			  	  "validity": "invalid"}			
+						else:
+							messages["something_else"] = {"message": "Please your custom reason for becomming aware that you were dreaming",
+								 	 	    			  "validity": "invalid"}
+
+		else:
+			messages["lucidity"] = {"message": "Please indicate whether you were aware you were dreaming at any point during the dream",
+							 	 	   "validity": "invalid"}	
+
+		dreamDict["control"] = self.request.get("control")
+		if dreamDict["control"]:
+
+			try:
+
+				control = int(dreamDict["control"])
+
+				if (control < 0 or
+					control > 10):
+
+					messages["control"] = {"message": "Control level was invalid.  Use the slider to set control level",
+							 		 	   "validity": "invalid"}
+				else:
+					messages["control"] = {"message": "Control level OK.",
+							 		 	   "validity": "invalid"}
+
+			except ValueError:
+
+				messages["control"] = {"message": "Control level was invalid.  Use the slider to set control level",
+							 	 	   "validity": "invalid"}	
+		else:
+			messages["control"] = {"message": "Please use the slider to set the level of control you felt you had during the dream",
+							 	   "validity": "invalid"}	
+
+		dreamDict["enjoyability"] = self.request.get("enjoyability")
+		if dreamDict["enjoyability"]:
+
+			try:
+
+				enjoyability = int(dreamDict["enjoyability"])
+
+				if (enjoyability < 0 or
+					enjoyability > 10):
+
+					messages["enjoyability"] = {"message": "Enjoyability was invalid.  Use the slider to set enjoyability",
+							 		 	        "validity": "invalid"}
+				else:
+					messages["enjoyability"] = {"message": "Enjoyability OK",
+							 		 	        "validity": "invalid"}
+
+			except ValueError:
+
+				messages["enjoyability"] = {"message": "Enjoyability level was invalid.  Use the slider to set enjoyability level",
+							 	 	        "validity": "invalid"}	
+		else:
+			messages["enjoyability"] = {"message": "Please use the slider to enter how enjoyable you think the dream was",
+							 	 		"validity": "invalid"}			
+		
+		dreamDict["title"] = self.request.get("title")
+		if dreamDict["title"]:
+
+			if len(dreamDict["title"]) < 51:
+				messages["title"] = {"message": "Title OK",
+							 	 	 "validity": "valid"}	
+			else:
+				messages["title"] = {"message": "Title was too long (50 char max)",
+							 	 	 "validity": "invalid"}		
+		else:
+			messages["title"] = {"message": "Please enter a title for the dream",
+							 	 "validity": "invalid"}	
+
+		dreamDict["description"] = self.request.get("description")
+		if dreamDict["description"]:
+
+			if len(dreamDict["description"]) < 301:
+				messages["description"] = {"message": "Description OK",
+							 	 	 	   "validity": "valid"}	
+			else:
+				messages["descriptiojn"] = {"message": "Description was too long (301 char max)",
+							 	 	 		"validity": "invalid"}		
+		else:
+			messages["description"] = {"message": "Please enter a description for the dream",
+							 	 	   "validity": "invalid"}
+
+		dreamTags = self.request.get("dreamtags")
+		### do get dream tags with regexes (values of each button)
+		if dreamTags:
+
+			dreamTags_array = dreamTags.split(",")
+
+			for dreamTag in dreamTags_array
+
+				tag_array = dreamTag.split("|")
+
+				if len(tag_array) != 2:
+					messages["dream_tags"] = {"message": "One of the tags contains an illegal '|' character",
+							 	 	 		  "validity": "invalid"}
+					break
+
+				tag_name = tag_array[0]
+				tag_group = tag_array[1]
+
+		        if len(tag_name) < 1):
+					messages["dream_tags"] = {"message": "One of the tags has no name",
+							 	 	 			"validity": "invalid"}
+		        elif len(tag_name > 50):
+					messages["dream_tags"] = {"message": tag_name+"'s name is too long (max 50 chars)",
+		 	 	 							  "validity": "invalid"}
+
+		        elif (re.search(r'[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:\[\]\{\}\|_\\]'), tag_name):
+
+		        elif (re.search(r'  ', tag_name)):
+
+		        elif (re.search(r"''", tag_name)):
+
+		        elif (re.search(r'--', tag_name)):
+
+
+		       	if (tag_name not in TAGS):
+
+		else:
+			messages["dream_tags"] = {"message": "Please enter a description for the dream",
+							 	 	   "validity": "invalid"}			
+
+		dreamDict["content"] = self.request.get("content")
 		if dreamDict["content"]:
-			if len(dreamDict["content"]) < 50000:
-				messages["content"] = {"message": "Content OK",
+			if len(dreamDict["content"]) < 50001:
+				messages["content"] = {"message": "Dream narrative OK",
 						 			   "validity": "valid"}
 			else:
-				messages["content"] = {"message": "Content invalid",
+				messages["content"] = {"message": "Dream narrative was too long (50000 char max)",
 						 			   "validity": "invalid"}	
 		else:
-			messages["content"] = {"message": "Please provide content",
+			messages["content"] = {"message": "Please provide a narrative of what happened in the dream",
 								   "validity": "invalid"}
 
-		messages["user"] = {"message": "OK",
-							"validity": "valid"}
-		messages["date_dreamt"] = {"message": "OK",
-							    "validity": "valid"}
-		messages["date_posted"] = {"message": "OK",
-							    "validity": "valid"}
-		messages["types"] = {"message": "OK",
-							    "validity": "valid"}
-		messages["places"] = {"message": "OK",
-							    "validity": "valid"}
-		messages["people"] = {"message": "OK",
-							    "validity": "valid"}
-		messages["emotions_during"] = {"message": "OK",
-								       "validity": "valid"}
-		messages["emotions_remembering"] = {"message": "OK",
-							   			    "validity": "valid"}
-		messages["lucidity"] = {"message": "OK",
-							    "validity": "valid"}
-		messages["lucid_reason"] = {"message": "OK",
-							        "validity": "valid"}
-		messages["control"] = {"message": "OK",
-							    "validity": "valid"}
-		messages["enjoyability"] = {"message": "OK",
-							    "validity": "valid"}
-		messages["awareness_level"] = {"message": "OK",
-							    	   "validity": "valid"}
-		messages["aware_users"] = {"message": "OK",
-							       "validity": "valid"}
+		dreamDict["awareness_level"] = 0
 
 		for attr in dreamDict:
 			if messages[attr]["validity"] == "invalid":
