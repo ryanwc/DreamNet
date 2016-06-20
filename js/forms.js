@@ -126,7 +126,7 @@ function createAndAppendTagButton(tagname, type) {
 
     id = tagname+"Button";
 
-    var removeTagButton = $("<button id=\""+id+"\" class=\"tag remove "+type+"\" value=\""+tagname+"|"+type+"\"><span class=\"dreamtag\">"+tagname+"</span> <span class=\"removetext\">(remove)</span></button>");
+    var removeTagButton = $("<button id=\""+id+"\" class=\"tag tagbutton remove "+type+"\" value=\""+tagname+"|"+type+"\"><span class=\"dreamtag\">"+tagname+"</span> <span class=\"removetext\">(remove)</span></button>");
 
     removeTagButton.click(function() {
 
@@ -210,10 +210,7 @@ function addAndRemoveClasses(element, classToAdd, classToRemove) {
 
 function validateDream() {
 
-    console.log("validating");
-
     var date_dreamt = $("#datedreamt").val();
-    console.log(date_dreamt);
     var lucidity = $("input:radio[name=lucidity]:checked").val();
     var lucid_reason = $("#lucidreasoninput").val();
     var lucid_length = $("#lucidlength").val();
@@ -221,7 +218,7 @@ function validateDream() {
     var enjoyability = $("#enjoyability").val();
     var title = $("#title").val();
     var description = $("#description").val();
-    var tagsdiv = $(".dreamtag");
+    var tagButtonClass = $(".tagbutton");
     var content = $("#content").val();
 
     var containsError = false;
@@ -273,7 +270,7 @@ function validateDream() {
     }
 
 
-    if (!validateTagsAndSetHiddenVal(tagsdiv)) {
+    if (!validateTagsAndSetHiddenVal(tagButtonClass)) {
 
         containsError = true;
     }
@@ -296,14 +293,20 @@ function validateDate(date) {
 
     if (date.length < 1) {
 
+        addAndRemoveClasses($("#datedreamtmessage"), "invalid", "valid");
+        $("#datedreamtmessage").html("<br>  Please enter the date you had the dream. ");
         return false;
     }
 
     if (!Date.parse(date)) {
 
+        addAndRemoveClasses($("#datedreamtmessage"), "invalid", "valid");
+        $("#datedreamtmessage").html("<br>  Date dreamt is in wrong format. ");
         return false;
     }
 
+    addAndRemoveClasses($("#datedreamtmessage"), "valid", "invalid");
+    $("#datedreamtmessage").html("<br>  Date dreamt OK. ");
     return true;
 }
 
@@ -311,14 +314,20 @@ function validateLucidity(lucidity) {
 
     if (lucidity.length < 1) {
 
+        addAndRemoveClasses($("#luciditymessage"), "invalid", "valid");
+        $("#datedreamtmessage").html("<br>  Please indicate whether you were aware you were dreaming at any point during the dream. ");
         return false;
     }
 
     if (lucidity != "False" && lucidity != "True") {
 
+        addAndRemoveClasses($("#luciditymessage"), "invalid", "valid");
+        $("#datedreamtmessage").html("<br>  Please select either 'Yes' or 'No'. ");
         return false;
     }
 
+    addAndRemoveClasses($("#luciditymessage"), "valid", "invalid");
+    $("#datedreamtmessage").html("<br>  Lucidity answer OK. ");
     return true;
 }
 
@@ -326,17 +335,23 @@ function validateLucidReason(lucid_reason) {
 
     if (lucid_reason.length < 1) {
 
+        addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
+        $("#lucidreasonmessage").html("<br>  Please indicate how you became aware you were dreaming. ");
         return false;
     }
 
     if (lucid_reason == "-1") {
 
+        addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
+        $("#lucidreasonmessage").html("<br>  Please indicate how you became aware you were dreaming. ");
         return false;
     }
 
     if (lucid_reason != "0" && lucid_reason != "1" && lucid_reason != "2" &&
         lucid_reason != "3" && lucid_reason != "4") {
 
+        addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
+        $("#lucidreasonmessage").html("<br>  Please indicate how you became aware you were dreaming. ");
         return false;
     }
 
@@ -350,6 +365,8 @@ function validateLucidReason(lucid_reason) {
         }
     }
 
+    addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
+    $("#lucidreasonmessage").html("<br>  Lucid reason OK. ");
     return true;
 }
 
@@ -459,13 +476,15 @@ function validateDescription(description) {
     return true;
 }
 
-function validateTagsAndSetHiddenVal(tagsdiv) {
+function validateTagsAndSetHiddenVal(tagButtonClass) {
 
     $("#dreamtags").val("");
 
-    tagsdiv.each(function() {
+    var hasTypeTag = false;
 
-        tagtext = $(this).html();
+    tagButtonClass.each(function() {
+
+        tagtext = $(this).find(".dreamtag").html();
 
         if (tagtext.length < 1) {
 
@@ -509,9 +528,30 @@ function validateTagsAndSetHiddenVal(tagsdiv) {
             return false;
         }
 
+        if (!$(this).hasClass("type") && !$(this).hasClass("person") &&
+            !$(this).hasClass("place") && !$(this).hasClass("thing") &&
+            !$(this).hasClass("emotion") && !$(this).hasClass("sensation")) {
+
+            addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+            $("#tagnamemessage").html("<br>  Tag '"+tagtext+"'. Try removing and re-adding it. ");
+            return false;           
+        }
+        
+        if ($(this).hasClass("type")) {
+
+            hasTypeTag = true;
+        }
+
         $("#dreamtags").val() = $("#dreamtags").val() + $(this).val() + ",";
     });
   
+    if (!hasTypeTag) {
+
+        addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
+        $("#tagnamemessage").html("<br> Please provide at least one 'type' tag. ");
+        return false;             
+    }
+
     return true;
 }
 

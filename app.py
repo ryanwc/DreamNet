@@ -1,4 +1,5 @@
 import os, webapp2, jinja2, re, hashlib, hmac, random, datetime, json
+from datetime import date
 import string, random, cPickle as pickle
 from webapp2 import redirect_to
 from google.appengine.ext import db
@@ -265,6 +266,8 @@ class NewDream(Handler):
 		messages = {}
 
 		dreamDict["user"] = user
+		messages["user"] = {"message": "User OK",
+						    "validity": "valid"}
 
 		dreamDict["date_dreamt"] = self.request.get("date_dreamt")
 		## change for international versions?
@@ -290,7 +293,9 @@ class NewDream(Handler):
 			messages["date_dreamt"] = {"message": "Please provide the day you had the dream",
 							 	 	   "validity": "invalid"}		
 
-		dreamDict["date_posted"] = date.datetime.now()
+		dreamDict["date_posted"] = date.today()
+		messages["date_posted"] = {"message": "Date posted OK",
+						    	   "validity": "valid"}
 
 		dreamDict["lucidity"] = self.request.get("lucidity")
 		if dreamDict["lucidity"]:
@@ -337,7 +342,6 @@ class NewDream(Handler):
 						else:
 							messages["something_else"] = {"message": "Please your custom reason for becomming aware that you were dreaming",
 								 	 	    			  "validity": "invalid"}
-
 		else:
 			messages["lucidity"] = {"message": "Please indicate whether you were aware you were dreaming at any point during the dream",
 							 	 	   "validity": "invalid"}	
@@ -410,21 +414,24 @@ class NewDream(Handler):
 				messages["description"] = {"message": "Description OK",
 							 	 	 	   "validity": "valid"}	
 			else:
-				messages["descriptiojn"] = {"message": "Description was too long (301 char max)",
+				messages["description"] = {"message": "Description was too long (301 char max)",
 							 	 	 		"validity": "invalid"}		
 		else:
 			messages["description"] = {"message": "Please enter a description for the dream",
 							 	 	   "validity": "invalid"}
 
-		dreamTags = self.request.get("dreamtags")
-		### do get dream tags with regexes (values of each button)
-		if dreamTags:
+		inputTags = self.request.get("dreamtags")
+		### get dream tags with regexes (values of each button)
+		hasTypeTag = False
+		dreamDict["dream_tags"] = {}
+		if inputTags:
 
-			dreamTags_array = dreamTags.split(",")
+			inputTags_array = inputTags.split(",")
 
-			for dreamTag in dreamTags_array
 
-				tag_array = dreamTag.split("|")
+			for inputTag in inputTags_array:
+
+				tag_array = inputTag.split("|")
 
 				if len(tag_array) != 2:
 					messages["dream_tags"] = {"message": "One of the tags contains an illegal '|' character",
@@ -434,27 +441,60 @@ class NewDream(Handler):
 				tag_name = tag_array[0]
 				tag_group = tag_array[1]
 
-		        if len(tag_name) < 1):
+				# check if already exists (but do not add yet)
+				# think have to all() each time thru for loop but not sure, playing safe
+				existingTagNames = TagName.all()
+				existingTagName = existingTagNames.filter("name =", tag_name).get()
+				if existingTagName:
+					if tag_group != existingTagName.group.name:
+						messages["dream_tags"] = {"message": "Tag '"+tag_name+"' has the wrong tag kind.  Try removing and re-adding i..",
+							 	 	 			  "validity": "invalid"}						
+
+				if len(tag_name) < 1:
 					messages["dream_tags"] = {"message": "One of the tags has no name",
 							 	 	 			"validity": "invalid"}
-		        elif len(tag_name > 50):
-					messages["dream_tags"] = {"message": tag_name+"'s name is too long (max 50 chars)",
+					break
+				elif len(tag_name > 50):
+					messages["dream_tags"] = {"message": "tag '"+tag_name+"' name is too long (max 50 chars)",
 		 	 	 							  "validity": "invalid"}
+					break
+				elif (re.search(r'[1234567890~!@#\$\+=%\^&\*\()<>,\./\?;:\[\]\{}\|_\\]'), tag_name):
+					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an illegal character",
+		 	 	 							  "validity": "invalid"}
+					break
+				elif (re.search(r'  ', tag_name)):
+					messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot contain two spaces in a row",
+		 	 	 							  "validity": "invalid"}
+					break
+				elif (re.search(r"''", tag_name)):
+					messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot contain two apostrophes in a row",
+		 	 	 							  "validity": "invalid"}
+					break
+				elif (re.search(r'--', tag_name)):
+					messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot contain two hyphens in a row",
+		 	 	 							  "validity": "invalid"}
+					break
 
-		        elif (re.search(r'[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:\[\]\{\}\|_\\]'), tag_name):
+				if (tag_group not in TAGS):
+					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an invalid tag group ('"+tag_group+"')",
+		 	 	 							  "validity": "invalid"}
+		 	 	 	break
+				elif tag_group == "type":
+					hasTypeTag = True
 
-		        elif (re.search(r'  ', tag_name)):
+				dreamDict["dream_tag"][tag_name] = tag_group
 
-		        elif (re.search(r"''", tag_name)):
-
-		        elif (re.search(r'--', tag_name)):
-
-
-		       	if (tag_name not in TAGS):
-
+		 	if not hasTypeTag:
+				messages["dream_tags"] = {"message": "Please enter at least one 'type' tag",
+							 	 	  	  "validity": "invalid"}	
+			
+			# if made it this far without setting the message, the tags are valid
+			if "dream_tags" not in messages:
+				messages["dream_tags"] = {"message": "Dream tags OK",
+	 	 	 							  "validity": "valid"}			 		
 		else:
-			messages["dream_tags"] = {"message": "Please enter a description for the dream",
-							 	 	   "validity": "invalid"}			
+			messages["dream_tags"] = {"message": "Please enter some tags, including at least one 'type' tag",
+							 	 	  "validity": "invalid"}			
 
 		dreamDict["content"] = self.request.get("content")
 		if dreamDict["content"]:
@@ -477,6 +517,24 @@ class NewDream(Handler):
 
 		dream = Dream(**dreamDict)
 		dream.put()
+
+		# create each dream tag object
+		# (consists of an id, a reference to a dream, and a reference to a tag name)
+		for tag_name in dreamDict["dream_tags"]:
+			existingTagName = TagName.all().filter("name =", tag_name).get()
+
+			tag_group = dreamDict["dream_tags"][tag_name]
+			tagGroupObj = TagGroup.all().filter("name =", tag_group)
+
+			assert tagGroupObj
+
+			if existingTagName == None:
+				tagNameObj = TagName(name=tag_name, group=tagGroupObj)
+				tagNameObj.put()
+			else:
+				tagNameObj = existingTagName
+
+			dreamTag = Tag(dream=dream, name=tagNameObj)
 
 		return redirect_to("viewdream", id=str(dream.key().id()))
 
