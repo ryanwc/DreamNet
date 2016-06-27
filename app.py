@@ -49,7 +49,7 @@ class Dream(db.Model):
 	control = db.IntegerProperty(required = True)
 	enjoyability = db.IntegerProperty(required = True)
 	awareness_level = db.IntegerProperty(required = True)
-	aware_users = db.StringProperty(required = True, multiline = True)
+	aware_users = db.StringProperty(multiline = True)
 
 	## maybe not right, idea is to render \n as HTML breaks
 	def render(self):
@@ -269,35 +269,49 @@ class NewDream(Handler):
 		messages["user"] = {"message": "User OK",
 						    "validity": "valid"}
 
-		dreamDict["date_dreamt"] = self.request.get("date_dreamt")
+		dreamDict["date_dreamt"] = self.request.get("datedreamt")
+		print "date dreamt from form: "
+		print dreamDict["date_dreamt"]
 		## change for international versions?
 		if dreamDict["date_dreamt"]:
-			date_dreamt_string = dreamDict["date_dreamt"]
-			date_dreamt_array = date_dreamt_string.split("[^0-9]")
+			date_dreamt_string = str(dreamDict["date_dreamt"])
+			date_dreamt_array = re.split(r"[^0-9]", date_dreamt_string)
+			print "date dreamt array: "
+			print date_dreamt_array
 
-			year = date_dreamt_array[2]
-			month = date_dreamt_array[0]
-			day = date_dreamt_array[1]
+			year = int(date_dreamt_array[0])
+			month = int(date_dreamt_array[1])
+			day = int(date_dreamt_array[2])
+
+			print year
+			print month
+			print day
 
 			date_dreamt = None
 
 			try:
 				date_dreamt = datetime.date(year, month, day)
+				print "date dreamt succeeded: "
+				print date_dreamt
 			except ValueError:
 				messages["date_dreamt"] = {"message": "Please fix the date formatting (mm/dd/yyyy)",
 							 	 	       "validity": "invalid"}
 
 			if date_dreamt:
 				dreamDict["date_dreamt"] = date_dreamt
+				messages["date_dreamt"] = {"message": "Date dreamt OK",
+			 	 	     "validity": "valid"}
 		else:
 			messages["date_dreamt"] = {"message": "Please provide the day you had the dream",
 							 	 	   "validity": "invalid"}		
 
-		dreamDict["date_posted"] = date.today()
+		dreamDict["date_posted"] = datetime.datetime.now()
 		messages["date_posted"] = {"message": "Date posted OK",
 						    	   "validity": "valid"}
 
 		dreamDict["lucidity"] = self.request.get("lucidity")
+		print "lucidity: "
+		print dreamDict["lucidity"]
 		if dreamDict["lucidity"]:
 			
 			if (dreamDict["lucidity"] != "True" and 
@@ -307,12 +321,17 @@ class NewDream(Handler):
 							 	 	    "validity": "invalid"}
 			else:
 				messages["lucidity"] = {"message": "Lucidity answer OK",
-							 	 	    "validity": "valid"}				
+							 	 	    "validity": "valid"}	
 
 			if dreamDict["lucidity"] == "True":
 
 				dreamDict["lucid_reason"] = self.request.get("lucidreason")
 
+				print "reason: "
+				print dreamDict["lucid_reason"]
+
+				# would it be best to have the forms return the text instead of a number code?
+				# originally thought code best so backend could be independent of front end text
 				if (dreamDict["lucid_reason"] == "-1" or 
 					dreamDict["lucid_reason"] == None or
 					dreamDict["lucid_reason"] == ""):
@@ -332,6 +351,9 @@ class NewDream(Handler):
 
 						dreamDict["something_else"] = self.request.get("somethingelse")
 
+						print "something else: "
+						print dreamDict["something_else"]
+
 						if dreamDict["something_else"]:
 							if len(dreamDict["something_else"]) < 301:
 								messages["something_else"] = {"message": "Custom reason for awareness OK",
@@ -341,10 +363,28 @@ class NewDream(Handler):
 								 	 	    			  	  "validity": "invalid"}			
 						else:
 							messages["something_else"] = {"message": "Please your custom reason for becomming aware that you were dreaming",
-								 	 	    			  "validity": "invalid"}
+								 	 	    			  "validity": "invalid"}		
+
+				dreamDict["lucid_length"] = self.request.get("lucidlength")
+
+				print "length: "
+				print dreamDict["lucid_length"]
+
+				# would it be best to have the forms return the text instead of a number code?
+				# originally thought code best so backend could be independent of front end text
+				if (dreamDict["lucid_length"] == "0" or 
+					dreamDict["lucid_length"] == "1" or
+					dreamDict["lucid_length"] == "2"):
+
+					messages["lucid_length"] = {"message": "Lucid length OK",
+							 	 	    		"validity": "valid"}	
+				else:
+
+					messages["lucid_length"] = {"message": "Please indicate how long you remained aware you were dreaming after becoming aware",
+							 	 	    		"validity": "invalid"}	
 		else:
 			messages["lucidity"] = {"message": "Please indicate whether you were aware you were dreaming at any point during the dream",
-							 	 	   "validity": "invalid"}	
+							 	 	"validity": "invalid"}	
 
 		dreamDict["control"] = self.request.get("control")
 		if dreamDict["control"]:
@@ -360,8 +400,7 @@ class NewDream(Handler):
 							 		 	   "validity": "invalid"}
 				else:
 					messages["control"] = {"message": "Control level OK.",
-							 		 	   "validity": "invalid"}
-
+							 		 	   "validity": "valid"}
 			except ValueError:
 
 				messages["control"] = {"message": "Control level was invalid.  Use the slider to set control level",
@@ -384,7 +423,7 @@ class NewDream(Handler):
 							 		 	        "validity": "invalid"}
 				else:
 					messages["enjoyability"] = {"message": "Enjoyability OK",
-							 		 	        "validity": "invalid"}
+							 		 	        "validity": "valid"}
 
 			except ValueError:
 
@@ -424,14 +463,25 @@ class NewDream(Handler):
 		### get dream tags with regexes (values of each button)
 		hasTypeTag = False
 		dreamDict["dream_tags"] = {}
+		print "input tags: "
+		print inputTags
 		if inputTags:
 
 			inputTags_array = inputTags.split(",")
 
+			print "input tags array: "
+			print inputTags_array
 
-			for inputTag in inputTags_array:
+			# validate each name|value pair, stopping before last array entry 
+			# due to "," being the last character in inputTags when splitting on ","
+			for i in range(0, len(inputTags_array)-1):
+
+				inputTag = inputTags_array[i]
 
 				tag_array = inputTag.split("|")
+
+				print "tag array: "
+				print tag_array
 
 				if len(tag_array) != 2:
 					messages["dream_tags"] = {"message": "One of the tags contains an illegal '|' character",
@@ -441,24 +491,30 @@ class NewDream(Handler):
 				tag_name = tag_array[0]
 				tag_group = tag_array[1]
 
+				print "tag name: "
+				print tag_name
+				print "tag group: "
+				print tag_group
+
 				# check if already exists (but do not add yet)
 				# think have to all() each time thru for loop but not sure, playing safe
 				existingTagNames = TagName.all()
 				existingTagName = existingTagNames.filter("name =", tag_name).get()
 				if existingTagName:
 					if tag_group != existingTagName.group.name:
-						messages["dream_tags"] = {"message": "Tag '"+tag_name+"' has the wrong tag kind.  Try removing and re-adding i..",
-							 	 	 			  "validity": "invalid"}						
+						messages["dream_tags"] = {"message": "Tag '"+tag_name+"' has the wrong tag kind.  Try removing and re-adding it.",
+							 	 	 			  "validity": "invalid"}
+						break				
 
 				if len(tag_name) < 1:
 					messages["dream_tags"] = {"message": "One of the tags has no name",
 							 	 	 			"validity": "invalid"}
 					break
-				elif len(tag_name > 50):
+				elif len(tag_name) > 50:
 					messages["dream_tags"] = {"message": "tag '"+tag_name+"' name is too long (max 50 chars)",
 		 	 	 							  "validity": "invalid"}
 					break
-				elif (re.search(r'[1234567890~!@#\$\+=%\^&\*\()<>,\./\?;:\[\]\{}\|_\\]'), tag_name):
+				elif (re.search(r'[1234567890~!@#\$\+=%\^&\*\()<>,\./\?;:\[\]\{}\|_\\]', tag_name)):
 					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an illegal character",
 		 	 	 							  "validity": "invalid"}
 					break
@@ -482,7 +538,7 @@ class NewDream(Handler):
 				elif tag_group == "type":
 					hasTypeTag = True
 
-				dreamDict["dream_tag"][tag_name] = tag_group
+				dreamDict["dream_tags"][tag_name] = tag_group
 
 		 	if not hasTypeTag:
 				messages["dream_tags"] = {"message": "Please enter at least one 'type' tag",
@@ -509,11 +565,40 @@ class NewDream(Handler):
 								   "validity": "invalid"}
 
 		dreamDict["awareness_level"] = 0
+		aware_users = "None yet"
+
+		# get existing tags in case redirect to form
+		tagsQ = TagName.all()
+		tagsQ.order("name")
+		groupsQ = TagGroup.all()
+		tagGroupToNames = {}
+		tagNameToGroup = {}
+
+		for tagGroup in groupsQ:
+			tagGroupToNames[tagGroup.name] = []
+
+		for tag in tagsQ:
+			tagNameToGroup[tag.name] = tag.group.name
+			tagGroupToNames[tag.group.name].append(tag.name)
 
 		for attr in dreamDict:
-			if messages[attr]["validity"] == "invalid":
-				return self.render("newdream.html", dreamDict=dreamDict, 
-					messages=messages)
+			print attr
+			print dreamDict[attr]
+			print type(dreamDict[attr])
+			if attr in messages:
+				if messages[attr]["validity"] == "invalid":
+					return self.render("newdream.html", dreamDict=dreamDict, 
+						messages=messages, tagGroupToNames=json.dumps(tagGroupToNames),
+						tagNameToGroup=json.dumps(tagNameToGroup))
+
+		# set values for datastore (some cannot be string)
+		if dreamDict["lucidity"] == "True":
+			dreamDict["lucidity"] = True
+		else:
+			dreamDict["lucidity"] = False
+
+		dreamDict["control"] = int(dreamDict["control"])
+		dreamDict["enjoyability"] = int(dreamDict["enjoyability"])
 
 		dream = Dream(**dreamDict)
 		dream.put()

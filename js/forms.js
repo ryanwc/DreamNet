@@ -22,6 +22,7 @@ function readyTags(tagNameToGroup, tagGroupToName) {
 
         if (inputTag.length > 0) {
 
+            /*
             // to try to accomodate other languages, do not do something like "[^a-zA-Z ]"
             if (inputTag.match(/[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:\[\]\{\}\|_\\]/)) {
 
@@ -50,11 +51,13 @@ function readyTags(tagNameToGroup, tagGroupToName) {
                 $("#tagnamemessage").html("<br> Tag name cannot contain more than one hypen in a row. ");
                 return;
             }
+            */
 
             var type;
 
             // should verify on backend to that no tags repeated
             var alreadyHave = false;
+
             dreamTags.each(function() {
 
                 if ($(this).html() == inputTag) {
@@ -94,7 +97,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
             $("#tagname").focus();
         }
 
-
     });
 
     // add tag with pressing enter
@@ -120,11 +122,19 @@ function readyTags(tagNameToGroup, tagGroupToName) {
             event.preventDefault();
         }
     });
+
+    if ($("input:radio[name=lucidity]:checked").val() == "True") {
+
+        toggleLucidQuestions();
+    }
 }
 
 function createAndAppendTagButton(tagname, type) {
 
     id = tagname+"Button";
+
+    window.alert(tagname);
+    window.alert(type);
 
     var removeTagButton = $("<button id=\""+id+"\" class=\"tag tagbutton remove "+type+"\" value=\""+tagname+"|"+type+"\"><span class=\"dreamtag\">"+tagname+"</span> <span class=\"removetext\">(remove)</span></button>");
 
@@ -136,6 +146,14 @@ function createAndAppendTagButton(tagname, type) {
     });
 
     $("#tags").append(removeTagButton);
+}
+
+function hide(element) {
+
+    if (!element.hasClass("displaynone")) {
+
+        element.addClass("displaynone");
+    }
 }
 
 function toggleDisplay(element) {
@@ -182,7 +200,7 @@ function toggleLucidQuestions() {
 
 function displaySomethingElse() {
 
-    if ($("#lucidreasoninput").val() == "4") {
+    if ($("#lucidreason").val() == "4") {
 
         $("#somethingelse").removeClass("displaynone");
     }
@@ -212,7 +230,7 @@ function validateDream() {
 
     var date_dreamt = $("#datedreamt").val();
     var lucidity = $("input:radio[name=lucidity]:checked").val();
-    var lucid_reason = $("#lucidreasoninput").val();
+    var lucid_reason = $("#lucidreason").val();
     var lucid_length = $("#lucidlength").val();
     var control = $("#control").val();
     var enjoyability = $("#enjoyability").val();
@@ -223,6 +241,7 @@ function validateDream() {
 
     var containsError = false;
 
+    /*
     if (!validateDate(date_dreamt)) {
 
          containsError = true;
@@ -235,7 +254,7 @@ function validateDream() {
 
     if (lucidity == "True") {
 
-        var lucid_reason = $("#lucidreasoninput").val();
+        var lucid_reason = $("#lucidreason").val();
         var lucid_length = $("#lucidlength").val();
 
         if (!validateLucidReason(lucid_reason)) {
@@ -269,12 +288,13 @@ function validateDream() {
         containsError = true;
     }
 
-
     if (!validateTagsAndSetHiddenVal(tagButtonClass)) {
 
         containsError = true;
     }
-
+    */
+    validateTagsAndSetHiddenVal(tagButtonClass)
+    /*
     if (!validateContent(content)) {
 
         containsError = true;
@@ -285,58 +305,72 @@ function validateDream() {
         window.alert("One of the values you entered is in the wrong format or contains an error.  Please look for red text near each question for guidance, then revise and re-submit.");
         return false;
     }
+    */
 
     return true;
 }
 
 function validateDate(date) {
 
+    $("#datedreamtmessageprefix").html("<br>");
+
     if (date.length < 1) {
 
         addAndRemoveClasses($("#datedreamtmessage"), "invalid", "valid");
-        $("#datedreamtmessage").html("<br>  Please enter the date you had the dream. ");
+        $("#datedreamtmessage").html("Please enter the date you had the dream.");
         return false;
     }
 
     if (!Date.parse(date)) {
 
         addAndRemoveClasses($("#datedreamtmessage"), "invalid", "valid");
-        $("#datedreamtmessage").html("<br>  Date dreamt is in wrong format. ");
+        $("#datedreamtmessage").html("Date dreamt is in wrong format.");
         return false;
     }
 
     addAndRemoveClasses($("#datedreamtmessage"), "valid", "invalid");
-    $("#datedreamtmessage").html("<br>  Date dreamt OK. ");
+    $("#datedreamtmessage").html("Date dreamt OK.");
     return true;
 }
 
 function validateLucidity(lucidity) {
 
+    $("#luciditymessageprefix").html("<br>");
+
+    if (typeof lucidity == 'undefined') {
+
+        addAndRemoveClasses($("#luciditymessage"), "invalid", "valid");
+        $("#luciditymessage").html("Please indicate whether you were aware you were dreaming at any point during the dream.");
+        return false;
+    }
+
     if (lucidity.length < 1) {
 
         addAndRemoveClasses($("#luciditymessage"), "invalid", "valid");
-        $("#datedreamtmessage").html("<br>  Please indicate whether you were aware you were dreaming at any point during the dream. ");
+        $("#luciditymessage").html("Please indicate whether you were aware you were dreaming at any point during the dream.");
         return false;
     }
 
     if (lucidity != "False" && lucidity != "True") {
 
         addAndRemoveClasses($("#luciditymessage"), "invalid", "valid");
-        $("#datedreamtmessage").html("<br>  Please select either 'Yes' or 'No'. ");
+        $("#luciditymessage").html("Please select either 'Yes' or 'No'.");
         return false;
     }
 
     addAndRemoveClasses($("#luciditymessage"), "valid", "invalid");
-    $("#datedreamtmessage").html("<br>  Lucidity answer OK. ");
+    $("#luciditymessage").html("Lucidity answer OK.");
     return true;
 }
 
 function validateLucidReason(lucid_reason) {
 
+    $("#lucidreasonmessageprefix").html("<br>");
+
     if (lucid_reason.length < 1) {
 
         addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-        $("#lucidreasonmessage").html("<br>  Please indicate how you became aware you were dreaming. ");
+        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.");
         return false;
     }
 
@@ -372,45 +406,63 @@ function validateLucidReason(lucid_reason) {
 
 function validateSomethingElse(somethingElse) {
 
+    $("#somethingelsemessageprefix").html("<br>");
+
     if (somethingElse.length < 1) {
 
+        addAndRemoveClasses($("#somethingelsemessage"), "invalid", "valid");
+        $("#somethingelsemessage").html("<br>  Please enter your own reason you became aware you were dreaming. ");
         return false;
     } 
 
-    if (somethingElse.length < 300) {
+    if (somethingElse.length > 300) {
 
+        addAndRemoveClasses($("#somethingelsemessage"), "invalid", "valid");
+        $("#somethingelsemessage").html("The reason you became aware you were dreaming is too long (max 300 chars).");
         return false;
     }
 
+    addAndRemoveClasses($("#somethingelsemessage"), "valid", "invalid");
+    $("#somethingelsemessage").html("Your reason for becoming aware you were dreaming is OK.");
     return true;
 }
 
 function validateLucidLength(lucid_length) {
 
+    $("#lucidlengthmessageprefix").html("<br>");
 
     if (lucid_length.length < 1) {
 
+        addAndRemoveClasses($("#lucidlengthmessage"), "invalid", "valid");
+        $("#lucidlengthmessage").html("Please indicate how long you remained aware you were dreaming.");
         return false;
     }
 
     if (lucid_length == "-1") {
 
+        addAndRemoveClasses($("#lucidlengthmessage"), "invalid", "valid");
+        $("#lucidlengthmessage").html("Please indicate how long you remained aware you were dreaming.");
         return false;
     }
 
     if (lucid_length != "0" && lucid_length != "1" && lucid_length != "2") {
 
+        addAndRemoveClasses($("#lucidlengthmessage"), "invalid", "valid");
+        $("#lucidlengthmessage").html("Please indicate how long you remained aware you were dreaming.");
         return false;
     }
 
+    addAndRemoveClasses($("#lucidlengthmessage"), "valid", "invalid");
+    $("#lucidlengthmessage").html("Awareness length OK.");
     return true;
 }
 
 function validateControl(control) {
 
-
     if (control.length < 1) {
 
+        addAndRemoveClasses($("#controlmessage"), "invalid", "valid");
+        $("#controlmessage").html("Please indicate the level of control you felt over your actions and the 'narrative' of the dream.");
         return false;
     }
 
@@ -418,9 +470,13 @@ function validateControl(control) {
         control != "4" && control != "5" && control != "6" && control != "7" && 
         control != "8" && control != "9" && control != "10") {
 
+        addAndRemoveClasses($("#controlmessage"), "invalid", "valid");
+        $("#controlmessage").html("Control level had an invalid value.  Please set control level using the slider.");
         return false;
     }
 
+    addAndRemoveClasses($("#controlmessage"), "valid", "invalid");
+    $("#controlmessage").html("Control level OK.");
     return true;
 }
 
@@ -432,6 +488,8 @@ function validateEnjoyability(enjoyability) {
 
     if (enjoyability.length < 1) {
 
+        addAndRemoveClasses($("#enjoyabilitymessage"), "invalid", "valid");
+        $("#enjoyabilitymessage").html("<br>  Please how enjoyable the dream was. ");
         return false;
     }
 
@@ -440,39 +498,59 @@ function validateEnjoyability(enjoyability) {
         enjoyability != "6" && enjoyability != "7" && enjoyability != "8" && 
         enjoyability != "9" && enjoyability != "10") {
 
+        addAndRemoveClasses($("#enjoyabilitymessage"), "invalid", "valid");
+        $("#enjoyabilitymessage").html("Please how enjoyable the dream was.");
         return false;
     }
 
+    addAndRemoveClasses($("#enjoyabilitymessage"), "valid", "invalid");
+    $("#enjoyabilitymessage").html("Enjoyability OK.");
     return true;
 }
 
 function validateTitle(title) {
 
+    $("#titlemessageprefix").html("<br>");
+
     if (title.length < 1) {
 
+        addAndRemoveClasses($("#titlemessage"), "invalid", "valid");
+        $("#titlemessage").html("Please enter a title for the dream.");
         return false;
     }
 
     if (title.length > 50) {
 
+        addAndRemoveClasses($("#titlemessage"), "invalid", "valid");
+        $("#titlemessage").html("Title is too long (max 50 chars).");
         return false;
     }
 
+    addAndRemoveClasses($("#titlemessage"), "valid", "invalid");
+    $("#titlemessage").html("Title OK.");
     return true;
 }
 
 function validateDescription(description) {
 
+    $("#descriptionmessageprefix").html("<br>");
+
     if (description.length < 1) {
 
+        addAndRemoveClasses($("#descriptionmessage"), "invalid", "valid");
+        $("#descriptionmessage").html("Please enter a short description of the dream.");
         return false;
     }
 
     if (description.length > 300) {
 
+        addAndRemoveClasses($("#descriptionmessage"), "invalid", "valid");
+        $("#descriptionmessage").html("Dream description is too long (max 300 chars).");
         return false;
     }
 
+    addAndRemoveClasses($("#descriptionmessage"), "valid", "invalid");
+    $("#descriptionmessage").html("Description OK.");
     return true;
 }
 
@@ -482,49 +560,52 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
 
     var hasTypeTag = false;
 
+    $("#tagnamemessageprefix").html("<br>");
+
     tagButtonClass.each(function() {
 
         tagtext = $(this).find(".dreamtag").html();
 
+        /*
         if (tagtext.length < 1) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-            $("#tagnamemessage").html("<br> There is an empty tag. Remove it and try again. ");
+            $("#tagnamemessage").html("There is an empty tag. Remove it and try again.");
             return false;       
         }
 
         if (tagtext.length > 50) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' is too long. Remove it and try again. ");
+            $("#tagnamemessage").html("Tag '"+tagtext+"' is too long. Remove it and try again.");
             return false;
         }
 
         if (tagtext.match(/[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:\[\]\{\}\|_\\]/)) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' contains an illegal character. Try using only letters, spaces, hyphens, and apostrophes. ");
+            $("#tagnamemessage").html("Tag '"+tagtext+"' contains an illegal character. Try using only letters, spaces, hyphens, and apostrophes.");
             return false;
         }
 
         if (tagtext.match(/  /)) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' cannot contain more than one space in a row. Remove it and try again. ");
+            $("#tagnamemessage").html("Tag '"+tagtext+"' cannot contain more than one space in a row. Remove it and try again.");
             return false;
         }
 
         if (tagtext.match(/''/)) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' cannot contain more than one apostrophe in a row. Remove it and try again. ");
+            $("#tagnamemessage").html("Tag '"+tagtext+"' cannot contain more than one apostrophe in a row. Remove it and try again.");
             return false;
         }
 
         if (tagtext.match(/--/)) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-            $("#tagnamemessage").html("<br> Tag '"+tagtext+"' cannot contain more than one hypen in a row. Remove it and try again. ");
+            $("#tagnamemessage").html("Tag '"+tagtext+"' cannot contain more than one hypen in a row. Remove it and try again.");
             return false;
         }
 
@@ -533,7 +614,7 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
             !$(this).hasClass("emotion") && !$(this).hasClass("sensation")) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-            $("#tagnamemessage").html("<br>  Tag '"+tagtext+"'. Try removing and re-adding it. ");
+            $("#tagnamemessage").html("Tag '"+tagtext+"'. Try removing and re-adding it.");
             return false;           
         }
         
@@ -541,32 +622,53 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
 
             hasTypeTag = true;
         }
+        */
 
-        $("#dreamtags").val() = $("#dreamtags").val() + $(this).val() + ",";
+        newval = $("#dreamtags").val() + $(this).val() + ",";
+        $("#dreamtags").val(newval);
     });
   
     if (!hasTypeTag) {
 
         addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-        $("#tagnamemessage").html("<br> Please provide at least one 'type' tag. ");
+        $("#tagnamemessage").html("Please provide at least one 'type' tag.");
         return false;             
     }
 
+    addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
+    $("#tagnamemessage").html("Dream tags OK.");
     return true;
 }
 
 function validateContent(content) {
 
+    $("#contentmessageprefix").html("<br>");
+
     if (content.length < 1) {
 
+        addAndRemoveClasses($("#contentmessage"), "invalid", "valid");
+        $("#contentmessage").html("Please write an (as in-depth as possible) account of what happened during the dream.  This can be in whatever form you like, but it may be easiest to write the dream like a story.");
         return false;
     }
 
     if (content.length > 50000) {
 
+        addAndRemoveClasses($("#contentmessage"), "invalid", "valid");
+        $("#contentmessage").html("Dream narrative is too long (max 50,000 chars).");
         return false;
     }
 
+    addAndRemoveClasses($("#contentmessage"), "valid", "invalid");
+    $("#contentmessage").html("Dream narrative OK.");
     return true;
+}
+
+function resetMessage(inputName) {
+
+    $("#"+inputName+"message").html("");
+    $("#"+inputName+"messageprefix").html("");
+
+    addAndRemoveClasses($("#"+inputName+"message"), "", "valid");
+    addAndRemoveClasses($("#"+inputName+"message"), "", "invalid");
 }
 
