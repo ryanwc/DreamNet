@@ -609,7 +609,7 @@ class NewDream(Handler):
 			existingTagName = TagName.all().filter("name =", tag_name).get()
 
 			tag_group = dreamDict["dream_tags"][tag_name]
-			tagGroupObj = TagGroup.all().filter("name =", tag_group)
+			tagGroupObj = TagGroup.all().filter("name =", tag_group).get()
 
 			assert tagGroupObj
 

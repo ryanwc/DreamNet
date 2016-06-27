@@ -22,7 +22,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
 
         if (inputTag.length > 0) {
 
-            /*
             // to try to accomodate other languages, do not do something like "[^a-zA-Z ]"
             if (inputTag.match(/[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:\[\]\{\}\|_\\]/)) {
 
@@ -51,7 +50,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
                 $("#tagnamemessage").html("<br> Tag name cannot contain more than one hypen in a row. ");
                 return;
             }
-            */
 
             var type;
 
@@ -132,9 +130,6 @@ function readyTags(tagNameToGroup, tagGroupToName) {
 function createAndAppendTagButton(tagname, type) {
 
     id = tagname+"Button";
-
-    window.alert(tagname);
-    window.alert(type);
 
     var removeTagButton = $("<button id=\""+id+"\" class=\"tag tagbutton remove "+type+"\" value=\""+tagname+"|"+type+"\"><span class=\"dreamtag\">"+tagname+"</span> <span class=\"removetext\">(remove)</span></button>");
 
@@ -241,7 +236,6 @@ function validateDream() {
 
     var containsError = false;
 
-    /*
     if (!validateDate(date_dreamt)) {
 
          containsError = true;
@@ -292,9 +286,9 @@ function validateDream() {
 
         containsError = true;
     }
-    */
+
     validateTagsAndSetHiddenVal(tagButtonClass)
-    /*
+
     if (!validateContent(content)) {
 
         containsError = true;
@@ -305,7 +299,6 @@ function validateDream() {
         window.alert("One of the values you entered is in the wrong format or contains an error.  Please look for red text near each question for guidance, then revise and re-submit.");
         return false;
     }
-    */
 
     return true;
 }
@@ -369,9 +362,9 @@ function validateLucidReason(lucid_reason) {
 
     if (lucid_reason.length < 1) {
 
-        // HAS BREAK AFTER MESSAGE TO MAKE 'somethingelse' BOX NICELY SPACED IF IT'S THERE
+        // HAS TWO BREAKS AFTER MESSAGE TO MAKE 'somethingelse' BOX NICELY SPACED IF IT'S THERE
         addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.<br>");
+        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.<br><br>");
         return false;
     }
 
@@ -567,7 +560,6 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
 
         tagtext = $(this).find(".dreamtag").html();
 
-        /*
         if (tagtext.length < 1) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
@@ -623,7 +615,6 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
 
             hasTypeTag = true;
         }
-        */
 
         newval = $("#dreamtags").val() + $(this).val() + ",";
         $("#dreamtags").val(newval);
