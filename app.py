@@ -344,7 +344,7 @@ class NewDream(Handler):
 					  dreamDict["lucid_reason"] == "3" or
 					  dreamDict["lucid_reason"] == "4"):
 
-					messages["lucid_reason"] = {"message": "Reasons for awareness OK",
+					messages["lucid_reason"] = {"message": "Reason selection OK",
 							 	 	    		"validity": "valid"}	
 
 					if dreamDict["lucid_reason"] == "4":
@@ -362,7 +362,7 @@ class NewDream(Handler):
 								messages["something_else"] = {"message": "Custom reason for awareness is too long (300 char max)",
 								 	 	    			  	  "validity": "invalid"}			
 						else:
-							messages["something_else"] = {"message": "Please your custom reason for becomming aware that you were dreaming",
+							messages["something_else"] = {"message": "Please enter your custom reason for becomming aware that you were dreaming",
 								 	 	    			  "validity": "invalid"}		
 
 				dreamDict["lucid_length"] = self.request.get("lucidlength")

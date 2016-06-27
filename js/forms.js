@@ -198,7 +198,7 @@ function toggleLucidQuestions() {
     }
 }
 
-function displaySomethingElse() {
+function toggleSomethingElse() {
 
     if ($("#lucidreason").val() == "4") {
 
@@ -369,8 +369,9 @@ function validateLucidReason(lucid_reason) {
 
     if (lucid_reason.length < 1) {
 
+        // HAS BREAK AFTER MESSAGE TO MAKE 'somethingelse' BOX NICELY SPACED IF IT'S THERE
         addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.");
+        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.<br>");
         return false;
     }
 
