@@ -52,9 +52,9 @@
 								<p>Were you aware that you were dreaming at any time during the dream?</p>
 							</div>
 							<div class="col-xs-12 input">
-								<input type="radio" name="lucidity" value="False" onclick="toggleLucidQuestions(); resetMessage('lucidity');" {% if dreamDict['lucidity']|string() == "False"|string() %}checked{% endif %}> <span class="inputlabel"> No</span>
+								<input type="radio" name="lucidity" value="False" onclick="toggleLucidQuestions(); resetMessage('lucidity');" {% if dreamDict['lucidity'] == "False" %}checked{% endif %}> <span class="inputlabel"> No</span>
 								<br>
-								<input type="radio" name="lucidity" value="True" onclick="toggleLucidQuestions(); resetMessage('lucidity');" {% if dreamDict['lucidity']|string() == "True"|string() %}checked{% endif %}> <span class="inputlabel">Yes</span><span id="luciditymessageprefix">{% if messages %}<br>{% endif %}</span><span id="luciditymessage" {% if messages %}class="{{messages['lucidity']['validity']}}"{% endif %}>{% if messages %}{{messages['lucidity']['message']}}{% endif %}</span>
+								<input type="radio" name="lucidity" value="True" onclick="toggleLucidQuestions(); resetMessage('lucidity');" {% if dreamDict['lucidity'] == "True" %}checked{% endif %}> <span class="inputlabel">Yes</span><span id="luciditymessageprefix">{% if messages %}<br>{% endif %}</span><span id="luciditymessage" {% if messages %}class="{{messages['lucidity']['validity']}}"{% endif %}>{% if messages %}{{messages['lucidity']['message']}}{% endif %}</span>
 							</div>
 						</div>
 						<br>
@@ -64,14 +64,38 @@
 								<p id="lucidreasonprompt">Cool! What made you become aware that you were dreaming?</p>
 							</div>
 							<div class="col-xs-12 input">
-								<select name="lucidreason" id="lucidreason" oninput="resetMessage('lucidreason'); resetMessage('somethingelse');" onChange="toggleSomethingElse();">
-									<option value="-1" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason']|string() == "-1"|string() %}selected{% endif %}{% endif %}{% endif %}>-Make a selection-</option>
-									<option value="0" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason']|string() == "0"|string() %}selected{% endif %}{% endif %}{% endif %}>I kept awareness as I feel asleep</option>
-									<option value="1" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason']|string() == "1"|string() %}selected{% endif %}{% endif %}{% endif %}>I did a "reality check" and it failed</option>
-									<option value="2" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason']|string() == "2"|string() %}selected{% endif %}{% endif %}{% endif %}>I recognized one of my "dream signs"</option>
-									<option value="3" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason']|string() == "3"|string() %}selected{% endif %}{% endif %}{% endif %}>Something just seemed "off"</option>
-									<option value="4" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason']|string() == "4"|string() %}selected{% endif %}{% endif %}{% endif %}>Something else (write it below)</option>
+								<select name="lucidreason" id="lucidreason" oninput="resetMessage('lucidreason'); resetMessage('somethingelse');" onChange="toggleSomethingElse();"><!-- not sure why 'onChange' (see #lucidreason) is working, it should be 'onchange'... -->
+									<option value="-1" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "-1" %}selected{% endif %}{% endif %}{% endif %}>-Make a selection-</option>
+									<option value="WILD" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "WILD" %}selected{% endif %}{% endif %}{% endif %}>I kept awareness as I feel asleep</option>
+									<option value="reality check" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "reality check" %}selected{% endif %}{% endif %}{% endif %}>Something specific in the dream helped me realize I was dreaming</option>
+									<option value="off" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "off" %}selected{% endif %}{% endif %}{% endif %}>Not sure; something just seemed "off"</option>
+									<option value="something else" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "something else" %}selected{% endif %}{% endif %}{% endif %}>Something else (write it below)</option>
 								</select><span id="lucidreasonmessageprefix">{% if messages %}{% if messages['lucid_reason'] %}<br>{% endif %}{% endif %}</span><span id="lucidreasonmessage" {% if messages %}{% if messages['lucid_reason'] %}class="{{messages['lucid_reason']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['lucid_reason'] %}{{messages['lucid_reason']['message']}}<br><br>{% endif %}{% endif %}</span>
+
+								First, was the specific thing that helped you realize you were dreaming one of your "dream signs"?
+								hint: A dream sign is something that occurs in your dreams on a regular basis, like a specific acitivty, situation, person, place, thing, feeling, or sensation.
+
+								OK, so what was the specific thing in the dream that helped you become aware you were dreaming?
+								[include all dream signs]
+								[pull from the user's dream sign list]
+								[if they say "yes" to dream sign but do not select one of their dream signs (maybe indicated which ones are their dream signs in this case) then prompt: this isn't one of your dream signs yet.  make it one?]
+
+								<select name="realitycheck" id="realitycheck" oninput="resetMessage('realitycheck'); resetMessage('otherrealitycheck');" onChange="toggleOtherRealityCheck();"><!-- same onChange -->
+									<option value="-1" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "-1" %}selected{% endif %}{% endif %}{% endif %}>-Make a selection-</option>
+									<option value="analog time" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "analog time" %}selected{% endif %}{% endif %}{% endif %}>Analog timepiece was strange or hard to read</option>
+									<option value="digital time" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "digital time" %}selected{% endif %}{% endif %}{% endif %}>Digital timepiece was strange or hard to read</option>
+									<option value="breathe thru nose" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "breathe thru nose" %}selected{% endif %}{% endif %}{% endif %}>I plugged my nose but was still able to breathe through it</option>
+									<option value="finger thru palm" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "finger thru palm" %}selected{% endif %}{% endif %}{% endif %}>I put my figer through my palm</option>
+									<option value="strange hands" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "strange hands" %}selected{% endif %}{% endif %}{% endif %}>My hands looked strange</option>
+									<option value="light switch" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "light switch" %}selected{% endif %}{% endif %}{% endif %}>Light switch did not work as expected</option>
+									<option value="mirror" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "mirror" %}selected{% endif %}{% endif %}{% endif %}>A mirror did not work as expected</option>
+									<option value="dream sign" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "dream sign" %}selected{% endif %}{% endif %}{% endif %}>I recognized one of my "dream signs"</option>
+									<option value="other reality check" {% if dreamDict %}{% if dreamDict['reality_check'] %}{% if dreamDict['reality_check'] == "other reality check" %}selected{% endif %}{% endif %}{% endif %}>Something else (write it below)</option>
+								</select><span id="realitycheckmessageprefix">{% if messages %}{% if messages['reality_check'] %}<br>{% endif %}{% endif %}</span><span id="realitycheckmessage" {% if messages %}{% if messages['reality_check'] %}class="{{messages['reality_check']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['reality_check'] %}{{messages['reality_check']['message']}}<br><br>{% endif %}{% endif %}</span>
+
+								<textarea id="otherrealitycheck" class="displaynone" rows="2" cols="20" type="text" name="otherrealitycheck" oninput="resetMessage('otherrealitycheck');" placeholder="Reality check you performed that failed, causing you to become aware you were dreaming">{% if dreamDict %}{% if dreamDict['other_reality_check'] %}{{dreamDict['other_reality_check']}}{% endif %}{% endif %}</textarea><span id="otherrealitycheckmessageprefix">{% if messages %}{% if messages['other_reality_check'] %}<br>{% endif %}{% endif %}</span><span id="otherrealitycheckmessage" {% if messages %}{% if messages['other_reality_check'] %}class="{{messages['other_reality_check']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['other_reality_check'] %}{{messages['other_reality_check']['message']}}{% endif %}{% endif %}</span>
+
+								<textarea id="dreamsign" class="displaynone" rows="2" cols="20" type="text" name="dreamsign" oninput="resetMessage('dreamsign');" placeholder="Reality check you performed that failed, causing you to become aware you were dreaming">{% if dreamDict %}{% if dreamDict['dream_sign'] %}{{dreamDict['dream_sign']}}{% endif %}{% endif %}</textarea><span id="dreamsignmessageprefix">{% if messages %}{% if messages['dream_sign'] %}<br>{% endif %}{% endif %}</span><span id="dreamsignmessage" {% if messages %}{% if messages['dream_sign'] %}class="{{messages['dream_sign']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['dream_sign'] %}{{messages['dream_sign']['message']}}{% endif %}{% endif %}</span>
 
 								<textarea id="somethingelse" class="displaynone" rows="2" cols="30" type="text" name="somethingelse" oninput="resetMessage('somethingelse');" placeholder="Reason you became aware you were dreaming">{% if dreamDict %}{% if dreamDict['something_else'] %}{{dreamDict['something_else']}}{% endif %}{% endif %}</textarea><span id="somethingelsemessageprefix">{% if messages %}{% if messages['something_else'] %}<br>{% endif %}{% endif %}</span><span id="somethingelsemessage" {% if messages %}{% if messages['something_else'] %}class="{{messages['something_else']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['something_else'] %}{{messages['something_else']['message']}}{% endif %}{% endif %}</span>
 							</div>
@@ -84,10 +108,10 @@
 							</div>
 							<div class="col-xs-12 input">
 								<select name="lucidlength" id="lucidlength" oninput="resetMessage('lucidlength');">
-									<option value="-1" onclick="resetMessage('lucidlength');" {% if dreamDict %}{% if dreamDict['lucid_length'] %}{% if dreamDict['lucid_length']|string() == "-1"|string() %}selected{% endif %}{% endif %}{% endif %}>-Make a selection-</option>
-									<option value="0" onclick="resetMessage('lucidlength');" {% if dreamDict %}{% if dreamDict['lucid_length'] %}{% if dreamDict['lucid_length']|string() == "0"|string() %}selected{% endif %}{% endif %}{% endif %}>I forgot I was dreaming almost immediately</option>
-									<option value="1" onclick="resetMessage('lucidlength');" {% if dreamDict %}{% if dreamDict['lucid_length'] %}{% if dreamDict['lucid_length']|string() == "1"|string() %}selected{% endif %}{% endif %}{% endif %}>I forgot I was dreaming after some time</option>
-									<option value="2" onclick="resetMessage('lucidlength');" {% if dreamDict %}{% if dreamDict['lucid_length'] %}{% if dreamDict['lucid_length']|string() == "2"|string() %}selected{% endif %}{% endif %}{% endif %}>I was aware for the rest of the dream</option>
+									<option value="-1" onclick="resetMessage('lucidlength');" {% if dreamDict %}{% if dreamDict['lucid_length'] %}{% if dreamDict['lucid_length'] == "-1" %}selected{% endif %}{% endif %}{% endif %}>-Make a selection-</option>
+									<option value="very short" onclick="resetMessage('lucidlength');" {% if dreamDict %}{% if dreamDict['lucid_length'] %}{% if dreamDict['lucid_length'] == "very short" %}selected{% endif %}{% endif %}{% endif %}>I forgot I was dreaming almost immediately</option>
+									<option value="in between" onclick="resetMessage('lucidlength');" {% if dreamDict %}{% if dreamDict['lucid_length'] %}{% if dreamDict['lucid_length'] == "in between" %}selected{% endif %}{% endif %}{% endif %}>I forgot I was dreaming after some time</option>
+									<option value="entire" onclick="resetMessage('lucidlength');" {% if dreamDict %}{% if dreamDict['lucid_length'] %}{% if dreamDict['lucid_length'] == "entire" %}selected{% endif %}{% endif %}{% endif %}>I was aware for the entire rest of the dream</option>
 								</select><span id="lucidlengthmessageprefix">{% if messages %}{% if messages['lucid_length'] %}<br>{% endif %}{% endif %}</span><span id="lucidlengthmessage" {% if messages %}{% if messages['lucid_length'] %}class="{{messages['lucid_length']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['lucid_length'] %}{{messages['lucid_length']['message']}}{% endif %}{% endif %}</span>
 							</div>
 						</div>

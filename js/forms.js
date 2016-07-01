@@ -208,6 +208,21 @@ function toggleSomethingElse() {
     }
 }
 
+function toggleOtherRealityCheck() {
+
+    if ($("#realitycheck").val() == "4") {
+
+        $("#otherrealitycheck").removeClass("displaynone");
+    }
+    else {
+
+        if (!$("#otherrealitycheck").hasClass("displaynone")) {
+
+          $("#otherrealitycheck").addClass("displaynone");
+        }
+    }
+}
+
 function addAndRemoveClasses(element, classToAdd, classToRemove) {
 
     if (element.hasClass(classToRemove)) {

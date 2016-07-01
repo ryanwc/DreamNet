@@ -270,22 +270,14 @@ class NewDream(Handler):
 						    "validity": "valid"}
 
 		dreamDict["date_dreamt"] = self.request.get("datedreamt")
-		print "date dreamt from form: "
-		print dreamDict["date_dreamt"]
 		## change for international versions?
 		if dreamDict["date_dreamt"]:
 			date_dreamt_string = str(dreamDict["date_dreamt"])
 			date_dreamt_array = re.split(r"[^0-9]", date_dreamt_string)
-			print "date dreamt array: "
-			print date_dreamt_array
 
 			year = int(date_dreamt_array[0])
 			month = int(date_dreamt_array[1])
 			day = int(date_dreamt_array[2])
-
-			print year
-			print month
-			print day
 
 			date_dreamt = None
 
@@ -310,8 +302,6 @@ class NewDream(Handler):
 						    	   "validity": "valid"}
 
 		dreamDict["lucidity"] = self.request.get("lucidity")
-		print "lucidity: "
-		print dreamDict["lucidity"]
 		if dreamDict["lucidity"]:
 			
 			if (dreamDict["lucidity"] != "True" and 
@@ -327,9 +317,6 @@ class NewDream(Handler):
 
 				dreamDict["lucid_reason"] = self.request.get("lucidreason")
 
-				print "reason: "
-				print dreamDict["lucid_reason"]
-
 				# would it be best to have the forms return the text instead of a number code?
 				# originally thought code best so backend could be independent of front end text
 				if (dreamDict["lucid_reason"] == "-1" or 
@@ -338,21 +325,18 @@ class NewDream(Handler):
 
 					messages["lucid_reason"] = {"message": "Please enter how you became aware you were dreaming",
 							 	 	    		"validity": "invalid"}	
-				elif (dreamDict["lucid_reason"] == "0" or 
-					  dreamDict["lucid_reason"] == "1" or
-					  dreamDict["lucid_reason"] == "2" or
-					  dreamDict["lucid_reason"] == "3" or
-					  dreamDict["lucid_reason"] == "4"):
+				elif (dreamDict["lucid_reason"] == "WILD" or 
+					  dreamDict["lucid_reason"] == "reality check" or
+					  dreamDict["lucid_reason"] == "dream sign" or
+					  dreamDict["lucid_reason"] == "off" or
+					  dreamDict["lucid_reason"] == "something else"):
 
 					messages["lucid_reason"] = {"message": "Reason selection OK",
 							 	 	    		"validity": "valid"}	
 
-					if dreamDict["lucid_reason"] == "4":
+					if dreamDict["lucid_reason"] == "something else":
 
 						dreamDict["something_else"] = self.request.get("somethingelse")
-
-						print "something else: "
-						print dreamDict["something_else"]
 
 						if dreamDict["something_else"]:
 							if len(dreamDict["something_else"]) < 301:
@@ -367,17 +351,14 @@ class NewDream(Handler):
 
 				dreamDict["lucid_length"] = self.request.get("lucidlength")
 
-				print "length: "
-				print dreamDict["lucid_length"]
-
 				# would it be best to have the forms return the text instead of a number code?
 				# originally thought code best so backend could be independent of front end text
-				if (dreamDict["lucid_length"] == "0" or 
-					dreamDict["lucid_length"] == "1" or
-					dreamDict["lucid_length"] == "2"):
+				if (dreamDict["lucid_length"] == "very short" or 
+					dreamDict["lucid_length"] == "in between" or
+					dreamDict["lucid_length"] == "entire"):
 
 					messages["lucid_length"] = {"message": "Lucid length OK",
-							 	 	    		"validity": "valid"}	
+							 	 	    		"validity": "valid"}
 				else:
 
 					messages["lucid_length"] = {"message": "Please indicate how long you remained aware you were dreaming after becoming aware",
@@ -463,14 +444,9 @@ class NewDream(Handler):
 		### get dream tags with regexes (values of each button)
 		hasTypeTag = False
 		dreamDict["dream_tags"] = {}
-		print "input tags: "
-		print inputTags
 		if inputTags:
 
 			inputTags_array = inputTags.split(",")
-
-			print "input tags array: "
-			print inputTags_array
 
 			# validate each name|value pair, stopping before last array entry 
 			# due to "," being the last character in inputTags when splitting on ","
@@ -480,9 +456,6 @@ class NewDream(Handler):
 
 				tag_array = inputTag.split("|")
 
-				print "tag array: "
-				print tag_array
-
 				if len(tag_array) != 2:
 					messages["dream_tags"] = {"message": "One of the tags contains an illegal '|' character",
 							 	 	 		  "validity": "invalid"}
@@ -490,11 +463,6 @@ class NewDream(Handler):
 
 				tag_name = tag_array[0]
 				tag_group = tag_array[1]
-
-				print "tag name: "
-				print tag_name
-				print "tag group: "
-				print tag_group
 
 				# check if already exists (but do not add yet)
 				# think have to all() each time thru for loop but not sure, playing safe
@@ -807,9 +775,6 @@ class ViewDream(Handler):
 	def get(self, id=None):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
-
-		print username
-		print dream.user.username
 
 		self.render("viewdream.html", dream=dream, username=username)
 
