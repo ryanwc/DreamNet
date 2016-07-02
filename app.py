@@ -26,17 +26,17 @@ class Handler(webapp2.RequestHandler):
 # define entities
 
 class User(db.Model):
-	# what other unchanging properties?
+	# what other properties?
 	username = db.StringProperty(required = True)
 	password = db.StringProperty(required = True)
-	#birthdate = db.DateProperty(required = True)
-	#nationality = db.StringProperty(required = True)
+	gender = db.StringProperty(required = True)
+	birthdate = db.DateProperty(required = True)
+	nationality = db.StringProperty(required = True)
 	email = db.StringProperty(required = True)
 	useful_dreams = db.StringProperty(required = True, multiline = True)
 
 class Dream(db.Model):
-	# what other properties do we want to keep? 
-	# current country? country of origin? primary language? gender? age?
+	# what other properties?
 	user = db.ReferenceProperty(User,
 							 	collection_name = "dreams")
 	title = db.StringProperty(required = True)
@@ -56,14 +56,16 @@ class Dream(db.Model):
 		self._render_text = self.content.replace("\n", "<br>")
 		return render_str(self._render_text)
 
+# types, places, people, things, emotions, sensations
 class TagGroup(db.Model):
-	# types, places, people, things, emotions, sensations
 	name = db.StringProperty(required = True)
+	description = db.StringProperty()
 
 class TagName(db.Model):
 	name = db.StringProperty(required = True)
 	group = db.ReferenceProperty(TagGroup,
 							     collection_name = "tag_names")
+	description = db.StringProperty()
 
 class Tag(db.Model):
 	dream = db.ReferenceProperty(Dream,
@@ -71,43 +73,91 @@ class Tag(db.Model):
 	name = db.ReferenceProperty(TagName,
 						    	collection_name = "tags")
 
+# impossibility, oddity, etc.
+class RealityCheckMechanism(db.Model):
+
+	name = db.StringProperty(required = True)
+	description = db.StringProperty(required = True)
+
+# a specific user's unique dreamsigns
+class DreamSign(db.Model):
+	mechanism = db.ReferenceProperty(RealityCheckMechanism,
+									 collection_name = "dream_signs")
+	tag = db.ReferenceProperty(Tag,
+							   collection_name = "dream_signs")
+	user = db.ReferenceProperty(User,
+								collection_name = "dream_signs")
+	description = db.ReferenceProperty(required = True)
+
+# specific instance of a reality check name, which could also be a dream sign
+class RealityCheck(db.Model):
+	tag = db.ReferenceProperty(Tag,
+							   collection_name = "reality_checks")
+	dream_sign = db.ReferenceProperty(DreamSign,
+									  collection_name = "reality_checks")
+	user = db.ReferenceProperty(User,
+								collection_name = "reality_checks")
+	dream = db.ReferenceProperty(Dream,
+								 collection_name = "reality_checks")
+	success = db.BooleanProperty(required = True)
+	# 0 = 1st RC in a specific dream, 3 = 4th, etc 
+	index = db.IntegerProperty(required = True)
+
 ### some helpful globals
 ### these could be a separate entity instead
-# need to resolve collisions by asking user is it this or this
-# need to say "havent seen that yet"
-# need to say "what the fuck is that crazy person behind me laughing at"
+
+# set some initial tags
 TAGS = {}
 
-types = ["flying", "falling", "nudity", "sex", "nightmare", "being chased",
-		 "paralysis", "trapped", "difficult to move", "eating", "death",
+types = ["flying", "superhero", "falling", "nudity", "sex", "nightmare", "being chased",
+		 "paralysis", "trapped", "hard to move", "hard to breathe" "eating", "death",
 		 "violence", "school/classroom/exam", "aquatic", "demonic",
-		 "religious", "angelic", "fantasy", "sci-fi", "romantic", "comedy",
-		 "missed/late to appointment/event", "travel", "futuristic", 
-		 "in the past", "light", "darkness"]
+		 "religious", "angelic/heavenly", "fantasy", "sci-fi", "romance", "comedy",
+		 "being late", "missed an appointment/event",
+		 "being in a hurry", "travel", "futuristic", "in the past", "light", "darkness",
+		 "video game", "continuity error", "colorful", "black and white", "sepia",
+		 "recurring", "magic", "extra ability", "illness", "medical", "floating",
+		 "low gravity", "superpower"]
 
-people = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
+beings = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
 		  "son", "daughter", "neice", "nephew", "cousin", "grandfather",
-		  "grandmother", "grandson", "granddaughter", "mother-in-law",
+    	  "grandmother", "grandson", "granddaughter", "mother-in-law",
 		  "father-in-law", "brother-in-law", "sister-in-law", "son-in-law",
 		  "daughter-in-law", "boss/manager", "direct report", "employee", 
 		  "coworker", "wife", "girlfriend", "husband", "boyfriend", 
 		  "best friend", "friend", "aquaintance", "business partner", "crush",
-		  "person from childhood", "person from highschool", 
-		  "person from college", "teacher/professor"]
+		  "person from childhood", "person from highschool", "lover",
+		  "person from college", "teacher/professor", "specific fictional character",
+		  "ghost", "caterpillar", "dog", "vampire", "angel", "demon", "spider",
+		  "alien", "unicorn", "horse", "tiger", "lion", "bear", "God", "elf", "dwarf",
+		  "orc", "wizard", "witch"]
 
 places = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
-		  "bedroom", "livingroom", "bathroom", "hallway", "ruins", 
+		  "bedroom", "livingroom", "bathroom", "hallway", "ruins", "religious building",
 		  "military base", "heaven", "hell", "beach", "house", "road/highway",
 		  "ocean", "lake", "river", "swamp", "desert", "glacier", "rainforest",
 		  "forest", "boat", "cave", "office building", "abandoned building",
 		  "stadium", "open field", "farm", "mountain", "airport", "school",
 		  "classroom", "hospital", "doctor's office", "science facility",
-		  "outer space", "spaceship", "alien world"]
+		  "outer space", "alien world"]
 
-things = ["bowl", "door", "hat", "ghost", "caterpillar", "dog", "chair",
-		  "watch", "clock", "staircase", "flag", "gun", "knife", "car",
+objects = ["bowl", "door", "hat", "chair",
+		  "staircase", "flag", "gun", "knife", "car",
 		  "boat", "airplane", "spoon", "fork", "table", "wall", "present",
-		  "strawberry", "food", "blueberry"]
+		  "strawberry", "food", "blueberry", "analog timepiece", "digital timepiece", 
+		  "light switch", "lightbulb", "mirror", "book", "door",
+		  "window", "train", "elevator", "escalator", 
+		  "bowl", "pants", "shirt", "dress", "skirt", 
+		  "shoes", "cell phone", "laptop computer", "desktop computer", 
+		  "tablet (computer)", "camera", "radio", "video player", "music player",
+		  "spaceship", "teeth", "plate", "box", "can", "napkin", "video game console",
+		  "physical video game", "banana", "hand", "face", "hair", "arm", "leg", "eye",
+		  "ear", "nose", "mouth", "foot", "finger", "toe", "shoulder", "stomach"
+		  "back", "wrist", "elbow", "knee", "ankle", "penis", "vagina", "testicle", 
+		  "scalp", "skin", "neck", "butt", "calf", "hamstring", "bicep", "tricep",
+		  "heel", "finger nail", "toenail", "scrotum", "bladder", "liver", "heart",
+		  "brain", "gums", "tongue", "floss", "toothbrush", "toothpaste", "skull", "bone",
+		  "gift", "money", "wallet", "chest", "breast", "spine", "glass"]
 
 emotions = ["happiness", "ecstacy", "sadness", "sorrow/grief", "depression",
 			"fear", "terror", "disgust", "anger", "indignation", "hatred",
@@ -122,11 +172,19 @@ sensations = ["pain", "discomfort", "pleasure", "orgasm", "taste", "color",
 			  "bitter", "umami", "comfort", "heat" "cold", "numbness"]
 
 TAGS['type'] = types
-TAGS['person'] = people
+TAGS['being'] = beings
 TAGS['place'] = places
-TAGS['thing'] = things
+TAGS['object'] = objects
 TAGS['emotion'] = emotions
 TAGS['sensation'] = sensations
+
+# set some initial reality checks
+
+# something malfunctioned // all things
+# impossible or strange behavior or occurrence // all tags (impossible to feel hot in ice)
+# mere presence of a person, place, thing, sensation, or emotion // dead person or always see a ball // all tags
+# mere absence of a person, place, thing, sensation, or emotion // mother not at home or don't have car // all tags
+MECHANISMS = ["malfunction", "impossibility/oddity", "presence", "absence"]
 
 ### helper functions
 
