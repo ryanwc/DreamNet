@@ -679,3 +679,48 @@ function resetMessage(inputName) {
     addAndRemoveClasses($("#"+inputName+"message"), "", "invalid");
 }
 
+toggleRealityCheckTags(tagGroupToName) {
+
+    var selectedMechanism = $("#mechanism").val();
+    var tagSelect = $("realitychecktag");
+
+    tagSelect.empty();
+
+    // set the beginning of the sentence
+    switch (selectedMechanism) {
+
+        case 'malfunction':
+            addAndRemoveClasses($("#mechanisminput"), "", "invalid");
+            $("#mechanisminput").html("a malfunctioning");
+            break;
+        case 'impossibility/oddity':
+            addAndRemoveClasses($("#mechanisminput"), "", "invalid");
+            $("#mechanisminput").html("an impossible or odd behavior or occurence involving [a(n)/my]");
+            break;
+        case 'presence':
+            addAndRemoveClasses($("#mechanisminput"), "", "invalid");
+            $("#mechanisminput").html("the presence of [a(n)/my]");
+            break;
+        case 'absence':
+            addAndRemoveClasses($("#mechanisminput"), "", "invalid");
+            $("#mechanisminput").html("the absence of [a(n)/my]");
+            break;
+        default:
+            addAndRemoveClasses($("#mechanisminput"), "invalid", "");
+            $("#mechanisminput").html("Oops!  We don't recognize your selection for the previous question.  Try re-selecting an option.");
+            break;
+    }
+
+    // display/hide the appropriate selects
+    // (a malfunction can only be an object)
+    if (selectedMechanism == "malfunction") {
+
+        addAndRemoveClasses($("#realitycheckmalfunctiontag"), "", "displaynone");
+        addAndRemoveClasses($("#realitycheckalltag"), "displaynone");      
+    }
+    else {
+
+        addAndRemoveClasses($("#realitycheckalltag"), "", "displaynone");
+        addAndRemoveClasses($("#realitycheckmalfunctiontag"), "displaynone");  
+    }
+}

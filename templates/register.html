@@ -10,28 +10,46 @@
 
 	<body>
 
-		<h1>Signin to the Dream Multiblog</h1>
+		<h1>Register a New Dreamer</h1>
 
 		<form action="/register" method="post">
 
 			<p>Enter username:</p>
-			<input type="text" label="Enter name:" name="name" placeholder="Name" {% if values %}value="{{values['name']}}"{% endif %}>{% if messages %}<span class="{{messages['name']['validity']}}">{{messages['name']['message']}}</span>{% endif %}
+			<input type="text" label="Enter name:" name="name" placeholder="Name" id="name" oninput="resetMessage('name');" {% if values %}value="{{values['name']}}"{% endif %}>{% if messages %}<span class="{{messages['name']['validity']}}">{{messages['name']['message']}}</span>{% endif %}
 			<br>
 
 			<p>Enter password:</p>
-			<input type="password" name="password" placeholder="Password" {% if values %}value="{{values['password']}}"{% endif %}>{% if messages %}<span class="{{messages['password']['validity']}}">{{messages['password']['message']}}</span>{% endif %}
+			<input type="password" name="password" placeholder="Password" id="password" oninput="resetMessage('password');" {% if values %}value="{{values['password']}}"{% endif %}>{% if messages %}<span class="{{messages['password']['validity']}}">{{messages['password']['message']}}</span>{% endif %}
 			<br>		
 
 			<p>Verify password:</p>
-			<input type="password" name="verifypassword" placeholder="Verify password" {% if values %}value="{{values['verifypassword']}}"{% endif %}>{% if messages %}<span class="{{messages['verifypassword']['validity']}}">{{messages['verifypassword']['message']}}</span>{% endif %}
+			<input type="password" name="verifypassword" id="verifypassword" oninput="resetMessage('verifypassword');" placeholder="Verify password" {% if values %}value="{{values['verifypassword']}}"{% endif %}>{% if messages %}<span class="{{messages['verifypassword']['validity']}}">{{messages['verifypassword']['message']}}</span>{% endif %}
 			<br>	
 
 			<p>Enter email:</p>
-			<input type="text" name="email" placeholder="Email" {% if values %}value="{{values['email']}}"{% endif %}>{% if messages %}<span class="{{messages['email']['validity']}}">{{messages['email']['message']}}</span>{% endif %}
+			<input type="text" name="email" placeholder="Email" id="email" oninput="resetMessage('email');" {% if values %}value="{{values['email']}}"{% endif %}>{% if messages %}<span class="{{messages['email']['validity']}}">{{messages['email']['message']}}</span>{% endif %}
+			<br>
+
+			<p>Enter birthdate:</p>
+			<input type="date" name="birthdate" id="birthdate" oninput="resetMessage('birthdate');" {% if values %}value="{{values['birthdate']}}"{% endif %}>{% if messages %}<span class="{{messages['birthdate']['validity']}}">{{messages['birthdate']['message']}}</span>{% endif %}
+			<br>
+			<span class="hint">(use mm/dd/yyyy format)</span>
+			<br>
+
+			<!-- need to verify/modify -->
+			<p>Enter nationality:</p>
+			<select name="nationality" id="nationality" oninput="resetMessage('nationality');">
+				<option value="-1">-Make a selection-</option>
+				{% for country in countries %}
+				<option value="{{country}}" {% if values %}{% if values['nationality'] == country %}checked{% endif %}{% endif %}>country</option>
+				{% endfor %}
+			</select>{% if messages %}<span class="{{messages['nationality']['validity']}}">{{messages['nationality']['message']}}</span>{% endif %}
 			<br>
 
 			<br>
 			<input type="submit">
 		</form>
+
+	<script src="/js/forms.js"></script>
 	</body>
 </html>

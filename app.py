@@ -43,6 +43,7 @@ class Dream(db.Model):
 	content = db.TextProperty(required = True)
 	date_dreamt = db.DateProperty(required = True)
 	date_posted = db.DateTimeProperty(auto_now_add=True)
+	interruption = db.BooleanProperty(required = True)
 	lucidity = db.BooleanProperty(required = True)
 	lucid_length = db.StringProperty()
 	lucid_reason = db.StringProperty()
@@ -73,7 +74,7 @@ class Tag(db.Model):
 	name = db.ReferenceProperty(TagName,
 						    	collection_name = "tags")
 
-# impossibility, oddity, etc.
+# e.g., impossibility
 class RealityCheckMechanism(db.Model):
 
 	name = db.StringProperty(required = True)
@@ -81,6 +82,7 @@ class RealityCheckMechanism(db.Model):
 
 # a specific user's unique dreamsigns
 class DreamSign(db.Model):
+	nickname = db.StringProperty(required = True)
 	mechanism = db.ReferenceProperty(RealityCheckMechanism,
 									 collection_name = "dream_signs")
 	tag = db.ReferenceProperty(Tag,
@@ -103,13 +105,17 @@ class RealityCheck(db.Model):
 	# 0 = 1st RC in a specific dream, 3 = 4th, etc 
 	index = db.IntegerProperty(required = True)
 
-### some helpful globals
-### these could be a separate entity instead
+### some globals
+
+COUNTRIES = ["Afganistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antigua & Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bonaire", "Bosnia & Herzegovina", "Botswana", "Brazil", "British Indian Ocean Ter", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Canary Islands", "Cape Verde", "Cayman Islands", "Central African Republic", "Chad", "Channel Islands", "Chile", "China", "Christmas Island", "Cocos Island", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "Cote DIvoire", "Croatia", "Cuba", "Curaco", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Ter", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Great Britain", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guinea", "Guyana", "Haiti", "Hawaii", "Honduras", "Hong Kong", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea Sout", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macau", "Macedonia", "Madagascar", "Malaysia", "Malawi", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Midway Islands", "Moldova", "Monaco", "Mongolia", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Nambia", "Nauru", "Nepal", "Netherland Antilles", "Netherlands", "Nevis", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "Norway", "Oman", "Pakistan", "Palau Island", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Phillipines", "Pitcairn Island", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic of Montenegro", "Republic of Serbia", "Reunion", "Romania", "Russia", "Rwanda", "St Barthelemy", "St Eustatius", "St Helena", "St Kitts-Nevis", "St Lucia", "St Maarten", "St Pierre & Miquelon", "St Vincent & Grenadines", "Saipan", "Samoa", "Samoa American", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Tahiti", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tokelau", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks & Caicos Is", "Tuvalu", "Uganda", "Ukraine", "United Arab Erimates", "United Kingdom", "United States of America", "Uraguay", "Uzbekistan", "Vanuatu", "Vatican City State", "Venezuela", "Vietnam", "Virgin Islands (Brit)", "Virgin Islands (USA)", "Wake Island", "Wallis & Futana Is", "Yemen", "Zaire", "Zambia", "Zimbabwe"]
+
+# set mechanisms by which reality checks work
+MECHANISMS = ["malfunction", "impossibility/oddity", "presence", "absence"]
 
 # set some initial tags
 TAGS = {}
 
-types = ["flying", "superhero", "falling", "nudity", "sex", "nightmare", "being chased",
+TYPES = ["flying", "superhero", "falling", "nudity", "sex", "nightmare", "being chased",
 		 "paralysis", "trapped", "hard to move", "hard to breathe" "eating", "death",
 		 "violence", "school/classroom/exam", "aquatic", "demonic",
 		 "religious", "angelic/heavenly", "fantasy", "sci-fi", "romance", "comedy",
@@ -119,7 +125,7 @@ types = ["flying", "superhero", "falling", "nudity", "sex", "nightmare", "being 
 		 "recurring", "magic", "extra ability", "illness", "medical", "floating",
 		 "low gravity", "superpower"]
 
-beings = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
+BEINGS = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
 		  "son", "daughter", "neice", "nephew", "cousin", "grandfather",
     	  "grandmother", "grandson", "granddaughter", "mother-in-law",
 		  "father-in-law", "brother-in-law", "sister-in-law", "son-in-law",
@@ -132,7 +138,7 @@ beings = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
 		  "alien", "unicorn", "horse", "tiger", "lion", "bear", "God", "elf", "dwarf",
 		  "orc", "wizard", "witch"]
 
-places = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
+PLACES = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
 		  "bedroom", "livingroom", "bathroom", "hallway", "ruins", "religious building",
 		  "military base", "heaven", "hell", "beach", "house", "road/highway",
 		  "ocean", "lake", "river", "swamp", "desert", "glacier", "rainforest",
@@ -141,7 +147,7 @@ places = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
 		  "classroom", "hospital", "doctor's office", "science facility",
 		  "outer space", "alien world"]
 
-objects = ["bowl", "door", "hat", "chair",
+OBJECTS = ["bowl", "door", "hat", "chair",
 		  "staircase", "flag", "gun", "knife", "car",
 		  "boat", "airplane", "spoon", "fork", "table", "wall", "present",
 		  "strawberry", "food", "blueberry", "analog timepiece", "digital timepiece", 
@@ -159,32 +165,25 @@ objects = ["bowl", "door", "hat", "chair",
 		  "brain", "gums", "tongue", "floss", "toothbrush", "toothpaste", "skull", "bone",
 		  "gift", "money", "wallet", "chest", "breast", "spine", "glass"]
 
-emotions = ["happiness", "ecstacy", "sadness", "sorrow/grief", "depression",
+EMOTIONS = ["happiness", "ecstacy", "sadness", "sorrow/grief", "depression",
 			"fear", "terror", "disgust", "anger", "indignation", "hatred",
 			"love", "anxiety", "relief", "shame", "pride", "envy", "goodwill", 
 			"confusion", "clarity", "stress", "relaxation", "caution", 
 			"rashness", "kindness", "pity", "cruelty", "courage", "cowardice",
 			"wonder", "boredom"]
 
-sensations = ["pain", "discomfort", "pleasure", "orgasm", "taste", "color",
+SENSATIONS = ["pain", "discomfort", "pleasure", "orgasm", "taste", "color",
 			  "red", "yellow", "green", "blue", "white", "black", "violet", 
 			  "orange", "pink", "brown", "purple", "sour", "sweet", "salty",
 			  "bitter", "umami", "comfort", "heat" "cold", "numbness"]
 
-TAGS['type'] = types
-TAGS['being'] = beings
-TAGS['place'] = places
-TAGS['object'] = objects
-TAGS['emotion'] = emotions
-TAGS['sensation'] = sensations
+TAGS['type'] = TYPES
+TAGS['being'] = BEINGS
+TAGS['place'] = PLACES
+TAGS['object'] = OBJECTS
+TAGS['emotion'] = EMOTIONS
+TAGS['sensation'] = SENSATIONS
 
-# set some initial reality checks
-
-# something malfunctioned // all things
-# impossible or strange behavior or occurrence // all tags (impossible to feel hot in ice)
-# mere presence of a person, place, thing, sensation, or emotion // dead person or always see a ball // all tags
-# mere absence of a person, place, thing, sensation, or emotion // mother not at home or don't have car // all tags
-MECHANISMS = ["malfunction", "impossibility/oddity", "presence", "absence"]
 
 ### helper functions
 
@@ -294,6 +293,13 @@ class NewDream(Handler):
 		if not username:
 			return redirect_to("signin")
 
+		user = User.all().filter("username =", username).get();
+
+		userDreamsigns = []
+
+		for dreamsign in user.dream_signs:
+			userDreamsigns.append(dreamsign.nickname)
+
 		tagsQ = TagName.all()
 		tagsQ.order("name")
 		groupsQ = TagGroup.all()
@@ -309,7 +315,8 @@ class NewDream(Handler):
 
 		self.render("newdream.html", dreamDict=None, 
 					messages=None, tagGroupToNames=json.dumps(tagGroupToNames),
-					tagNameToGroup=json.dumps(tagNameToGroup))
+					tagNameToGroup=json.dumps(tagNameToGroup),
+					userDreamsigns=userDreamsigns)
 
 	def post(self):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
@@ -613,9 +620,16 @@ class NewDream(Handler):
 			print type(dreamDict[attr])
 			if attr in messages:
 				if messages[attr]["validity"] == "invalid":
+
+					userDreamsigns = []
+
+					for dreamsign in user.dream_signs:
+						userDreamsigns.append(dreamsign.nickname)
+
 					return self.render("newdream.html", dreamDict=dreamDict, 
 						messages=messages, tagGroupToNames=json.dumps(tagGroupToNames),
-						tagNameToGroup=json.dumps(tagNameToGroup))
+						tagNameToGroup=json.dumps(tagNameToGroup),
+						userDreamsigns=userDreamsigns)
 
 		# set values for datastore (some cannot be string)
 		if dreamDict["lucidity"] == "True":
