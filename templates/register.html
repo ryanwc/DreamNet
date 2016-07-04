@@ -14,36 +14,73 @@
 
 		<form action="/register" method="post">
 
-			<p>Enter username:</p>
+			<p>Enter Username:</p>
 			<input type="text" label="Enter name:" name="name" placeholder="Name" id="name" oninput="resetMessage('name');" {% if values %}value="{{values['name']}}"{% endif %}>{% if messages %}<span class="{{messages['name']['validity']}}">{{messages['name']['message']}}</span>{% endif %}
 			<br>
 
-			<p>Enter password:</p>
+			<p>Enter Password:</p>
 			<input type="password" name="password" placeholder="Password" id="password" oninput="resetMessage('password');" {% if values %}value="{{values['password']}}"{% endif %}>{% if messages %}<span class="{{messages['password']['validity']}}">{{messages['password']['message']}}</span>{% endif %}
 			<br>		
 
-			<p>Verify password:</p>
+			<p>Verify Password:</p>
 			<input type="password" name="verifypassword" id="verifypassword" oninput="resetMessage('verifypassword');" placeholder="Verify password" {% if values %}value="{{values['verifypassword']}}"{% endif %}>{% if messages %}<span class="{{messages['verifypassword']['validity']}}">{{messages['verifypassword']['message']}}</span>{% endif %}
 			<br>	
 
-			<p>Enter email:</p>
+			<p>Enter Email:</p>
 			<input type="text" name="email" placeholder="Email" id="email" oninput="resetMessage('email');" {% if values %}value="{{values['email']}}"{% endif %}>{% if messages %}<span class="{{messages['email']['validity']}}">{{messages['email']['message']}}</span>{% endif %}
 			<br>
 
-			<p>Enter birthdate:</p>
+			<p>Enter Birthdate:</p>
 			<input type="date" name="birthdate" id="birthdate" oninput="resetMessage('birthdate');" {% if values %}value="{{values['birthdate']}}"{% endif %}>{% if messages %}<span class="{{messages['birthdate']['validity']}}">{{messages['birthdate']['message']}}</span>{% endif %}
 			<br>
 			<span class="hint">(use mm/dd/yyyy format)</span>
 			<br>
 
 			<!-- need to verify/modify -->
-			<p>Enter nationality:</p>
+			<p>Enter Nationality:</p>
 			<select name="nationality" id="nationality" oninput="resetMessage('nationality');">
 				<option value="-1">-Make a selection-</option>
 				{% for country in countries %}
-				<option value="{{country}}" {% if values %}{% if values['nationality'] == country %}checked{% endif %}{% endif %}>country</option>
+				<option value="{{country}}" {% if values %}{% if values['nationality'] == country %}checked{% endif %}{% endif %}>{{country}}</option>
 				{% endfor %}
 			</select>{% if messages %}<span class="{{messages['nationality']['validity']}}">{{messages['nationality']['message']}}</span>{% endif %}
+			<br>
+
+			<p>Enter Highest Education Level Attained:</p>
+			<select name="education" id="education" oninput="resetMessage('education');">
+				<option value="-1">-Make a selection-</option>
+				{% for educationLevel in educationLevels %}
+				<option value="{{educationLevel}}" {% if values %}{% if values['education'] == educationLevel %}checked{% endif %}{% endif %}>{{educationLevel}}</option>
+				{% endfor %}
+			</select>{% if messages %}<span class="{{messages['educationLevel']['validity']}}">{{messages['education']['message']}}</span>{% endif %}
+			<br>
+
+			<p>Enter Profession:</p>
+			<select name="profession" id="profession" oninput="resetMessage('profession');">
+				<option value="-1">-Make a selection-</option>
+				{% for profession in professions %}
+				<option value="{{profession}}" {% if values %}{% if values['profession'] == profession %}checked{% endif %}{% endif %}>{{profession}}</option>
+				{% endfor %}
+			</select>{% if messages %}<span class="{{messages['profession']['validity']}}">{{messages['profession']['message']}}</span>{% endif %}
+			<br>
+
+			<p>Enter Sector:</p>
+			<select name="sector" id="sector" oninput="resetMessage('sector');">
+				<option value="-1">-Make a selection-</option>
+				{% for sector in sectors %}
+				<option value="{{sector}}" {% if values %}{% if values['sector'] == sector %}checked{% endif %}{% endif %}>{{sector}}</option>
+				{% endfor %}
+			</select>{% if messages %}<span class="{{messages['sector']['validity']}}">{{messages['sector']['message']}}</span>{% endif %}
+			<br>
+
+			<!-- only display if not retired, student, or unemployed -->
+			<p>Enter Industry:</p>
+			<select name="industry" id="industry" oninput="resetMessage('industry');">
+				<option value="-1">-Make a selection-</option>
+				{% for industry in industries %}
+				<option value="{{industry}}" {% if values %}{% if values['industry'] == industry %}checked{% endif %}{% endif %}>{{industry}}</option>
+				{% endfor %}
+			</select>{% if messages %}<span class="{{messages['industry']['validity']}}">{{messages['industry']['message']}}</span>{% endif %}
 			<br>
 
 			<br>
