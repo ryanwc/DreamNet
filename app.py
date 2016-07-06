@@ -32,17 +32,29 @@ class User(db.Model):
 	gender = db.StringProperty(required = True)
 	birthdate = db.DateProperty(required = True)
 	nationality = db.StringProperty(required = True)
+	residence = db.StringProperty(required = True)
 	email = db.StringProperty(required = True)
 	profession = db.StringProperty(required = True)
 	industry = db.StringProperty(required = True)
 	sector = db.StringProperty(required = True)
 	education_level = db.StringProperty(required = True)
+	isParent = db.BooleanProperty(required = True)
+	isCommitted = db.BooleanProperty(required = True)
+	satisfaction_ratings = db.StringProperty(multiline = True, required = True)
 	useful_dreams = db.StringProperty(required = True, multiline = True)
 
 class Dream(db.Model):
 	# what other properties?
 	user = db.ReferenceProperty(User,
 							 	collection_name = "dreams")
+	user_age = db.IntegerProperty(required = True)
+	user_education_level = db.StringProperty(required = True)
+	user_profession = db.StringProperty(required = True)
+	user_sector = db.StringProperty(required = True)
+	user_industry = db.StringProperty(required = True)
+	user_isParent = db.BooleanProperty(required = True)
+	user_isCommitted = db.BooleanProperty(required = True)
+	user_satsifaction_ratings = db.StringProperty(required = True, multiline = True)
 	title = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
 	date_dreamt = db.DateProperty(required = True)
@@ -116,6 +128,8 @@ INDUSTRIES = ["Agriculture, Forestry, Fishing, and Hunting", "Automotive", "Arts
 SECTORS = ["Public", "Private", "Military"]
 PROFESSIONS = ["Advertiser", "Accountant", "Actuary", "Administrative support professional", "Administrator", "Architect", "Artist", "Buying/purchasing professional", "Caretaker", "Clergy", "Corporate governance professional", "Corrections officer", "Designer", "Distribution/logistics professional", "Engineer", "Finance professional", "Human resources professional", "Information technology professional", "Judge", "Legislator", "Laborer", "Lawyer", "Lobbyist", "Manager", "Marketer", "Mathemetician", "Medical doctor", "Nurse", "Quality control professional", "Performer", "Politician", "Police officer", "Professor", "Psychologist / counseler", "Public relations professional", "Researcher", "Retired", "Salesperon", "Scientist", "Security professional", "Senior executive", "Skilled tradesperson", "Social worker", "Strategist", "Student", "Surveyor", "Teacher", "Translator", "Unemployed"]
 EDUCATION_LEVELS = ["Have not graduated high school", "High school graduate or equivalent", "Trade school graduate", "College graduate", "Master's Degree", "Doctorate"]
+
+SATISFACTION_AREAS = ["Career", "Finances", "Mental Health", "Phyical Health", "Friends", "Family", "Significant Other / Romance", "Personal Growth", "Fun and Recreation", "Physical Environment"]
 
 # set mechanisms by which reality checks work
 MECHANISMS = ["malfunction", "impossibility/oddity", "presence", "absence"]
@@ -682,20 +696,26 @@ class Register(Handler):
 
 		self.render("register.html", countries=COUNTRIES, industries=INDUSTRIES,
 			professions=PROFESSIONS, educationLevels=EDUCATION_LEVELS, sectors=SECTORS,
+			satisfactionAreas=SATISFACTION_AREAS, satisfactionRatings=None,
 			values=None, messages=None)
 
 	def post(self):
 
-		name = self.request.get("name")
-		password = self.request.get("password")
-		verifyPassword = self.request.get("verifypassword")
-		email = self.request.get("email")
-		birthdate = self.request.get("birthdate")
-		nationality = self.request.get("nationality")
-		profession = self.request.get("profession")
-		sector = self.request.get("sector")
-		industry = self.request.get("industry")
-		education = self.request.get("education")
+		# use userDict to pass values to User constructor or to form if an input is not valid
+		values = {}
+
+		values['name'] = self.request.get("name")
+		values['password'] = self.request.get("password")
+		values['verifyPassword'] = self.request.get("verifypassword")
+		values['email'] = self.request.get("email")
+		values['birthdate'] = self.request.get("birthdate")
+		values['nationality'] = self.request.get("nationality")
+		values['profession'] = self.request.get("profession")
+		values['sector'] = self.request.get("sector")
+		values['industry'] = self.request.get("industry")
+		values['education_level'] = self.request.get("educationlevel")
+		values['isCommitted'] = self.request.get("iscommitted")
+		values['isParent'] = self.request.get("isparent")
 
 		# holds message for user about input and 
 		# whether input is valid or invalid
@@ -703,7 +723,34 @@ class Register(Handler):
 
 		### CLEAN INPUT WITH BLEACH OR SIMILAR IF PRODUCTION
 
-		# ideally refactor so all helper validation functions
+		satisfactionRatings = {}
+		for SATISFACTION_AREA in SATISFACTION_AREAS:
+
+			thisAreaRating = self.request.get(SATISFACTION_AREA)
+
+			if thisAreaRating:
+
+				try:
+
+					thisAreaRating = int(thisAreaRating)
+
+					if (thisAreaRating < 0 or
+						thisAreaRating > 10):
+
+						messages[SATISFACTION_AREA] = {"message": SATISFACTION_AREA + " satisfaction level invalid.",
+								 		 	          "validity": "invalid"}
+					else:
+						messages[SATISFACTION_AREA] = {"message": SATISFACTION_AREA + " satisfaction level OK",
+								 		 	          "validity": "valid"}
+				except ValueError:
+
+					messages[satisfactionArea] = {"message": SATISFACTION_AREA + " satisfaction level invalid.",
+								 	 	          "validity": "invalid"}		
+			else:
+				messages[satisfactionArea] = {"message": "Please provide a satisfaction level for " + SATISFACTION_AREA,
+											  "validity": "invalid"}
+
+			satisfactionRatings[SATISFACTION_AREA] = thisAreaRating
 
 		# name must be only alphabetic chars
 		if name:
@@ -810,29 +857,57 @@ class Register(Handler):
 			messages["profession"] = {"message": "Please provide a profession",
 								 "validity": "invalid"}
 
-		values = {}
-		values["name"] = name
-		values["password"] = password
-		values["verifypassword"] = verifyPassword
-		values["email"] = email
-		values["birthdate"] = birthdate
-		values["education"] = education
-		values["industry"] = industry
-		values["profession"] = profession
-		values["sector"] = sector
+		if isParent:
+			if (isParent == "True" or
+				isParent == "False"):
+				messages["isParent"] = {"message": "Parent status OK",
+									 	"validity": "valid"}
+
+				if isParent == "True":
+					values["isParent"] = True
+				else:
+					values["isParent"] = False
+			else:
+				messages["isParent"] = {"message": "Parent status is invalid",
+									 	 "validity": "invalid"}
+		else:
+			messages["isParent"] = {"message": "Please indicate whether you are a parent",
+								 "validity": "invalid"}
+
+		if isCommitted:
+			if (isCommitted == "True" or
+				isCommitted == "False"):
+				messages["isCommitted"] = {"message": "Committed status OK",
+									 	"validity": "valid"}
+
+				if isCommitted == "True":
+					values["isCommitted"] = True
+				else:
+					values["isCommitted"] = False
+			else:
+				messages["isCommitted"] = {"message": "Committed status is invalid",
+									 	 "validity": "invalid"}
+		else:
+			messages["isCommitted"] = {"message": "Please indicate whether you are in a committed relationship",
+								 "validity": "invalid"}
 
 		saltedpasshash = make_pw_hash(name, password)
 
+		# prepare arguments for User constructor
+		userDict = values
+		userDict.pop("verifypassword", None)
 		useful_dreams = {}
+		userDict["userful_dreams"] = pickle.dumps(useful_dreams)
+		userDict["satisfaction_ratings"] = pickle.dumps(satisfactionRatings)
 
-		user = User(username=name, password=saltedpasshash, 
-					email=email, useful_dreams=pickle.dumps(useful_dreams))
+		user = User(**userDict)
 		user.put()
 
 		# if more than one with this email or user name, delete this one
 		# and return invalid. hacky workaround of seemingly bad google 
-		# datastore support for unique entity values
-		# (username and email should be unique)
+		# datastore support for unique entity values (username and email should be unique)
+		# if we tested before while verifying name, then when we get to point of User creation
+		# someone else could have used the name.  this way, that is not possible
 		users = User.all()
 		users.filter("username =", user.username)
 		numSameUsername = 0
@@ -855,6 +930,9 @@ class Register(Handler):
 				user.delete()
 				break
 
+		# if any field was invalid, re-render the form while saving all input
+		# and giving a valid/invalid message for each input 
+		# could make more efficient by flagging boolean "hasInvalid" previously
 		for field in messages:
 			if messages[field]["validity"] == "invalid":
 
@@ -867,7 +945,8 @@ class Register(Handler):
 				return self.render("register.html", values=values, 
 					messages=messages, countries=COUNTRIES, industries=INDUSTRIES,
 					professions=PROFESSIONS, educationLevels=EDUCATION_LEVELS, 
-					sectors=SECTORS)
+					sectors=SECTORS, satisfactionAreas=SATISFACTION_AREAS,
+					satisfactionRatings=satisfactionRatings)
 
 		username_cookie_val = make_secure_val(user.username)
 
