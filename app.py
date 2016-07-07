@@ -3,7 +3,9 @@ from datetime import date
 import string, random, cPickle as pickle
 from webapp2 import redirect_to
 from google.appengine.ext import db
-# import bleach third party lib?
+
+# third party lib
+import bleach
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
@@ -35,8 +37,8 @@ class User(db.Model):
 	residence = db.StringProperty(required = True)
 	email = db.StringProperty(required = True)
 	profession = db.StringProperty(required = True)
-	industry = db.StringProperty(required = True)
-	sector = db.StringProperty(required = True)
+	industry = db.StringProperty()
+	sector = db.StringProperty()
 	education_level = db.StringProperty(required = True)
 	isParent = db.BooleanProperty(required = True)
 	isCommitted = db.BooleanProperty(required = True)
@@ -127,9 +129,11 @@ COUNTRIES = ["Afganistan", "Albania", "Algeria", "American Samoa", "Andorra", "A
 INDUSTRIES = ["Agriculture, Forestry, Fishing, and Hunting", "Automotive", "Arts, Entertainment, and Recreation", "Business Services - Administrative Support", "Business Services - Excluding Admin Support", "Construction", "Educational Services", "Finance/Banking", "Food Services and Drinking Establishments", "Health Services", "Hospitals", "Hospitality", "Insurance", "Manufacturing - Durable Goods", "Manufacturing - Nondurable Goods", "Museums/Historical Sites/Similar Institutions", "Natural Resources - Excluding Oil and Gas", "Natural Resources - Oil and Gas", "Other Information Services", "Postal Service", "Private Households", "Retail - Food and Beverage", "Retail - Household", "Retail - General", "Retail - Sporting, Hobby, or Leisure", "Scientific and Technical Services", "Publishing/Broadcasting - Excluding Internet", "Publishing/Broadcasting - Internet", "Real Estate", "Religious Institutions and Services", "Rental and Leasing Services", "Repair and Maintenance", "Social Assistance", "Telecommunications", "Transportation - Bulk Materials/Goods", "Transportation - Passengers", "Utilities", "Warehousing and Storage", "Waste Management and Remediation Services", "Wholesalers - Durable Goods", "Wholesalers - Nondurable Goods"]
 SECTORS = ["Public", "Private", "Military"]
 PROFESSIONS = ["Advertiser", "Accountant", "Actuary", "Administrative support professional", "Administrator", "Architect", "Artist", "Buying/purchasing professional", "Caretaker", "Clergy", "Corporate governance professional", "Corrections officer", "Designer", "Distribution/logistics professional", "Engineer", "Finance professional", "Human resources professional", "Information technology professional", "Judge", "Legislator", "Laborer", "Lawyer", "Lobbyist", "Manager", "Marketer", "Mathemetician", "Medical doctor", "Nurse", "Quality control professional", "Performer", "Politician", "Police officer", "Professor", "Psychologist / counseler", "Public relations professional", "Researcher", "Retired", "Salesperon", "Scientist", "Security professional", "Senior executive", "Skilled tradesperson", "Social worker", "Strategist", "Student", "Surveyor", "Teacher", "Translator", "Unemployed"]
+NO_INDUSTRY_PROFESSIONS = ["Student", "Retired", "Unemployed"]
+NO_SECTOR_PROFESSIONS = ["Retired", "Unemployed"]
 EDUCATION_LEVELS = ["Have not graduated high school", "High school graduate or equivalent", "Trade school graduate", "College graduate", "Master's Degree", "Doctorate"]
 
-SATISFACTION_AREAS = ["Career", "Finances", "Mental Health", "Phyical Health", "Friends", "Family", "Significant Other / Romance", "Personal Growth", "Fun and Recreation", "Physical Environment"]
+SATISFACTION_AREAS = ["Career", "Finances", "Mental Health", "Physical Health", "Friends", "Family", "Significant Other / Romance", "Personal Growth", "Fun and Recreation", "Physical Environment"]
 
 GENDERS = ["Male", "Female", "Non-binary"]
 
@@ -220,7 +224,7 @@ def make_pw_hash(name, pw, salt=None):
 	h = hashlib.sha256(name + pw + salt).hexdigest()
 	return '%s,%s' % (h, salt)
 
-def valid_pw(name, pw, h):
+def correct_pw(name, pw, h):
 	salt = h.split(",")[1]
 	return h == make_pw_hash(name, pw, salt)
 
@@ -229,9 +233,38 @@ USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
     return USER_RE.match(username)
 
-PASSWORD_RE = re.compile(r"^.{3,20}$")
+SPECIAL_CHAR_RE = re.compile(r"[\!@\#\$%\^&\*]")
+NUMBER_RE = re.compile(r"[0-9]")
+LOWER_CASE_RE = re.compile(r"[a-z]")
+UPPER_CASE_RE = re.compile(r"[A-Z]")
 def valid_password(password):
-	return PASSWORD_RE.match(password)
+
+	if len(password) < 6:
+		print "short"
+		return False
+
+	if len(password) > 20:
+		print "long"
+		return False
+
+	if not SPECIAL_CHAR_RE.search(password):
+		print password
+		print "spec"
+		return False
+
+	if not NUMBER_RE.search(password):
+		print "num"
+		return False
+
+	if not LOWER_CASE_RE.search(password):
+		print "up"
+		return False
+
+	if not UPPER_CASE_RE.search(password):
+		print "low"
+		return False
+
+	return True
 
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 def valid_email(email):
@@ -243,6 +276,10 @@ def hash_str(s):
 
 def make_secure_val(s):
 	return "%s|%s" % (s, hash_str(s))
+
+def is_passowrd(password):
+
+	match
 
 # allows for '|' in the value
 def check_secure_val(h):
@@ -271,6 +308,18 @@ def getUserFromSecureCookie(username_cookie_val):
 			username = username_cookie_val
 
 	return username
+
+def get_valid_date(date):
+
+	date_string = str(date)
+	date_array = re.split(r"[^0-9]", date_string)
+
+	year = int(date_array[0])
+	month = int(date_array[1])
+	day = int(date_array[2])
+
+	# could throw ValueError exception
+	return datetime.date(year, month, day)
 
 # define template servers
 class Home(Handler):
@@ -361,27 +410,24 @@ class NewDream(Handler):
 		dreamDict["date_dreamt"] = self.request.get("datedreamt")
 		## change for international versions?
 		if dreamDict["date_dreamt"]:
-			date_dreamt_string = str(dreamDict["date_dreamt"])
-			date_dreamt_array = re.split(r"[^0-9]", date_dreamt_string)
-
-			year = int(date_dreamt_array[0])
-			month = int(date_dreamt_array[1])
-			day = int(date_dreamt_array[2])
 
 			date_dreamt = None
 
 			try:
-				date_dreamt = datetime.date(year, month, day)
-				print "date dreamt succeeded: "
-				print date_dreamt
+				date_dreamt = get_valid_date(dreamDict["date_dreamt"])
 			except ValueError:
 				messages["date_dreamt"] = {"message": "Please fix the date formatting (mm/dd/yyyy)",
 							 	 	       "validity": "invalid"}
 
 			if date_dreamt:
 				dreamDict["date_dreamt"] = date_dreamt
-				messages["date_dreamt"] = {"message": "Date dreamt OK",
-			 	 	     "validity": "valid"}
+
+				if dreamDict["date_dreamt"] > datetime.datetime.now():
+					messages["date_dreamt"] = {"message": "Date dreamt cannot be in the future",
+								 	 	       "validity": "invalid"}
+				else:
+					messages["date_dreamt"] = {"message": "Date dreamt OK",
+				 	 	     "validity": "valid"}
 		else:
 			messages["date_dreamt"] = {"message": "Please provide the day you had the dream",
 							 	 	   "validity": "invalid"}		
@@ -706,23 +752,23 @@ class Register(Handler):
 		# use userDict to pass values to User constructor or to form if an input is not valid
 		values = {}
 
-		values['name'] = self.request.get("name")
-		values['password'] = self.request.get("password")
-		values['verifyPassword'] = self.request.get("verifypassword")
-		values['email'] = self.request.get("email")
-		values['birthdate'] = self.request.get("birthdate")
-		values['gender'] = self.request.get("gender")
-		values['nationality'] = self.request.get("nationality")
-		values['profession'] = self.request.get("profession")
-		values['sector'] = self.request.get("sector")
-		values['industry'] = self.request.get("industry")
-		values['education_level'] = self.request.get("educationlevel")
-		values['isCommitted'] = self.request.get("iscommitted")
-		values['isParent'] = self.request.get("isparent")
+		values['username'] = bleach.clean(self.request.get("username"))
+		values['password'] = bleach.clean(self.request.get("password"))
+		values['verify_password'] = bleach.clean(self.request.get("verifypassword"))
+		values['email'] = bleach.clean(self.request.get("email"))
+		values['birthdate'] = bleach.clean(self.request.get("birthdate"))
+		values['gender'] = bleach.clean(self.request.get("gender"))
+		values['nationality'] = bleach.clean(self.request.get("nationality"))
+		values['residence'] = bleach.clean(self.request.get("residence"))
+		values['profession'] = bleach.clean(self.request.get("profession"))
+		values['education_level'] = bleach.clean(self.request.get("educationlevel"))
+		values['isCommitted'] = bleach.clean(self.request.get("iscommitted"))
+		values['isParent'] = bleach.clean(self.request.get("isparent"))
 
 		# holds message for user about input and 
 		# whether input is valid or invalid
 		messages = {}
+		hasInvalid = False
 
 		### CLEAN INPUT WITH BLEACH OR SIMILAR IF PRODUCTION
 
@@ -740,178 +786,278 @@ class Register(Handler):
 					if (thisAreaRating < 0 or
 						thisAreaRating > 10):
 
-						messages[SATISFACTION_AREA] = {"message": SATISFACTION_AREA + " satisfaction level invalid.",
+						messages[SATISFACTION_AREA] = {"message": SATISFACTION_AREA + " invalid.",
 								 		 	          "validity": "invalid"}
+						hasInvalid = True
 					else:
-						messages[SATISFACTION_AREA] = {"message": SATISFACTION_AREA + " satisfaction level OK",
+						messages[SATISFACTION_AREA] = {"message": SATISFACTION_AREA + " valid",
 								 		 	          "validity": "valid"}
 				except ValueError:
 
-					messages[satisfactionArea] = {"message": SATISFACTION_AREA + " satisfaction level invalid.",
-								 	 	          "validity": "invalid"}		
+					messages[satisfactionArea] = {"message": SATISFACTION_AREA + " invalid.",
+								 	 	          "validity": "invalid"}	
+					hasInvalid = True	
 			else:
 				messages[satisfactionArea] = {"message": "Please provide a satisfaction level for " + SATISFACTION_AREA,
 											  "validity": "invalid"}
+				hasInvalid = True
 
 			satisfactionRatings[SATISFACTION_AREA] = thisAreaRating
 
 		# name must be only alphabetic chars
-		if name:
-			if valid_username(name):
-				messages["name"] = {"message": "Name OK",
+		if values['username']:
+			if valid_username(values['username']):
+				messages["username"] = {"message": "Name OK",
 							 		"validity": "valid"}
 			else:
-				messages["name"] = {"message": "Name invalid",
-									"validity": "invalid"}			
+				messages["username"] = {"message": "Name invalid",
+									"validity": "invalid"}	
+				hasInvalid = True		
 		else:
-			messages["name"] = {"message": "Please provide a name",
+			messages["username"] = {"message": "Please provide a name",
 								"validity": "invalid"}
+			hasInvalid = True
 
 		# not the "best" password but could improve for production
-		if password:
-			if valid_password(password):
+		if values['password']:
+			if valid_password(values['password']):
 				messages["password"] = {"message": "Password OK",
 						 				"validity": "valid"}
 			else:
 				messages["password"] = {"message": "Password invalid",
-						 				"validity": "invalid"}	
+						 				"validity": "invalid"}
+				hasInvalid = True	
 		else:
 			messages["password"] = {"message": "Please provide a pasword",
 								    "validity": "invalid"}
+			hasInvalid = True
 
 		# verifypassword must match password
-		if verifyPassword:
-			if not verifyPassword == password:
-				messages["verifypassword"] = \
+		if values['verify_password']:
+			if not values['verify_password'] == values['password']:
+				messages["verify_password"] = \
 					{"message": "Verify password does not match password",
 		 			 "validity": "invalid"}
+				hasInvalid = True
 		 	else:
-				messages["verifypassword"] = {"message": "OK (password "+\
+				messages["verify_password"] = {"message": "OK (password "+\
 							"matches)", "validity": "valid"}
 		else:
-			messages["verifypassword"] = {"message": "Please verify password",
+			messages["verify_password"] = {"message": "Please verify password",
 								    	  "validity": "invalid"}
+			hasInvalid = True
 
 		# email must be valid email
-		# not the 'best' but a start
-		if email:
-			if valid_email(email):
+		if values['email']:
+			if valid_email(values['email']):
 				messages["email"] = {"message": "Email is valid",
 									 "validity": "valid"}
 			else:
 				messages["email"] = {"message": "Email is invalid",
 									 "validity": "invalid"}
+				hasInvalid = True
 		else:
 			messages["email"] = {"message": "Please provide an email",
 								 "validity": "invalid"}
+			hasInvalid = True
 
-		if birthdate:
-			if valid_birthdate(birthdate):
-				messages["birthdate"] = {"message": "Birthdate OK",
-									 	 "validity": "valid"}
-			else:
-				messages["birthdate"] = {"message": "Birthdate is invalid",
-									 	 "validity": "invalid"}
+		if values['birthdate']:
+
+			birthdate = None
+
+			try:
+				birthdate = get_valid_date(values['birthdate'])
+			except ValueError:
+				messages["birthdate"] = {"message": "Please fix the date formatting (mm/dd/yyyy)",
+							 	 	       "validity": "invalid"}
+				hasInvalid = True
+
+			if birthdate:
+				values["birthdate"] = birthdate
+
+				if values["birthdate"] > datetime.date.today():
+					messages["birthdate"] = {"message": "Birthdate cannot be in the future",
+								 	 	       "validity": "invalid"}
+					hasInvalid = True
+				else:
+					messages["birthdate"] = {"message": "Birthdate OK",
+				 	 	     "validity": "valid"}
 		else:
 			messages["birthdate"] = {"message": "Please provide a birthdate",
 								 "validity": "invalid"}
+			hasInvalid = True
 
-		if gender:
-			if gender in GENDERS:
+		if values['gender']:
+			if values['gender'] in GENDERS:
 				messages["gender"] = {"message": "Gender OK",
 									 	 "validity": "valid"}
 			else:
 				messages["gender"] = {"message": "Gender is invalid",
 									 	 "validity": "invalid"}
+				hasInvalid = True
 		else:
 			messages["gender"] = {"message": "Please provide a gender",
 								 "validity": "invalid"}
+			hasInvalid = True
 
-		if industry:
-			if industry in INDUSTRIES:
-				messages["industry"] = {"message": "Industry OK",
+		if values['nationality']:
+			if values['nationality'] in COUNTRIES:
+				messages["nationality"] = {"message": "Nationality OK",
 									 	 "validity": "valid"}
 			else:
-				messages["industry"] = {"message": "Industry is invalid",
+				messages["nationality"] = {"message": "Nationality is invalid",
 									 	 "validity": "invalid"}
+				hasInvalid = True
 		else:
-			messages["industry"] = {"message": "Please provide an industry",
+			messages["nationality"] = {"message": "Please provide a nationality",
 								 "validity": "invalid"}	
+			hasInvalid = True
 
-		if education:
-			if education in EDUCATION_LEVELS:
-				messages["education"] = {"message": "Education level OK",
+		if values['residence']:
+			if values['residence'] in COUNTRIES:
+				messages["residence"] = {"message": "Residence OK",
 									 	 "validity": "valid"}
 			else:
-				messages["education"] = {"message": "Education is invalid",
+				messages["residence"] = {"message": "Residence is invalid",
 									 	 "validity": "invalid"}
+				hasInvalid = True
 		else:
-			messages["education"] = {"message": "Please provide an education level",
-								 "validity": "invalid"}
+			messages["residence"] = {"message": "Please provide a current country of residence",
+								 "validity": "invalid"}	
+			hasInvalid = True
 
-		if sector:
-			if sector in SECTORS:
-				messages["sectir"] = {"message": "Sector OK",
+		if values['education_level']:
+			if values['education_level'] in EDUCATION_LEVELS:
+				messages["education_level"] = {"message": "Education level OK",
 									 	 "validity": "valid"}
 			else:
-				messages["sector"] = {"message": "Sector is invalid",
+				messages["education_level"] = {"message": "Education is invalid",
 									 	 "validity": "invalid"}
+				hasInvalid = True
 		else:
-			messages["sector"] = {"message": "Please provide a sector",
+			messages["education_level"] = {"message": "Please provide an education level",
 								 "validity": "invalid"}
+			hasInvalid = True
 
-		if profession:
-			if profession in PROFESSIONS:
+		if values['profession']:
+			if values['profession'] in PROFESSIONS:
 				messages["profession"] = {"message": "Profession OK",
 									 	 "validity": "valid"}
+
+				if values['profession'] not in NO_INDUSTRY_PROFESSIONS:
+
+					values['industry'] = self.request.get("industry")
+
+					if values['industry']:
+						if values['industry'] in INDUSTRIES:
+							messages["industry"] = {"message": "Industry OK",
+												 	 "validity": "valid"}
+						else:
+							messages["industry"] = {"message": "Industry is invalid",
+												 	 "validity": "invalid"}
+							hasInvalid = True
+					else:
+						messages["industry"] = {"message": "Please provide an industry",
+											 "validity": "invalid"}	
+						hasInvalid = True
+				else:
+					values['industry'] = None
+
+				if values['profession'] not in NO_SECTOR_PROFESSIONS:
+
+					values['sector'] = self.request.get("sector")
+
+					if values['sector']:
+						if values['sector'] in SECTORS:
+							messages["sector"] = {"message": "Sector OK",
+												 	 "validity": "valid"}
+						else:
+							messages["sector"] = {"message": "Sector is invalid",
+												 	 "validity": "invalid"}
+							hasInvalid = True
+					else:
+						messages["sector"] = {"message": "Please provide a sector",
+											 "validity": "invalid"}	
+						hasInvalid = True
+				else:
+					values['sector'] = None
 			else:
 				messages["profession"] = {"message": "Profession is invalid",
 									 	 "validity": "invalid"}
+				hasInvalid = True
 		else:
 			messages["profession"] = {"message": "Please provide a profession",
 								 "validity": "invalid"}
+			hasInvalid = True
 
-		if isParent:
-			if (isParent == "True" or
-				isParent == "False"):
+		if values['isParent']:
+			if (values['isParent'] == "True" or
+				values['isParent'] == "False"):
 				messages["isParent"] = {"message": "Parent status OK",
 									 	"validity": "valid"}
 
-				if isParent == "True":
+				if values['isParent'] == "True":
 					values["isParent"] = True
 				else:
 					values["isParent"] = False
 			else:
 				messages["isParent"] = {"message": "Parent status is invalid",
 									 	 "validity": "invalid"}
+				hasInvalid = True
 		else:
 			messages["isParent"] = {"message": "Please indicate whether you are a parent",
 								 "validity": "invalid"}
+			hasInvalid = True
 
-		if isCommitted:
-			if (isCommitted == "True" or
-				isCommitted == "False"):
+		if values['isCommitted']:
+			if (values['isCommitted'] == "True" or
+				values['isCommitted'] == "False"):
 				messages["isCommitted"] = {"message": "Committed status OK",
 									 	"validity": "valid"}
 
-				if isCommitted == "True":
+				if values['isCommitted'] == "True":
 					values["isCommitted"] = True
 				else:
 					values["isCommitted"] = False
 			else:
 				messages["isCommitted"] = {"message": "Committed status is invalid",
 									 	 "validity": "invalid"}
+				hasInvalid = True
 		else:
 			messages["isCommitted"] = {"message": "Please indicate whether you are in a committed relationship",
 								 "validity": "invalid"}
+			hasInvalid = True
 
-		saltedpasshash = make_pw_hash(name, password)
+		saltedpasshash = make_pw_hash(values['username'], values['password'])
+
+		# if any field was invalid, re-render the form while saving all input
+		# and giving a valid/invalid message for each input 
+		# could make more efficient by flagging boolean "hasInvalid" previously
+		if hasInvalid:
+
+			COUNTRIES.sort()
+			INDUSTRIES.sort()
+			PROFESSIONS.sort()
+			EDUCATION_LEVELS.sort()
+			SECTORS.sort()
+
+			# these are booleans right now.  str needed?
+			values['isCommitted'] = str(values['isCommitted'])
+			values['isParent'] = str(values['isParent'])
+
+			print values['nationality']
+			return self.render("register.html", values=values, 
+				messages=messages, countries=COUNTRIES, industries=INDUSTRIES,
+				professions=PROFESSIONS, educationLevels=EDUCATION_LEVELS, 
+				sectors=SECTORS, satisfactionAreas=SATISFACTION_AREAS,
+				satisfactionRatings=satisfactionRatings)
 
 		# prepare arguments for User constructor
 		userDict = values
 		userDict.pop("verifypassword", None)
 		useful_dreams = {}
-		userDict["userful_dreams"] = pickle.dumps(useful_dreams)
+		userDict["password"] = saltedpasshash
+		userDict["useful_dreams"] = pickle.dumps(useful_dreams)
 		userDict["satisfaction_ratings"] = pickle.dumps(satisfactionRatings)
 
 		user = User(**userDict)
@@ -922,16 +1068,19 @@ class Register(Handler):
 		# datastore support for unique entity values (username and email should be unique)
 		# if we tested before while verifying name, then when we get to point of User creation
 		# someone else could have used the name.  this way, that is not possible
+		duplicate = False
+
 		users = User.all()
 		users.filter("username =", user.username)
 		numSameUsername = 0
 		for u in users.run():
 			numSameUsername += 1
 			if numSameUsername > 1:
-				messages["name"] = {"message": "Name already taken",
+				messages["username"] = {"message": "Name already taken",
 									"validity": "invalid"}
 				user.delete()
-			break
+				duplicate = True
+				break
 
 		users = User.all()
 		users.filter("email =", user.email)
@@ -942,25 +1091,26 @@ class Register(Handler):
 				messages["email"] = {"message": "Email already in use",
 									 "validity": "invalid"}
 				user.delete()
+				duplicate = True
 				break
 
-		# if any field was invalid, re-render the form while saving all input
-		# and giving a valid/invalid message for each input 
-		# could make more efficient by flagging boolean "hasInvalid" previously
-		for field in messages:
-			if messages[field]["validity"] == "invalid":
+		if duplicate:
 
-				COUNTRIES.sort()
-				INDUSTRIES.sort()
-				PROFESSIONS.sort()
-				EDUCATION_LEVELS.sort()
-				SECTORS.sort()
+			COUNTRIES.sort()
+			INDUSTRIES.sort()
+			PROFESSIONS.sort()
+			EDUCATION_LEVELS.sort()
+			SECTORS.sort()
 
-				return self.render("register.html", values=values, 
-					messages=messages, countries=COUNTRIES, industries=INDUSTRIES,
-					professions=PROFESSIONS, educationLevels=EDUCATION_LEVELS, 
-					sectors=SECTORS, satisfactionAreas=SATISFACTION_AREAS,
-					satisfactionRatings=satisfactionRatings)
+			# these are booleans right now.  str needed?
+			values['isCommitted'] = str(values['isCommitted'])
+			values['isParent'] = str(values['isParent'])
+
+			return self.render("register.html", values=values, 
+				messages=messages, countries=COUNTRIES, industries=INDUSTRIES,
+				professions=PROFESSIONS, educationLevels=EDUCATION_LEVELS, 
+				sectors=SECTORS, satisfactionAreas=SATISFACTION_AREAS,
+				satisfactionRatings=satisfactionRatings)
 
 		username_cookie_val = make_secure_val(user.username)
 
@@ -991,7 +1141,7 @@ class Signin(Handler):
 							 		"validity": "valid"}
 				if password:
 					saltedpasshash = user.password
-					if valid_pw(user.username, password, saltedpasshash):
+					if correct_pw(user.username, password, saltedpasshash):
 						messages["password"] = {"message": "",
 									 		    "validity": "valid"}
 					else:

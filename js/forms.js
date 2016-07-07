@@ -679,7 +679,7 @@ function resetMessage(inputName) {
     addAndRemoveClasses($("#"+inputName+"message"), "", "invalid");
 }
 
-toggleRealityCheckTags(tagGroupToName) {
+function toggleRealityCheckTags(tagGroupToName) {
 
     var selectedMechanism = $("#mechanism").val();
     var tagSelect = $("realitychecktag");
@@ -724,3 +724,29 @@ toggleRealityCheckTags(tagGroupToName) {
         addAndRemoveClasses($("#realitycheckmalfunctiontag"), "displaynone");  
     }
 }
+
+function toggleProfessionQuestions() {
+
+    var profession = $("#profession").val();
+
+    switch (profession) {
+
+        case 'Student':
+            addAndRemoveClasses($("#sectorquestion"), "", "displaynone");
+            addAndRemoveClasses($("#industryquestion"), "displaynone", "");
+            break;
+        case 'Unemployed':
+            addAndRemoveClasses($("#sectorquestion"), "displaynone", "");
+            addAndRemoveClasses($("#industryquestion"), "displaynone", "");
+            break;
+        case 'Retired':
+            addAndRemoveClasses($("#sectorquestion"), "displaynone", "");
+            addAndRemoveClasses($("#industryquestion"), "displaynone", "");
+            break;
+        default:
+            addAndRemoveClasses($("#sectorquestion"), "", "displaynone");
+            addAndRemoveClasses($("#industryquestion"), "", "displaynone");
+            break;
+    }
+}
+
