@@ -23,210 +23,282 @@
 				<div class="col-xs-12 formcol">
 					<form action="/register" method="post">
 
-						<div class="section" id="core">
 
-							<span class="sectionheader">Login Info</span>
+						<div class="row multisection">
+							<div class="col-xs-12 col-onlymid-6">
 
-							<div class="row">
-								<div class="col-xs-12 col-sm-6 question">
-									<div class="prompt">
-										<span>Username:</span>
+								<div class="row section" id="core">
+									<div class="col-xs-12 nopadding">
+
+										<span class="sectionheader">Login Info</span>
+
+										<div class="row">
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Username:</span>
+												</div>
+												<div class="input">					
+													<input type="text" name="username" placeholder="Username" id="username" oninput="resetMessage('username');" {% if values %}value="{{values['username']}}"{% endif %}>{% if messages %}<span class="{{messages['username']['validity']}}">{{messages['username']['message']}}</span>{% endif %}
+												</div>
+											</div>
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Email:</span>
+												</div>
+												<div class="input">	
+													<input type="text" name="email" placeholder="Email" id="email" oninput="resetMessage('email');" {% if values %}value="{{values['email']}}"{% endif %}>{% if messages %}<span class="{{messages['email']['validity']}}">{{messages['email']['message']}}</span>{% endif %}
+												</div>
+											</div>
+										</div>
+
+										<div class="row">
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Password:</span>
+												</div>
+												<div class="input">	
+													<input type="password" name="password" placeholder="Password" id="password" oninput="resetMessage('password');" {% if values %}value="{{values['password']}}"{% endif %}>{% if messages %}<span class="{{messages['password']['validity']}}">{{messages['password']['message']}}</span>{% endif %}
+												</div>
+											</div>	
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Verify Password:</span>
+												</div>
+												<div class="input">					
+													<input type="password" name="verifypassword" id="verifypassword" oninput="resetMessage('verifypassword');" placeholder="Verify password" {% if values %}value="{{values['verifypassword']}}"{% endif %}>{% if messages %}<span class="{{messages['verifypassword']['validity']}}">{{messages['verifypassword']['message']}}</span>{% endif %}
+												</div>
+											</div>
+										</div>
+
 									</div>
-									<div class="input">					
-										<input type="text" name="username" placeholder="Username" id="username" oninput="resetMessage('username');" {% if values %}value="{{values['username']}}"{% endif %}>{% if messages %}<span class="{{messages['username']['validity']}}">{{messages['username']['message']}}</span>{% endif %}
+								</div>
+
+							</div>
+
+							<div class="col-xs-12 col-onlymid-6">
+
+								<div class="row section" id="demographics">
+									<div class="col-xs-12 nopadding">
+
+										<span class="sectionheader">Demographics</span>
+
+										<div class="row">
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Birthdate:</span>
+												</div>
+												<div class="input">		
+													<input type="date" name="birthdate" id="birthdate" oninput="resetMessage('birthdate');" {% if values %}value="{{values['birthdate']}}"{% endif %}>{% if messages %}<span class="{{messages['birthdate']['validity']}}">{{messages['birthdate']['message']}}</span>{% endif %}
+													<br>
+													<span class="hint">(use mm/dd/yyyy format)</span>
+												</div>
+											</div>
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Gender:</span>
+												</div>
+												<div class="input">
+													<input type="radio" name="gender" value="Male" onclick="resetMessage('gender');" {% if values %}{% if values['gender'] == "Male" %}checked{% endif %}{% endif %}> <span class="inputlabel"> Male</span>
+													<span>&nbsp;</span>
+													<input type="radio" name="gender" value="Female" onclick="resetMessage('gender');" {% if values %}{% if values['gender'] == "Female" %}checked{% endif %}{% endif %}> <span class="inputlabel"> Female</span>
+													<span>&nbsp;</span>
+													<input type="radio" name="gender" value="Non-binary" onclick="resetMessage('gender');" {% if values %}{% if values['gender'] == "Non-binary" %}checked{% endif %}{% endif %}> <span class="inputlabel"> Non-binary</span><span id="gendermessageprefix">{% if messages %}<br>{% endif %}</span><span id="gendermessage" {% if messages %}class="{{messages['gender']['validity']}}"{% endif %}>{% if messages %}{{messages['gender']['message']}}{% endif %}</span>
+												</div>
+											</div>
+										</div>
+
+										<div class="row">
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Nationality:</span>
+												</div>
+												<div class="input">		
+													<select name="nationality" id="nationality" oninput="resetMessage('nationality');">
+														<option value="-1">-Select nationality-</option>
+														{% for country in countries %}
+														<option value="{{country}}" {% if values %}{% if values['nationality'] == country %}checked{% endif %}{% endif %}>{{country}}</option>
+														{% endfor %}
+													</select>{% if messages %}<span class="{{messages['nationality']['validity']}}">{{messages['nationality']['message']}}</span>{% endif %}
+												</div>
+											</div>
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Current Country of Residence:</span>
+												</div>
+												<div class="input">	
+													<select name="residence" id="residence" oninput="resetMessage('residence');">
+														<option value="-1">-Select current country-</option>
+														{% for country in countries %}
+														<option value="{{country}}" {% if values %}{% if values['residence'] == country %}checked{% endif %}{% endif %}>{{country}}</option>
+														{% endfor %}
+													</select>{% if messages %}<span class="{{messages['residence']['validity']}}">{{messages['residence']['message']}}</span>{% endif %}
+												</div>
+											</div>
+										</div>
+
+									</div>
+								</div>
+							<!-- end section -->
+							</div>
+						</div>
+						<!-- end multisection -->
+
+
+						<div class="row multisection">
+							<div class="col-xs-12 col-onlymid-6">
+
+								<div class="row section" id="education">
+									<div class="col-xs-12 nopadding">
+
+										<span class="sectionheader">Education/Work Info</span>
+
+										<div class="row">
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Highest Education Level Attained:</span>
+												</div>
+												<div class="input">							
+													<select name="educationlevel" id="educationlevel" oninput="resetMessage('educationlevel');">
+														<option value="-1">-Select education level-</option>
+														{% for educationLevel in educationLevels %}
+														<option value="{{educationLevel}}" {% if values %}{% if values['education_level'] == educationLevel %}checked{% endif %}{% endif %}>{{educationLevel}}</option>
+														{% endfor %}
+													</select>{% if messages %}<span class="{{messages['education_level']['validity']}}">{{messages['education_level']['message']}}</span>{% endif %}
+												</div>
+											</div>
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Current Profession:</span>
+												</div>
+												<div class="input">	
+													<select name="profession" id="profession" oninput="resetMessage('profession');">
+														<option value="-1">-Select profession-</option>
+														{% for profession in professions %}
+														<option value="{{profession}}" {% if values %}{% if values['profession'] == profession %}checked{% endif %}{% endif %}>{{profession}}</option>
+														{% endfor %}
+													</select>{% if messages %}<span class="{{messages['profession']['validity']}}">{{messages['profession']['message']}}</span>{% endif %}
+												</div>
+											</div>
+										</div>
+
+										<div class="row">
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Current Employment Sector:</span>
+												</div>
+												<div class="input">	
+													<select name="sector" id="sector" oninput="resetMessage('sector');">
+														<option value="-1">-Select sector-</option>
+														{% for sector in sectors %}
+														<option value="{{sector}}" {% if values %}{% if values['sector'] == sector %}checked{% endif %}{% endif %}>{{sector}}</option>
+														{% endfor %}
+													</select>{% if messages %}<span class="{{messages['sector']['validity']}}">{{messages['sector']['message']}}</span>{% endif %}
+												</div>
+											</div>
+
+									<!-- only display if not retired, student, or unemployed -->
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Current Industry:</span>
+												</div>
+												<div class="input">	
+													<select name="industry" id="industry" oninput="resetMessage('industry');">
+														<option value="-1">-Select industry-</option>
+														{% for industry in industries %}
+														<option value="{{industry}}" {% if values %}{% if values['industry'] == industry %}checked{% endif %}{% endif %}>{{industry}}</option>
+														{% endfor %}
+													</select>{% if messages %}<span class="{{messages['industry']['validity']}}">{{messages['industry']['message']}}</span>{% endif %}
+												</div>
+											</div>
+										</div>
+
 									</div>
 								</div>
 
-								<div class="col-xs-12 col-sm-6 question">
-									<div class="prompt">
-										<span>Email:</span>
-									</div>
-									<div class="input">	
-										<input type="text" name="email" placeholder="Email" id="email" oninput="resetMessage('email');" {% if values %}value="{{values['email']}}"{% endif %}>{% if messages %}<span class="{{messages['email']['validity']}}">{{messages['email']['message']}}</span>{% endif %}
-									</div>
-								</div>
 							</div>
 
-							<div class="row">
-								<div class="col-xs-12 col-sm-6 question">
-									<div class="prompt">
-										<span>Password:</span>
-									</div>
-									<div class="input">	
-										<input type="password" name="password" placeholder="Password" id="password" oninput="resetMessage('password');" {% if values %}value="{{values['password']}}"{% endif %}>{% if messages %}<span class="{{messages['password']['validity']}}">{{messages['password']['message']}}</span>{% endif %}
-									</div>
-								</div>	
+							<div class="col-xs-12 col-onlymid-6">
 
-								<div class="col-xs-12 col-sm-6 question">
-									<div class="prompt">
-										<span>Verify Password:</span>
-									</div>
-									<div class="input">					
-										<input type="password" name="verifypassword" id="verifypassword" oninput="resetMessage('verifypassword');" placeholder="Verify password" {% if values %}value="{{values['verifypassword']}}"{% endif %}>{% if messages %}<span class="{{messages['verifypassword']['validity']}}">{{messages['verifypassword']['message']}}</span>{% endif %}
-									</div>
-								</div>
-							</div>
+								<div class="row section" id="obligations">
+									<div class="col-xs-12 nopadding">
 
-						</div>
+										<span class="sectionheader">Social Obligations</span>
 
-						<div class="row">
-							<div class="col-xs-12 col-md-6 prompt">
-								<p>Birthdate:</p>
-							</div>
-							<div class="col-xs-12 col-md-6 input">		
-								<input type="date" name="birthdate" id="birthdate" oninput="resetMessage('birthdate');" {% if values %}value="{{values['birthdate']}}"{% endif %}>{% if messages %}<span class="{{messages['birthdate']['validity']}}">{{messages['birthdate']['message']}}</span>{% endif %}
-								<br>
-								<span class="hint">(use mm/dd/yyyy format)</span>
-							</div>
-						</div>
-						<br>
+										<div class="row">
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Are you a parent?</span>
+												</div>
+												<div class="input">
+													<input type="radio" name="isparent" value="False" onclick="resetMessage('isparent');" {% if values %}{% if values['isParent'] == "False" %}checked{% endif %}{% endif %}> <span class="inputlabel"> No</span>
+													<br>
+													<input type="radio" name="isparent" value="True" onclick="resetMessage('isparent');" {% if values %}{% if values['isParent'] == "True" %}checked{% endif %}{% endif %}> <span class="inputlabel">Yes</span><span id="isparentmessageprefix">{% if messages %}<br>{% endif %}</span><span id="isparentmessage" {% if messages %}class="{{messages['isParent']['validity']}}"{% endif %}>{% if messages %}{{messages['isParent']['message']}}{% endif %}</span>
+												</div>
+											</div>
 
-						<!-- need to verify/modify -->
-						<div class="row">
-							<div class="col-xs-12 col-md-6 prompt">
-								<p>Nationality:</p>
-							</div>
-							<div class="col-xs-12 col-md-6 input">		
-								<select name="nationality" id="nationality" oninput="resetMessage('nationality');">
-									<option value="-1">-Make a selection-</option>
-									{% for country in countries %}
-									<option value="{{country}}" {% if values %}{% if values['nationality'] == country %}checked{% endif %}{% endif %}>{{country}}</option>
-									{% endfor %}
-								</select>{% if messages %}<span class="{{messages['nationality']['validity']}}">{{messages['nationality']['message']}}</span>{% endif %}
-							</div>
-						</div>
-						<br>
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>Are you in a committed relationship with a significant other?</span>
+												</div>
+												<div class="input">
+													<input type="radio" name="iscommitted" value="False" onclick="resetMessage('iscommitted');" {% if values %}{% if values['isCommitted'] == "False" %}checked{% endif %}{% endif %}> <span class="inputlabel"> No</span>
+													<br>
+													<input type="radio" name="iscommitted" value="True" onclick="resetMessage('iscommitted');" {% if values %}{% if values['isCommitted'] == "True" %}checked{% endif %}{% endif %}> <span class="inputlabel">Yes</span><span id="iscommittedmessageprefix">{% if messages %}<br>{% endif %}</span><span id="iscommittedmessage" {% if messages %}class="{{messages['isCommitted']['validity']}}"{% endif %}>{% if messages %}{{messages['isCommitted']['message']}}{% endif %}</span>
+												</div>
+											</div>
+										</div>
 
-						<div class="row">
-							<div class="col-xs-12 col-md-6 prompt">
-								<p>Current Country of Residence:</p>
-							</div>
-							<div class="col-xs-12 col-md-6 input">	
-								<select name="residence" id="residence" oninput="resetMessage('residence');">
-									<option value="-1">-Make a selection-</option>
-									{% for country in countries %}
-									<option value="{{country}}" {% if values %}{% if values['residence'] == country %}checked{% endif %}{% endif %}>{{country}}</option>
-									{% endfor %}
-								</select>{% if messages %}<span class="{{messages['residence']['validity']}}">{{messages['residence']['message']}}</span>{% endif %}
-							</div>
-						</div>
-						<br>
-
-						<div class="row">
-							<div class="col-xs-12 col-md-6 prompt">
-								<p>Highest Education Level Attained:</p>
-							</div>
-							<div class="col-xs-12 col-md-6 input">							
-								<select name="educationlevel" id="educationlevel" oninput="resetMessage('educationlevel');">
-									<option value="-1">-Make a selection-</option>
-									{% for educationLevel in educationLevels %}
-									<option value="{{educationLevel}}" {% if values %}{% if values['education_level'] == educationLevel %}checked{% endif %}{% endif %}>{{educationLevel}}</option>
-									{% endfor %}
-								</select>{% if messages %}<span class="{{messages['education_level']['validity']}}">{{messages['education_level']['message']}}</span>{% endif %}
-							</div>
-						</div>
-						<br>
-
-						<div class="row">
-							<div class="col-xs-12 col-md-6 prompt">
-								<p>Current Profession:</p>
-							</div>
-							<div class="col-xs-12 col-md-6 input">	
-								<select name="profession" id="profession" oninput="resetMessage('profession');">
-									<option value="-1">-Make a selection-</option>
-									{% for profession in professions %}
-									<option value="{{profession}}" {% if values %}{% if values['profession'] == profession %}checked{% endif %}{% endif %}>{{profession}}</option>
-									{% endfor %}
-								</select>{% if messages %}<span class="{{messages['profession']['validity']}}">{{messages['profession']['message']}}</span>{% endif %}
-							</div>
-						</div>
-						<br>
-
-						<div class="row">
-							<div class="col-xs-12 col-md-6 prompt">
-								<p>Current Employment Sector:</p>
-							</div>
-							<div class="col-xs-12 col-md-6 input">	
-								<select name="sector" id="sector" oninput="resetMessage('sector');">
-									<option value="-1">-Make a selection-</option>
-									{% for sector in sectors %}
-									<option value="{{sector}}" {% if values %}{% if values['sector'] == sector %}checked{% endif %}{% endif %}>{{sector}}</option>
-									{% endfor %}
-								</select>{% if messages %}<span class="{{messages['sector']['validity']}}">{{messages['sector']['message']}}</span>{% endif %}
-							</div>
-						</div>
-						<br>
-
-						<!-- only display if not retired, student, or unemployed -->
-						<div class="row">
-							<div class="col-xs-12 col-md-6 prompt">
-								<p>Current Industry:</p>
-							</div>
-							<div class="col-xs-12 col-md-6 input">	
-								<select name="industry" id="industry" oninput="resetMessage('industry');">
-									<option value="-1">-Make a selection-</option>
-									{% for industry in industries %}
-									<option value="{{industry}}" {% if values %}{% if values['industry'] == industry %}checked{% endif %}{% endif %}>{{industry}}</option>
-									{% endfor %}
-								</select>{% if messages %}<span class="{{messages['industry']['validity']}}">{{messages['industry']['message']}}</span>{% endif %}
-							</div>
-						</div>
-						<br>
-
-						<div class="row">
-							<div class="col-xs-12 prompt">
-								<p>Rate your satisfaction* with the following areas of your life...</p>
-							</div>
-						</div>
-
-						{% for satisfactionArea in satisfactionAreas %}
-						<div class="row">
-							<div class="col-xs-12 col-md-6">
-								<div class="satisfactionArea">
-									<div class="satisfactionAreaLabelCol">
-										<span class="satisfactionAreaLabel">{{satisfactionArea}}</span>
-									</div>
-									<div class="input sliderbox">
-										<input id="{{satisfactionArea}}" class="slider" type="range" name="{{satisfactionArea}}" min="0" max="10" oninput="resetMessage('{{satisfactionArea}}');" {% if values %}value="satisfactionRatings['{{satisfactionArea}}']"{% endif %}>
-										<br>
-										<span class="hint leftlabel">Very Dissatisfied</span>
-										<div class="hint centerandrightlabelbox">
-											<span class="centerlabel">Indifferent</span>
-											<span class="rightlabel">Very Satisfied</span>
-										</div><span id="{{satisfactionArea}}messageprefix">{% if messages %}{% endif %}</span><span id="{{satisfactionArea}}message" {% if messages %}class="{{messages['{{satisfactionArea}}']['validity']}}"{% endif %}>{% if messages %}{{messages['{{satisfactionArea}}']['message']}}{% endif %}</span>
 									</div>
 								</div>
-							</div>
-						</div>
-						<br>
-						{% endfor %}
-
-						<div class="row">
-							<div class="col-xs-12 prompt">
-								<p class="hint">*This is how satisfied you *feel* in these areas, not a measure of accomplishment or amount.  For example, you might be at the top of your profession but not feel satisfied with your career, or you might have little money but be completely satisfied with your finances.</p>
+								
 							</div>
 						</div>
 
-						<div class="row">
-							<div class="col-xs-12 prompt">
-								<p>Are you a parent?</p>
-							</div>
-							<div class="col-xs-12 input">
-								<input type="radio" name="isparent" value="False" onclick="resetMessage('isparent');" {% if values %}{% if values['isParent'] == "False" %}checked{% endif %}{% endif %}> <span class="inputlabel"> No</span>
-								<br>
-								<input type="radio" name="isparent" value="True" onclick="resetMessage('isparent');" {% if values %}{% if values['isParent'] == "True" %}checked{% endif %}{% endif %}> <span class="inputlabel">Yes</span><span id="isparentmessageprefix">{% if messages %}<br>{% endif %}</span><span id="isparentmessage" {% if messages %}class="{{messages['isParent']['validity']}}"{% endif %}>{% if messages %}{{messages['isParent']['message']}}{% endif %}</span>
-							</div>
-						</div>
-						<br>
+						<div class="row section" id="satisfaction">
+							<div class="col-xs-12 nopadding">
 
-						<div class="row">
-							<div class="col-xs-12 prompt">
-								<p>Are you in a committed relationship with a significant other?</p>
-							</div>
-							<div class="col-xs-12 input">
-								<input type="radio" name="iscommitted" value="False" onclick="resetMessage('iscommitted');" {% if values %}{% if values['isCommitted'] == "False" %}checked{% endif %}{% endif %}> <span class="inputlabel"> No</span>
-								<br>
-								<input type="radio" name="iscommitted" value="True" onclick="resetMessage('iscommitted');" {% if values %}{% if values['isCommitted'] == "True" %}checked{% endif %}{% endif %}> <span class="inputlabel">Yes</span><span id="iscommittedmessageprefix">{% if messages %}<br>{% endif %}</span><span id="iscommittedmessage" {% if messages %}class="{{messages['isCommitted']['validity']}}"{% endif %}>{% if messages %}{{messages['isCommitted']['message']}}{% endif %}</span>
+								<span class="sectionheader">Life Satisfaction</span>
+
+								<div class="row">
+									<div class="col-xs-12 question">
+										<div class="prompt">
+											<p>Use the sliders to rate your satisfaction* with the following areas of your life...</p>
+										</div>
+									</div>
+								</div>
+
+								<div class="row satisfactionRow">
+								{% for satisfactionArea in satisfactionAreas %}
+									<div class="col-xs-12 col-sm-6 nopadding">
+										<div class="satisfactionArea">
+											<div class="satisfactionAreaLabelDiv">
+												<span class="satisfactionAreaLabel">{{satisfactionArea}}</span>
+											</div>
+											<div class="input sliderbox">
+												<input id="{{satisfactionArea}}" class="slider" type="range" name="{{satisfactionArea}}" min="0" max="10" oninput="resetMessage('{{satisfactionArea}}');" {% if values %}value="satisfactionRatings['{{satisfactionArea}}']"{% endif %}>
+												<br>
+												<span class="hint leftlabel">Very Dissatisfied</span>
+												<div class="hint centerandrightlabelbox">
+													<span class="centerlabel">Indifferent</span>
+													<span class="rightlabel">Very Satisfied</span>
+												</div><span id="{{satisfactionArea}}messageprefix">{% if messages %}{% endif %}</span><span id="{{satisfactionArea}}message" {% if messages %}class="{{messages['{{satisfactionArea}}']['validity']}}"{% endif %}>{% if messages %}{{messages['{{satisfactionArea}}']['message']}}{% endif %}</span>
+											</div>
+										</div>
+									</div>
+								{% endfor %}
+								</div>
+
+								<div class="row">
+									<div class="col-xs-12 prompt">
+										<p class="hint">*This is a measure of how satisfied you *feel* in these areas, not of accomplishment or amount.  For example, you might be at the top of your profession but not feel satisfied with your career, or you might have relatively little money but be completely satisfied with your finances.</p>
+									</div>
+								</div>
+
 							</div>
 						</div>
 

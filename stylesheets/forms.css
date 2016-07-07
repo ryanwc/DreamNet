@@ -60,11 +60,13 @@ option {
 
 .sliderbox {
 	position: relative;
-	width: 300px;
+	width: 100%;
 }
 
 .slider {
+	/* bad non relative */
 	width: 100%;
+	max-width: 290px;
 }
 
 .leftlabel {
@@ -93,12 +95,19 @@ option {
 	overflow-y: scroll;
 }
 
+.satisfactionRow {
+	margin: 0 auto;
+}
+
 .satisfactionArea {
 	background-color: darkgrey;
 	border: 1px solid black;
 	padding-left: 1px;
 	padding-right: 1px;
-	max-width: 305px;
+	max-width: 290px;
+	margin-bottom: 10px;
+	margin-right: auto;
+	margin-left: auto;
 }
 
 .satisfactionAreaLabel {
@@ -108,7 +117,7 @@ option {
 	font-weight: bold;
 }
 
-.satisfactionAreaLabelCol {
+.satisfactionAreaLabelDiv {
 	text-align: center;
 }
 
@@ -162,20 +171,70 @@ legend {
 	margin-bottom: 20px;
 	border: 1px solid black;
 	padding-left: 2px;
+	padding-right: 2px;
+	border-radius: 5px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 #core {
-	background-color: grey;
+	background-color: #4d4d4d;
+}
+
+#demographics {
+	background-color: #1f3d7a;
+}
+
+#education {
+	background-color: #4d4d4d;
+}
+
+#obligations {
+	background-color: #1f3d7a;
+}
+
+#satisfaction {
+	background-color: #4d4d4d;
 }
 
 @media screen and (max-width: 767px) {
 	#core {
     	width: 290px;
 	}
+	#demographics {
+    	width: 290px;
+	}
+	#education {
+    	width: 290px;
+	}
+	#obligations {
+    	width: 290px;
+	}
+}
+
+@media screen and (min-width: 640px) and (max-width: 767px) {
+	.col-onlymid-6 {
+    	width: 50%;
+	}
+	#demographics {
+		background-color: #4d4d4d;
+	}
+	#education {
+		background-color: #1f3d7a;
+	}
 }
 
 @media screen and (min-width: 768px) {
 	#core {
+    	width: 640px;
+	}
+	#demographics {
+    	width: 640px;
+	}
+	#education {
+    	width: 640px;
+	}
+	#obligations {
     	width: 640px;
 	}
 }
@@ -320,4 +379,8 @@ legend {
 
 .displaynone {
 	display: none !important;
+}
+
+.nopadding {
+	padding: 0;
 }
