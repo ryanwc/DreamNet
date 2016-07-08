@@ -40,7 +40,9 @@
 													<span>Username:</span>
 												</div>
 												<div class="input">					
-													<input type="text" name="username" placeholder="Username" id="username" oninput="resetMessage('username');" {% if values %}value="{{values['username']}}"{% endif %}><span id="usernamemessageprefix">{% if messages %}<br>{% endif %}<span id="usernamemessage" {% if messages %}class="{{messages['username']['validity']}}"{% endif %}>{% if messages %}{{messages['username']['message']}}{% endif %}</span>
+													<input type="text" name="username" placeholder="Username" id="username" oninput="resetMessage('username');" {% if values %}value="{{values['username']}}"{% endif %}><span class="hint">
+													<br>
+													Username must be at least 3 and less than 20 characters long and can only contain letters, numbers, hypens, and underscores.</span><span id="usernamemessageprefix">{% if messages %}<br>{% endif %}<span id="usernamemessage" {% if messages %}class="{{messages['username']['validity']}}"{% endif %}>{% if messages %}{{messages['username']['message']}}{% endif %}</span>
 												</div>
 											</div>
 
@@ -140,6 +142,21 @@
 														<option value="{{country}}" {% if values %}{% if values['residence'] == country %}selected{% endif %}{% endif %}>{{country}}</option>
 														{% endfor %}
 													</select><span id="residencemessageprefix">{% if messages %}<br>{% endif %}<span id="residencemessage" {% if messages %}class="{{messages['residence']['validity']}}"{% endif %}>{% if messages %}{{messages['residence']['message']}}{% endif %}</span>
+												</div>
+											</div>
+										</div>
+
+										<div class="row">
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>What kind of area do you live in?</span>
+												</div>
+												<div class="input">
+													<input type="radio" name="area" value="Rural/Small Town" onclick="resetMessage('area');" {% if values %}{% if values['area'] == "Rural/Small Town" %}checked{% endif %}{% endif %}> <span class="inputlabel"> Rural/Small Town</span>
+													<br>
+													<input type="radio" name="area" value="Small/Medium City" onclick="resetMessage('area');" {% if values %}{% if values['area'] == "Small/Medium City" %}checked{% endif %}{% endif %}> <span class="inputlabel"> Small/Medium City</span>
+													<br>
+													<input type="radio" name="area" value="Large City" onclick="resetMessage('area');" {% if values %}{% if values['area'] == "Large City" %}checked{% endif %}{% endif %}> <span class="inputlabel"> Large City</span><span id="areamessageprefix">{% if messages %}<br>{% endif %}</span><span id="areamessage" {% if messages %}class="{{messages['area']['validity']}}"{% endif %}>{% if messages %}{{messages['area']['message']}}{% endif %}</span>
 												</div>
 											</div>
 										</div>
@@ -281,16 +298,16 @@
 									<div class="col-xs-12 col-sm-6 nopadding">
 										<div class="satisfactionArea">
 											<div class="satisfactionAreaLabelDiv">
-												<span class="satisfactionAreaLabel">{{satisfactionArea}}</span>
+												<span class="satisfactionAreaLabel">{{satisfactionArea['name']}}</span>
 											</div>
 											<div class="input sliderbox">
-												<input id="{{satisfactionArea}}" class="slider" type="range" name="{{satisfactionArea}}" min="0" max="10" oninput="resetMessage('{{satisfactionArea}}');" {% if values %}value="satisfactionRatings[satisfactionArea]"{% endif %}>
+												<input id="{{satisfactionArea['code']}}" class="slider" type="range" name="{{satisfactionArea['code']}}" min="0" max="10" oninput="resetMessage('{{satisfactionArea['code']}}');" {% if values %}value="{{satisfactionRatings[satisfactionArea['code']]}}"{% endif %}>
 												<br>
 												<span class="hint leftlabel">Very Dissatisfied</span>
 												<div class="hint centerandrightlabelbox">
 													<span class="centerlabel">Indifferent</span>
 													<span class="rightlabel">Very Satisfied</span>
-												</div><span id="{{satisfactionArea}}messageprefix">{% if messages %}{% endif %}</span><span id="{{satisfactionArea}}message" {% if messages %}class="{{messages[satisfactionArea]['validity']}}"{% endif %}>{% if messages %}{{messages[satisfactionArea]['message']}}{% endif %}</span>
+												</div><span id="{{satisfactionArea['code']}}messageprefix">{% if messages %}{% endif %}</span><span id="{{satisfactionArea['code']}}message" {% if messages %}class="{{messages[satisfactionArea['code']]['validity']}}"{% endif %}>{% if messages %}{{messages[satisfactionArea['code']]['message']}}{% endif %}</span>
 											</div>
 										</div>
 									</div>

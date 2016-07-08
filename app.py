@@ -35,6 +35,7 @@ class User(db.Model):
 	birthdate = db.DateProperty(required = True)
 	nationality = db.StringProperty(required = True)
 	residence = db.StringProperty(required = True)
+	area = db.StringProperty(required = True)
 	email = db.StringProperty(required = True)
 	profession = db.StringProperty(required = True)
 	industry = db.StringProperty()
@@ -47,9 +48,13 @@ class User(db.Model):
 
 class Dream(db.Model):
 	# what other properties?
+	# do not need to record gender, nationality because those don't change
+	# (if someone has a sex change, we'll just say they were always the new sex)
 	user = db.ReferenceProperty(User,
 							 	collection_name = "dreams")
 	user_age = db.IntegerProperty(required = True)
+	user_area = db.IntegerProperty(required = True)
+	user_residence = db.IntegerProperty(required = True)
 	user_education_level = db.StringProperty(required = True)
 	user_profession = db.StringProperty(required = True)
 	user_sector = db.StringProperty(required = True)
@@ -126,6 +131,8 @@ class RealityCheck(db.Model):
 ### some globals
 
 COUNTRIES = ["Afganistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antigua & Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bonaire", "Bosnia & Herzegovina", "Botswana", "Brazil", "British Indian Ocean Ter", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Canary Islands", "Cape Verde", "Cayman Islands", "Central African Republic", "Chad", "Channel Islands", "Chile", "China", "Christmas Island", "Cocos Island", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "Cote DIvoire", "Croatia", "Cuba", "Curaco", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Ter", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Great Britain", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guinea", "Guyana", "Haiti", "Hawaii", "Honduras", "Hong Kong", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea Sout", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macau", "Macedonia", "Madagascar", "Malaysia", "Malawi", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Midway Islands", "Moldova", "Monaco", "Mongolia", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Nambia", "Nauru", "Nepal", "Netherland Antilles", "Netherlands", "Nevis", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "Norway", "Oman", "Pakistan", "Palau Island", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Phillipines", "Pitcairn Island", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic of Montenegro", "Republic of Serbia", "Reunion", "Romania", "Russia", "Rwanda", "St Barthelemy", "St Eustatius", "St Helena", "St Kitts-Nevis", "St Lucia", "St Maarten", "St Pierre & Miquelon", "St Vincent & Grenadines", "Saipan", "Samoa", "Samoa American", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Tahiti", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tokelau", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks & Caicos Is", "Tuvalu", "Uganda", "Ukraine", "United Arab Erimates", "United Kingdom", "United States of America", "Uraguay", "Uzbekistan", "Vanuatu", "Vatican City State", "Venezuela", "Vietnam", "Virgin Islands (Brit)", "Virgin Islands (USA)", "Wake Island", "Wallis & Futana Is", "Yemen", "Zaire", "Zambia", "Zimbabwe"]
+AREAS = ["Rural/Small Town", "Small/Medium City", "Large City"]
+
 INDUSTRIES = ["Agriculture, Forestry, Fishing, and Hunting", "Automotive", "Arts, Entertainment, and Recreation", "Business Services - Administrative Support", "Business Services - Excluding Admin Support", "Construction", "Educational Services", "Finance/Banking", "Food Services and Drinking Establishments", "Health Services", "Hospitals", "Hospitality", "Insurance", "Manufacturing - Durable Goods", "Manufacturing - Nondurable Goods", "Museums/Historical Sites/Similar Institutions", "Natural Resources - Excluding Oil and Gas", "Natural Resources - Oil and Gas", "Other Information Services", "Postal Service", "Private Households", "Retail - Food and Beverage", "Retail - Household", "Retail - General", "Retail - Sporting, Hobby, or Leisure", "Scientific and Technical Services", "Publishing/Broadcasting - Excluding Internet", "Publishing/Broadcasting - Internet", "Real Estate", "Religious Institutions and Services", "Rental and Leasing Services", "Repair and Maintenance", "Social Assistance", "Telecommunications", "Transportation - Bulk Materials/Goods", "Transportation - Passengers", "Utilities", "Warehousing and Storage", "Waste Management and Remediation Services", "Wholesalers - Durable Goods", "Wholesalers - Nondurable Goods"]
 SECTORS = ["Public", "Private", "Military"]
 PROFESSIONS = ["Advertiser", "Accountant", "Actuary", "Administrative support professional", "Administrator", "Architect", "Artist", "Buying/purchasing professional", "Caretaker", "Clergy", "Corporate governance professional", "Corrections officer", "Designer", "Distribution/logistics professional", "Engineer", "Finance professional", "Human resources professional", "Information technology professional", "Judge", "Legislator", "Laborer", "Lawyer", "Lobbyist", "Manager", "Marketer", "Mathemetician", "Medical doctor", "Nurse", "Quality control professional", "Performer", "Politician", "Police officer", "Professor", "Psychologist / counseler", "Public relations professional", "Researcher", "Retired", "Salesperon", "Scientist", "Security professional", "Senior executive", "Skilled tradesperson", "Social worker", "Strategist", "Student", "Surveyor", "Teacher", "Translator", "Unemployed"]
@@ -133,7 +140,7 @@ NO_INDUSTRY_PROFESSIONS = ["Student", "Retired", "Unemployed"]
 NO_SECTOR_PROFESSIONS = ["Retired", "Unemployed"]
 EDUCATION_LEVELS = ["Have not graduated high school", "High school graduate or equivalent", "Trade school graduate", "College graduate", "Master's Degree", "Doctorate"]
 
-SATISFACTION_AREAS = ["Career", "Finances", "Mental Health", "Physical Health", "Friends", "Family", "Significant Other / Romance", "Personal Growth", "Fun and Recreation", "Physical Environment"]
+SATISFACTION_AREAS = [{"name": "Career","code":"carsat"},{"name": "Finances","code":"finsat"}, {"name": "Mental Health","code":"mensat"}, {"name":"Physical Health","code":"physat"}, {"name":"Friends","code":"frisat"}, {"name":"Family","code":"famsat"}, {"name":"Significant Other / Romance","code":"romsat"}, {"name":"Personal Growth","code":"grosat"}, {"name":"Fun and Recreation","code":"funsat"}, {"name":"Physical Environment","code":"envsat"}]
 
 GENDERS = ["Male", "Female", "Non-binary"]
 
@@ -407,7 +414,7 @@ class NewDream(Handler):
 		messages["user"] = {"message": "User OK",
 						    "validity": "valid"}
 
-		dreamDict["date_dreamt"] = self.request.get("datedreamt")
+		dreamDict["date_dreamt"] = bleach.clean(self.request.get("datedreamt"))
 		## change for international versions?
 		if dreamDict["date_dreamt"]:
 
@@ -436,7 +443,7 @@ class NewDream(Handler):
 		messages["date_posted"] = {"message": "Date posted OK",
 						    	   "validity": "valid"}
 
-		dreamDict["lucidity"] = self.request.get("lucidity")
+		dreamDict["lucidity"] = bleach.clean(self.request.get("lucidity"))
 		if dreamDict["lucidity"]:
 			
 			if (dreamDict["lucidity"] != "True" and 
@@ -450,7 +457,7 @@ class NewDream(Handler):
 
 			if dreamDict["lucidity"] == "True":
 
-				dreamDict["lucid_reason"] = self.request.get("lucidreason")
+				dreamDict["lucid_reason"] = bleach.clean(self.request.get("lucidreason"))
 
 				# would it be best to have the forms return the text instead of a number code?
 				# originally thought code best so backend could be independent of front end text
@@ -471,7 +478,7 @@ class NewDream(Handler):
 
 					if dreamDict["lucid_reason"] == "something else":
 
-						dreamDict["something_else"] = self.request.get("somethingelse")
+						dreamDict["something_else"] = bleach.clean(self.request.get("somethingelse"))
 
 						if dreamDict["something_else"]:
 							if len(dreamDict["something_else"]) < 301:
@@ -484,7 +491,7 @@ class NewDream(Handler):
 							messages["something_else"] = {"message": "Please enter your custom reason for becomming aware that you were dreaming",
 								 	 	    			  "validity": "invalid"}		
 
-				dreamDict["lucid_length"] = self.request.get("lucidlength")
+				dreamDict["lucid_length"] = bleach.clean(self.request.get("lucidlength"))
 
 				# would it be best to have the forms return the text instead of a number code?
 				# originally thought code best so backend could be independent of front end text
@@ -502,7 +509,7 @@ class NewDream(Handler):
 			messages["lucidity"] = {"message": "Please indicate whether you were aware you were dreaming at any point during the dream",
 							 	 	"validity": "invalid"}	
 
-		dreamDict["control"] = self.request.get("control")
+		dreamDict["control"] = bleach.clean(self.request.get("control"))
 		if dreamDict["control"]:
 
 			try:
@@ -525,7 +532,7 @@ class NewDream(Handler):
 			messages["control"] = {"message": "Please use the slider to set the level of control you felt you had during the dream",
 							 	   "validity": "invalid"}	
 
-		dreamDict["enjoyability"] = self.request.get("enjoyability")
+		dreamDict["enjoyability"] = bleach.clean(self.request.get("enjoyability"))
 		if dreamDict["enjoyability"]:
 
 			try:
@@ -549,7 +556,7 @@ class NewDream(Handler):
 			messages["enjoyability"] = {"message": "Please use the slider to enter how enjoyable you think the dream was",
 							 	 		"validity": "invalid"}			
 		
-		dreamDict["title"] = self.request.get("title")
+		dreamDict["title"] = bleach.clean(self.request.get("title"))
 		if dreamDict["title"]:
 
 			if len(dreamDict["title"]) < 51:
@@ -562,7 +569,7 @@ class NewDream(Handler):
 			messages["title"] = {"message": "Please enter a title for the dream",
 							 	 "validity": "invalid"}	
 
-		dreamDict["description"] = self.request.get("description")
+		dreamDict["description"] = bleach.clean(self.request.get("description"))
 		if dreamDict["description"]:
 
 			if len(dreamDict["description"]) < 301:
@@ -575,7 +582,7 @@ class NewDream(Handler):
 			messages["description"] = {"message": "Please enter a description for the dream",
 							 	 	   "validity": "invalid"}
 
-		inputTags = self.request.get("dreamtags")
+		inputTags = bleach.clean(self.request.get("dreamtags"))
 		### get dream tags with regexes (values of each button)
 		hasTypeTag = False
 		dreamDict["dream_tags"] = {}
@@ -655,7 +662,7 @@ class NewDream(Handler):
 			messages["dream_tags"] = {"message": "Please enter some tags, including at least one 'type' tag",
 							 	 	  "validity": "invalid"}			
 
-		dreamDict["content"] = self.request.get("content")
+		dreamDict["content"] = bleach.clean(self.request.get("content"))
 		if dreamDict["content"]:
 			if len(dreamDict["content"]) < 50001:
 				messages["content"] = {"message": "Dream narrative OK",
@@ -710,6 +717,18 @@ class NewDream(Handler):
 		dreamDict["control"] = int(dreamDict["control"])
 		dreamDict["enjoyability"] = int(dreamDict["enjoyability"])
 
+		# set the "point in time" user variables for this dream
+		dreamDict["user_age"] = datetime.date.today().year - user.birthdate.year
+		dreamDict["user_area"] = user.area
+		dreamDict["user_residence"] = user.residence
+		dreamDict["user_education_level"] = user.education_level
+		dreamDict["user_profession"] = user.profession
+		dreamDict["user_sector"] = user.sector
+		dreamDict["user_industry"] = user.industry
+		dreamDict["user_isParent"] = user.isParent
+		dreamDict["user_isCommitted"] = user.isCommitted
+		dreamDict["user_satsifaction_ratings"] = user.satisfaction_ratings
+
 		dream = Dream(**dreamDict)
 		dream.put()
 
@@ -760,6 +779,7 @@ class Register(Handler):
 		values['gender'] = bleach.clean(self.request.get("gender"))
 		values['nationality'] = bleach.clean(self.request.get("nationality"))
 		values['residence'] = bleach.clean(self.request.get("residence"))
+		values['area'] = bleach.clean(self.request.get("area"))
 		values['profession'] = bleach.clean(self.request.get("profession"))
 		values['education_level'] = bleach.clean(self.request.get("educationlevel"))
 		values['isCommitted'] = bleach.clean(self.request.get("iscommitted"))
@@ -775,7 +795,7 @@ class Register(Handler):
 		satisfactionRatings = {}
 		for SATISFACTION_AREA in SATISFACTION_AREAS:
 
-			thisAreaRating = self.request.get(SATISFACTION_AREA)
+			thisAreaRating = bleach.clean(self.request.get(SATISFACTION_AREA['code']))
 
 			if thisAreaRating:
 
@@ -786,23 +806,23 @@ class Register(Handler):
 					if (thisAreaRating < 0 or
 						thisAreaRating > 10):
 
-						messages[SATISFACTION_AREA] = {"message": SATISFACTION_AREA + " invalid.",
+						messages[SATISFACTION_AREA['code']] = {"message": SATISFACTION_AREA['name'] + " invalid.",
 								 		 	          "validity": "invalid"}
 						hasInvalid = True
 					else:
-						messages[SATISFACTION_AREA] = {"message": SATISFACTION_AREA + " valid",
+						messages[SATISFACTION_AREA['code']] = {"message": SATISFACTION_AREA['name'] + " valid",
 								 		 	          "validity": "valid"}
 				except ValueError:
 
-					messages[satisfactionArea] = {"message": SATISFACTION_AREA + " invalid.",
+					messages[satisfactionArea['code']] = {"message": SATISFACTION_AREA['name'] + " invalid.",
 								 	 	          "validity": "invalid"}	
 					hasInvalid = True	
 			else:
-				messages[satisfactionArea] = {"message": "Please provide a satisfaction level for " + SATISFACTION_AREA,
+				messages[satisfactionArea['code']] = {"message": "Please provide a satisfaction level for " + SATISFACTION_AREA['name'],
 											  "validity": "invalid"}
 				hasInvalid = True
 
-			satisfactionRatings[SATISFACTION_AREA] = thisAreaRating
+			satisfactionRatings[SATISFACTION_AREA['code']] = thisAreaRating
 
 		# name must be only alphabetic chars
 		if values['username']:
@@ -926,6 +946,19 @@ class Register(Handler):
 								 "validity": "invalid"}	
 			hasInvalid = True
 
+		if values['area']:
+			if values['area'] in AREAS:
+				messages["area"] = {"message": "Area OK",
+									 	 "validity": "valid"}
+			else:
+				messages["area"] = {"message": "Area is invalid",
+									 	 "validity": "invalid"}
+				hasInvalid = True
+		else:
+			messages["area"] = {"message": "Please pick the option that best describes where you live",
+								 "validity": "invalid"}	
+			hasInvalid = True
+
 		if values['education_level']:
 			if values['education_level'] in EDUCATION_LEVELS:
 				messages["education_level"] = {"message": "Education level OK",
@@ -946,7 +979,7 @@ class Register(Handler):
 
 				if values['profession'] not in NO_INDUSTRY_PROFESSIONS:
 
-					values['industry'] = self.request.get("industry")
+					values['industry'] = bleach.clean(self.request.get("industry"))
 
 					if values['industry']:
 						if values['industry'] in INDUSTRIES:
@@ -965,7 +998,7 @@ class Register(Handler):
 
 				if values['profession'] not in NO_SECTOR_PROFESSIONS:
 
-					values['sector'] = self.request.get("sector")
+					values['sector'] = bleach.clean(self.request.get("sector"))
 
 					if values['sector']:
 						if values['sector'] in SECTORS:
@@ -1125,8 +1158,8 @@ class Signin(Handler):
 
 	def post(self):
 
-		name = self.request.get("name")
-		password = self.request.get("password")
+		name = bleach.clean(self.request.get("name"))
+		password = bleach.clean(self.request.get("password"))
 
 		# holds message for user about input and 
 		# whether input is valid or invalid
