@@ -195,7 +195,7 @@ function toggleLucidQuestions() {
 
 function toggleSomethingElse() {
 
-    if ($("#lucidreason").val() == "4") {
+    if ($("#lucidreason").val() == "something else") {
 
         $("#somethingelse").removeClass("displaynone");
     }
@@ -205,6 +205,20 @@ function toggleSomethingElse() {
 
           $("#somethingelse").addClass("displaynone");
         }
+    }
+}
+
+function toggleSpecificCheck() {
+
+    if ($("input:radio[name=dreamsignbool]:checked").val() == "True") {
+
+        addAndRemoveClasses($("#dreamsignquestion"), "", "displaynone");
+        addAndRemoveClasses($("#realitycheckquestion"), "displaynone", "");
+    }
+    else if ($("input:radio[name=dreamsignbool]:checked").val() == "False") {
+
+        addAndRemoveClasses($("#dreamsignquestion"), "displaynone", "");
+        addAndRemoveClasses($("#realitycheckquestion"), "", "displaynone");
     }
 }
 
@@ -234,6 +248,37 @@ function addAndRemoveClasses(element, classToAdd, classToRemove) {
 
         element.addClass(classToAdd);
     }
+}
+
+function validateUser(satisfactionAreas) {
+
+    var username = $("#username").val();
+    var password = $("#password").val();
+    var verifyPassword = $("#verifypassword").val();
+    var gender = $("#gender").val();
+    var birthdate = $("#birthdate").val();
+    var nationality = $("#nationality").val();
+    var residence = $("#residence").val();
+    var area = $("#area").val();
+    var email = $("#email").val();
+    var profession = $("#profession").val();
+    var industry = $("#industry").val();
+    var sector = $("#sector").val();
+    var education_level = $("#education").val();
+    var isParent = $("#isparent").val();
+    var isCommitted = $("#iscommitted").val();
+
+    // does not verify all that should be present are present, but verifies the ones that are
+    var satisfaction_rating_input_divs = $(".satsifactionareaslider");
+    var thisRating;
+    satisfaction_rating_input_divs.each(function() {
+
+        thisRating = $(this).val();
+
+        //if (!validate)
+    });
+
+
 }
 
 function validateDream() {
@@ -498,17 +543,17 @@ function validateEnjoyability(enjoyability) {
     if (enjoyability.length < 1) {
 
         addAndRemoveClasses($("#enjoyabilitymessage"), "invalid", "valid");
-        $("#enjoyabilitymessage").html("<br>  Please how enjoyable the dream was. ");
+        $("#enjoyabilitymessage").html("<br>  Please rate how enjoyable the dream was. ");
         return false;
     }
 
-    if (enjoyability != "0" && enjoyability != "1" && enjoyability != "2" && 
-        enjoyability != "3" && enjoyability != "4" && enjoyability != "5" && 
-        enjoyability != "6" && enjoyability != "7" && enjoyability != "8" && 
-        enjoyability != "9" && enjoyability != "10") {
+    var rating = parseInt(enjoyability);
+
+    // will return false if NaN
+    if (rating < 0 || rating > 10) {
 
         addAndRemoveClasses($("#enjoyabilitymessage"), "invalid", "valid");
-        $("#enjoyabilitymessage").html("Please how enjoyable the dream was.");
+        $("#enjoyabilitymessage").html("Please rate how enjoyable the dream was.");
         return false;
     }
 
@@ -679,49 +724,55 @@ function resetMessage(inputName) {
     addAndRemoveClasses($("#"+inputName+"message"), "", "invalid");
 }
 
-function toggleRealityCheckTags(tagGroupToName) {
+function toggleRealityCheckTags() {
 
     var selectedMechanism = $("#mechanism").val();
-    var tagSelect = $("realitychecktag");
-
-    tagSelect.empty();
 
     // set the beginning of the sentence
     switch (selectedMechanism) {
-
+        // some cases do some of the same things
         case 'malfunction':
-            addAndRemoveClasses($("#mechanisminput"), "", "invalid");
-            $("#mechanisminput").html("a malfunctioning");
+            addAndRemoveClasses($("#objectmalfunction"), "", "displaynone");
+            addAndRemoveClasses($("#objectidentifier"), "", "displaynone"); 
+            addAndRemoveClasses($("#identifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#allcheck"), "displaynone", ""); 
+            $("#extramechanismtext").html("");  
             break;
         case 'impossibility/oddity':
-            addAndRemoveClasses($("#mechanisminput"), "", "invalid");
-            $("#mechanisminput").html("an impossible or odd behavior or occurence involving [a(n)/my]");
+            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
+            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#identifier"), "", "displaynone"); 
+            addAndRemoveClasses($("#allcheck"), "", "displaynone");  
+            $("#extramechanismtext").html(" involving ");
             break;
         case 'presence':
-            addAndRemoveClasses($("#mechanisminput"), "", "invalid");
-            $("#mechanisminput").html("the presence of [a(n)/my]");
+            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
+            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#identifier"), "", "displaynone"); 
+            addAndRemoveClasses($("#allcheck"), "", "displaynone");  
+            $("#extramechanismtext").html("");
             break;
         case 'absence':
-            addAndRemoveClasses($("#mechanisminput"), "", "invalid");
-            $("#mechanisminput").html("the absence of [a(n)/my]");
+            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
+            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#identifier"), "", "displaynone"); 
+            addAndRemoveClasses($("#allcheck"), "", "displaynone");  
+            $("#extramechanismtext").html("");
             break;
+        case '-1':
+            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
+            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#identifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#allcheck"), "displaynone", "");  
+            $("#extramechanismtext").html("");
+            break;          
         default:
-            addAndRemoveClasses($("#mechanisminput"), "invalid", "");
-            $("#mechanisminput").html("Oops!  We don't recognize your selection for the previous question.  Try re-selecting an option.");
+            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
+            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#identifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#allcheck"), "displaynone", "");  
+            $("#extramechanismtext").html("");
             break;
-    }
-
-    // display/hide the appropriate selects
-    // (a malfunction can only be an object)
-    if (selectedMechanism == "malfunction") {
-
-        addAndRemoveClasses($("#realitycheckmalfunctiontag"), "", "displaynone");
-        addAndRemoveClasses($("#realitycheckalltag"), "displaynone");      
-    }
-    else {
-
-        addAndRemoveClasses($("#realitycheckalltag"), "", "displaynone");
-        addAndRemoveClasses($("#realitycheckmalfunctiontag"), "displaynone");  
     }
 }
 
@@ -749,4 +800,5 @@ function toggleProfessionQuestions() {
             break;
     }
 }
+
 

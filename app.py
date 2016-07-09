@@ -333,7 +333,7 @@ class Home(Handler):
 	def get(self, page=1):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
-		'''
+		''' only do first time
 		for group in TAGS:
 			group = TagGroup(name=group)
 			group.put()
@@ -385,17 +385,20 @@ class NewDream(Handler):
 		groupsQ = TagGroup.all()
 		tagGroupToNames = {}
 		tagNameToGroup = {}
+		objectTags = []
+		nonObjectTags = []
 
 		for tagGroup in groupsQ:
 			tagGroupToNames[tagGroup.name] = []
 
 		for tag in tagsQ:
+			print tag.name
 			tagNameToGroup[tag.name] = tag.group.name
 			tagGroupToNames[tag.group.name].append(tag.name)
 
 		self.render("newdream.html", dreamDict=None, 
 					messages=None, tagGroupToNames=json.dumps(tagGroupToNames),
-					tagNameToGroup=json.dumps(tagNameToGroup),
+					tagNameToGroup=json.dumps(tagNameToGroup), realityChecks=tagGroupToNames,
 					userDreamsigns=userDreamsigns)
 
 	def post(self):

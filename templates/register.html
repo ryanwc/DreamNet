@@ -301,7 +301,7 @@
 												<span class="satisfactionAreaLabel">{{satisfactionArea['name']}}</span>
 											</div>
 											<div class="input sliderbox">
-												<input id="{{satisfactionArea['code']}}" class="slider" type="range" name="{{satisfactionArea['code']}}" min="0" max="10" oninput="resetMessage('{{satisfactionArea['code']}}');" {% if values %}value="{{satisfactionRatings[satisfactionArea['code']]}}"{% endif %}>
+												<input id="{{satisfactionArea['code']}}" class="slider satisfactionareaslider" type="range" name="{{satisfactionArea['code']}}" min="0" max="10" oninput="resetMessage('{{satisfactionArea['code']}}');" {% if values %}value="{{satisfactionRatings[satisfactionArea['code']]}}"{% endif %}>
 												<br>
 												<span class="hint leftlabel">Very Dissatisfied</span>
 												<div class="hint centerandrightlabelbox">
