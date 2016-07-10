@@ -269,7 +269,7 @@ function validateUser(satisfactionAreas) {
     var isCommitted = $("#iscommitted").val();
 
     // does not verify all that should be present are present, but verifies the ones that are
-    var satisfaction_rating_input_divs = $(".satsifactionareaslider");
+    var satisfaction_rating_input_divs = $(".ratingareaslider");
     var thisRating;
     satisfaction_rating_input_divs.each(function() {
 
@@ -985,6 +985,11 @@ function toggleSomethingSpecific() {
 
             addAndRemoveClasses($(this), "displaynone", "");
         });
+
+        $("input:radio[name=dreamsignbool]:checked").prop("checked", false);
+
+        addAndRemoveClasses($("#dreamsignquestion"), "displaynone", "");
+        addAndRemoveClasses($("#realitycheckquestion"), "displaynone", "");
     }
 }
 

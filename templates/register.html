@@ -293,15 +293,15 @@
 									</div>
 								</div>
 
-								<div class="row satisfactionRow">
+								<div class="row ratingRow">
 								{% for satisfactionArea in satisfactionAreas %}
 									<div class="col-xs-12 col-sm-6 nopadding">
-										<div class="satisfactionArea">
-											<div class="satisfactionAreaLabelDiv">
-												<span class="satisfactionAreaLabel">{{satisfactionArea['name']}}</span>
+										<div class="ratingArea">
+											<div class="ratingAreaLabelDiv">
+												<span class="ratingAreaLabel">{{satisfactionArea['name']}}</span>
 											</div>
 											<div class="input sliderbox">
-												<input id="{{satisfactionArea['code']}}" class="slider satisfactionareaslider" type="range" name="{{satisfactionArea['code']}}" min="0" max="10" oninput="resetMessage('{{satisfactionArea['code']}}');" {% if values %}value="{{satisfactionRatings[satisfactionArea['code']]}}"{% endif %}>
+												<input id="{{satisfactionArea['code']}}" class="slider ratingareaslider" type="range" name="{{satisfactionArea['code']}}" min="0" max="10" oninput="resetMessage('{{satisfactionArea['code']}}');" {% if values %}value="{{satisfactionRatings[satisfactionArea['code']]}}"{% endif %}>
 												<br>
 												<span class="hint leftlabel">Very Dissatisfied</span>
 												<div class="hint centerandrightlabelbox">

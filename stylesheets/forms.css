@@ -95,11 +95,11 @@ option {
 	overflow-y: scroll;
 }
 
-.satisfactionRow {
+.ratingRow {
 	margin: 0 auto;
 }
 
-.satisfactionArea {
+.ratingArea {
 	background-color: darkgrey;
 	border: 1px solid black;
 	padding-left: 1px;
@@ -110,14 +110,14 @@ option {
 	margin-left: auto;
 }
 
-.satisfactionAreaLabel {
+.ratingAreaLabel {
 	text-decoration: underline;
 	color: black;
 	text-shadow: none;
 	font-weight: bold;
 }
 
-.satisfactionAreaLabelDiv {
+.ratingAreaLabelDiv {
 	text-align: center;
 }
 
@@ -218,7 +218,15 @@ legend {
 }
 
 #lucidity {
-	background-color: #8080ff;
+	background-color: #D4AF37;
+}
+
+#ratings {
+	background-color: #262626;
+}
+
+#headlines {
+	background-color: #262626;
 }
 
 @media screen and (max-width: 767px) {
@@ -238,9 +246,14 @@ legend {
 	#starter {
 		width: 290px;
 	}
-
 	#lucidity {
 		with: 290px;
+	}
+	#ratings {
+		width: 290px;
+	}
+	#headlines {
+		width: 290px;
 	}
 }
 
@@ -274,6 +287,12 @@ legend {
 		width: 640px;
 	}
 	#lucidity {
+		width: 640px;
+	}
+	#ratings {
+		width: 640px;
+	}
+	#headlines {
 		width: 640px;
 	}
 }

@@ -113,12 +113,12 @@
 													<select name="lucidreason" id="lucidreason" oninput="resetMessage('lucidreason'); resetMessage('somethingelse');" onChange="toggleSomethingElse(); toggleSomethingSpecific();"><!-- not sure why 'onChange' (see #lucidreason) is working, it should be 'onchange'... -->
 														<option value="-1" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "-1" %}selected{% endif %}{% endif %}{% endif %}>-Make a selection-</option>
 														<option value="WILD" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "WILD" %}selected{% endif %}{% endif %}{% endif %}>I kept awareness as I feel asleep</option>
-														<option value="reality check" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "reality check" %}selected{% endif %}{% endif %}{% endif %}>Something specific in the dream helped me realize I was dreaming</option>
+														<option value="reality check" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "reality check" %}selected{% endif %}{% endif %}{% endif %}>Something specific in the dream</option>
 														<option value="off" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "off" %}selected{% endif %}{% endif %}{% endif %}>Not sure; something just seemed "off"</option>
 														<option value="something else" {% if dreamDict %}{% if dreamDict['lucid_reason'] %}{% if dreamDict['lucid_reason'] == "something else" %}selected{% endif %}{% endif %}{% endif %}>Something else (write it below)</option>
 													</select><span id="lucidreasonmessageprefix">{% if messages %}{% if messages['lucid_reason'] %}<br>{% endif %}{% endif %}</span><span id="lucidreasonmessage" {% if messages %}{% if messages['lucid_reason'] %}class="{{messages['lucid_reason']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['lucid_reason'] %}{{messages['lucid_reason']['message']}}<br><br>{% endif %}{% endif %}</span>
 
-													<textarea id="somethingelse" class="displaynone" rows="3" cols="33" type="text" name="somethingelse" oninput="resetMessage('somethingelse');" placeholder="Reason you became aware you were dreaming">{% if dreamDict %}{% if dreamDict['something_else'] %}{{dreamDict['something_else']}}{% endif %}{% endif %}</textarea><span id="somethingelsemessageprefix">{% if messages %}{% if messages['something_else'] %}<br>{% endif %}{% endif %}</span><span id="somethingelsemessage" {% if messages %}{% if messages['something_else'] %}class="{{messages['something_else']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['something_else'] %}{{messages['something_else']['message']}}{% endif %}{% endif %}</span>
+													<textarea id="somethingelse" class="displaynone" rows="3" cols="30" type="text" name="somethingelse" oninput="resetMessage('somethingelse');" placeholder="Reason you became aware you were dreaming">{% if dreamDict %}{% if dreamDict['something_else'] %}{{dreamDict['something_else']}}{% endif %}{% endif %}</textarea><span id="somethingelsemessageprefix">{% if messages %}{% if messages['something_else'] %}<br>{% endif %}{% endif %}</span><span id="somethingelsemessage" {% if messages %}{% if messages['something_else'] %}class="{{messages['something_else']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['something_else'] %}{{messages['something_else']['message']}}{% endif %}{% endif %}</span>
 												</div>
 											</div>
 
@@ -197,12 +197,12 @@
 												</div>
 											</div>
 
-											<div id="realitycheckdescription" class="col-xs-12 col-sm-6 question displaynone">
+											<div id="realitycheckdescription" class="col-xs-12 col-sm-6 somethingspecificquestion question displaynone">
 												<div class="prompt">
 													<span>You can use the space below to provide more description about the thing that helped you become aware you were dreaming.</span>
 												</div>
 												<div class="input">
-													<textarea id="realitycheckdescription" rows="3" cols="33" type="text" name="realitycheckdescription" oninput="resetMessage('realitycheckdescription');" placeholder="More description of the thing that helped you become aware you were dreaming">{% if dreamDict %}{% if dreamDict['reality_check_description'] %}{{dreamDict['reality_check_description']}}{% endif %}{% endif %}</textarea><span id="realitycheckdescriptionmessageprefix">{% if messages %}{% if messages['reality_check_descriptiojn'] %}<br>{% endif %}{% endif %}</span><span id="realitycheckdescriptionmessage" {% if messages %}{% if messages['reality_check_description'] %}class="{{messages['reality_check_description']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['reality_check_description'] %}{{messages['reality_check_description']['message']}}{% endif %}{% endif %}</span>
+													<textarea id="realitycheckdescription" rows="3" cols="30" type="text" name="realitycheckdescription" oninput="resetMessage('realitycheckdescription');" placeholder="More description of the thing that helped you become aware you were dreaming">{% if dreamDict %}{% if dreamDict['reality_check_description'] %}{{dreamDict['reality_check_description']}}{% endif %}{% endif %}</textarea><span id="realitycheckdescriptionmessageprefix">{% if messages %}{% if messages['reality_check_descriptiojn'] %}<br>{% endif %}{% endif %}</span><span id="realitycheckdescriptionmessage" {% if messages %}{% if messages['reality_check_description'] %}class="{{messages['reality_check_description']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['reality_check_description'] %}{{messages['reality_check_description']['message']}}{% endif %}{% endif %}</span>
 												</div>
 											</div>
 
@@ -232,57 +232,107 @@
 							</div>
 						</div>
 
-						<div class="row">
-							<div class="col-xs-12 prompt">
-								<p>What level of control did it feel like you had over your actions and your surroundings during the dream?</p>
-							</div>
-							<div class="col-xs-12 input sliderbox">
-								<input id="control" class="slider" type="range" name="control" min="0" max="10" oninput="resetMessage('control');" {% if dreamDict %}value="dreamDict['control']"{% endif %}>
-								<br>
-								<span class="hint leftlabel">None</span>
-								<div class="hint centerandrightlabelbox">
-									<span class="centerlabel">Some</span>
-									<span class="rightlabel">Complete</span>
-								</div><span id="controlmessageprefix">{% if messages %}{% endif %}</span><span id="controlmessage" {% if messages %}class="{{messages['control']['validity']}}"{% endif %}>{% if messages %}{{messages['control']['message']}}{% endif %}</span>
-							</div>
-						</div>
-						<br>
+						<div class="row multisection">
+							<div class="col-xs-12 col-onlymid-6">
 
-						<div class="row">
-							<div class="col-xs-12 prompt">
-								<p>How enjoyable was the dream?</p>
-							</div>
-							<div class="col-xs-12 sliderbox input">
-								<input id="enjoyability" class="slider" type="range" name="enjoyability" min="0" max="10" oninput="resetMessage('enjoyability');" {% if dreamDict %}value="dreamDict['enjoyability']"{% endif %}>
-								<br>
-								<span class="hint leftlabel">Unenjoyable</span>
-								<div class="hint centerandrightlabelbox">
-									<span class="centerlabel">Neutral</span>
-									<span class="rightlabel">Enjoyable</span>
-								</div><span id="enjoyabilitymessageprefix">{% if messages %}{% endif %}</span><span id="enjoyabilitymessage" {% if messages %}class="{{messages['enjoyability']['validity']}}"{% endif %}>{% if messages %}{{messages['enjoyability']['message']}}{% endif %}</span>
-							</div>
-						</div>
-						<br>
+								<div class="row section" id="ratings">
+									<div class="col-xs-12 nopadding">
 
-						<div class="row">
-							<div class="col-xs-12 prompt">
-								<p>If the dream was a story, what would its title be?</p>
-							</div>
-							<div class="col-xs-12 input">
-								<input id="title" type="text" name="title" size="30" autocomplete="off" placeholder="Title" oninput="resetMessage('title');" {% if dreamDict %}value="{{dreamDict['title']}}"{% endif %}><span id="titlemessageprefix">{% if messages %}<br>{% endif %}</span><span id="titlemessage" {% if messages %}class="{{messages['title']['validity']}}"{% endif %}>{% if messages %}{{messages['title']['message']}}{% endif %}</span>
-							</div>
-						</div>
-						<br>
+										<span class="sectionheader newdreamsectionheader">Ratings</span>
 
-						<div class="row">
-							<div class="col-xs-12 prompt">
-								<p>What's a one or two sentence description of the dream?</p>
-							</div>
-							<div class="col-xs-12 input">
-								<textarea id="description" name="description" autocomplete="off" rows="3" cols="40" placeholder="Description" oninput="resetMessage('description');">{% if dreamDict %}{{dreamDict['description']}}{% endif %}</textarea><span id="descriptionmessageprefix">{% if messages %}<br>{% endif %}</span><span id="descriptionmessage" {% if messages %}class="{{messages['description']['validity']}}"{% endif %}>{% if messages %}{{messages['description']['message']}}{% endif %}</span>
+										<div class="row">
+											<div class="col-xs-12 question">
+												<div class="prompt">
+													<p>Use the sliders to rate different aspects of the dream.</p>
+												</div>
+											</div>
+										</div>
+
+										<div class="row">
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="ratingArea">
+													<div class="ratingAreaLabelDiv">
+														<span class="ratingAreaLabel">Control</span>
+														<div class="prompt">
+															<span>What level of control did it feel like you had over your actions and your surroundings during the dream?</span>
+														</div>
+													</div>
+													<div class="input sliderbox">
+														<input id="control" class="slider ratingslider" type="range" name="control" min="0" max="10" oninput="resetMessage('control');" {% if dreamDict %}value="dreamDict['control']"{% endif %}>
+														<br>
+														<span class="hint leftlabel">None</span>
+														<div class="hint centerandrightlabelbox">
+															<span class="centerlabel">Some</span>
+															<span class="rightlabel">Complete</span>
+														</div><span id="controlmessageprefix">{% if messages %}{% endif %}</span><span id="controlmessage" {% if messages %}class="{{messages['control']['validity']}}"{% endif %}>{% if messages %}{{messages['control']['message']}}{% endif %}</span>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="ratingArea">
+													<div class="ratingAreaLabelDiv">
+														<span class="ratingAreaLabel">Enjoyability</span>
+														<div class="prompt">
+															<span>How enjoyable was the dream?</span>
+														</div>
+													</div>
+													<div class="sliderbox input">
+														<input id="enjoyability" class="slider ratingslider" type="range" name="enjoyability" min="0" max="10" oninput="resetMessage('enjoyability');" {% if dreamDict %}value="dreamDict['enjoyability']"{% endif %}>
+														<br>
+														<span class="hint leftlabel">Unenjoyable</span>
+														<div class="hint centerandrightlabelbox">
+															<span class="centerlabel">Neutral</span>
+															<span class="rightlabel">Enjoyable</span>
+														</div><span id="enjoyabilitymessageprefix">{% if messages %}{% endif %}</span><span id="enjoyabilitymessage" {% if messages %}class="{{messages['enjoyability']['validity']}}"{% endif %}>{% if messages %}{{messages['enjoyability']['message']}}{% endif %}</span>
+													</div>
+												</div>
+											</div>
+											
+										</div>
+
+									</div>
+								</div>
+
 							</div>
 						</div>
-						<br>		
+
+						<div class="row multisection">
+							<div class="col-xs-12 col-onlymid-6">
+
+								<div class="row section" id="headlines">
+									<div class="col-xs-12 nopadding">
+
+										<span class="sectionheader newdreamsectionheader">Headlines</span>
+
+										<div class="row">
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>If the dream was a story, what would its title be?</span>
+												</div>
+												<div class="input">
+													<input id="title" type="text" name="title" size="30" autocomplete="off" placeholder="Title" oninput="resetMessage('title');" {% if dreamDict %}value="{{dreamDict['title']}}"{% endif %}><span id="titlemessageprefix">{% if messages %}<br>{% endif %}</span><span id="titlemessage" {% if messages %}class="{{messages['title']['validity']}}"{% endif %}>{% if messages %}{{messages['title']['message']}}{% endif %}</span>
+												</div>
+											</div>
+
+											<div class="col-xs-12 col-sm-6 question">
+												<div class="prompt">
+													<span>What's a one or two sentence description of the dream?</span>
+												</div>
+												<div class="input">
+													<textarea id="description" name="description" autocomplete="off" rows="3" cols="40" placeholder="Description" oninput="resetMessage('description');">{% if dreamDict %}{{dreamDict['description']}}{% endif %}</textarea><span id="descriptionmessageprefix">{% if messages %}<br>{% endif %}</span><span id="descriptionmessage" {% if messages %}class="{{messages['description']['validity']}}"{% endif %}>{% if messages %}{{messages['description']['message']}}{% endif %}</span>
+												</div>
+											</div>
+
+										</div>
+
+									</div>
+								</div>
+
+							</div>
+						</div>
 
 						<div class="row">
 							<div class="col-xs-12 prompt">
@@ -368,7 +418,7 @@
 	<script>
 		readyTags({{tagNameToGroup|safe}}, {{tagGroupToNames|safe}});
 	</script>
-	// do stuff if the user already input data
+	<!-- do stuff if the user already input data -->
     {% if dreamDict %}
 		{% for dreamtagname in dreamDict['dream_tags'] %}
 		<script>

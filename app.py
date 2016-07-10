@@ -254,28 +254,21 @@ UPPER_CASE_RE = re.compile(r"[A-Z]")
 def valid_password(password):
 
 	if len(password) < 6:
-		print "short"
 		return False
 
 	if len(password) > 20:
-		print "long"
 		return False
 
 	if not SPECIAL_CHAR_RE.search(password):
-		print password
-		print "spec"
 		return False
 
 	if not NUMBER_RE.search(password):
-		print "num"
 		return False
 
 	if not LOWER_CASE_RE.search(password):
-		print "up"
 		return False
 
 	if not UPPER_CASE_RE.search(password):
-		print "low"
 		return False
 
 	return True
@@ -400,7 +393,6 @@ class NewDream(Handler):
 			tagGroupToNames[tagGroup.name] = []
 
 		for tag in tagsQ:
-			print tag.name
 			tagNameToGroup[tag.name] = tag.group.name
 			tagGroupToNames[tag.group.name].append(tag.name)
 
@@ -703,9 +695,9 @@ class NewDream(Handler):
 			tagGroupToNames[tag.group.name].append(tag.name)
 
 		for attr in dreamDict:
-			print attr
-			print dreamDict[attr]
-			print type(dreamDict[attr])
+			#print attr
+			#print dreamDict[attr]
+			#print type(dreamDict[attr])
 			if attr in messages:
 				if messages[attr]["validity"] == "invalid":
 
@@ -1091,7 +1083,6 @@ class Register(Handler):
 			values['isCommitted'] = str(values['isCommitted'])
 			values['isParent'] = str(values['isParent'])
 
-			print values['nationality']
 			return self.render("register.html", values=values, 
 				messages=messages, countries=COUNTRIES, industries=INDUSTRIES,
 				professions=PROFESSIONS, educationLevels=EDUCATION_LEVELS, 
