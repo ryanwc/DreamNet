@@ -30,6 +30,7 @@ class Handler(webapp2.RequestHandler):
 class User(db.Model):
 	# what other properties?
 	username = db.StringProperty(required = True)
+	lc_username = db.StringProperty(required = True)
 	password = db.StringProperty(required = True)
 	gender = db.StringProperty(required = True)
 	birthdate = db.DateProperty(required = True)
@@ -63,6 +64,7 @@ class Dream(db.Model):
 	user_isCommitted = db.BooleanProperty(required = True)
 	user_satsifaction_ratings = db.StringProperty(required = True, multiline = True)
 	title = db.StringProperty(required = True)
+	lc_title = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
 	date_dreamt = db.DateProperty(required = True)
 	date_posted = db.DateTimeProperty(auto_now_add=True)
@@ -87,6 +89,7 @@ class TagGroup(db.Model):
 
 class TagName(db.Model):
 	name = db.StringProperty(required = True)
+	lc_name = db.StringProperty(required = True)
 	group = db.ReferenceProperty(TagGroup,
 							     collection_name = "tag_names")
 	description = db.StringProperty()
@@ -124,9 +127,10 @@ class RealityCheck(db.Model):
 								collection_name = "reality_checks")
 	dream = db.ReferenceProperty(Dream,
 								 collection_name = "reality_checks")
-	success = db.BooleanProperty(required = True)
+	description = db.StringProperty()
+	#success = db.BooleanProperty(required = True)
 	# 0 = 1st RC in a specific dream, 3 = 4th, etc 
-	index = db.IntegerProperty(required = True)
+	#index = db.IntegerProperty(required = True)
 
 ### some globals
 
@@ -150,15 +154,15 @@ MECHANISMS = ["malfunction", "impossibility/oddity", "presence", "absence"]
 # set some initial tags
 TAGS = {}
 
-TYPES = ["flying", "superhero", "falling", "nudity", "sex", "nightmare", "being chased",
-		 "paralysis", "trapped", "hard to move", "hard to breathe" "eating", "death",
-		 "violence", "school/classroom/exam", "aquatic", "demonic",
-		 "religious", "angelic/heavenly", "fantasy", "sci-fi", "romance", "comedy",
-		 "being late", "missed an appointment/event",
+TYPES = ["flying", "superhero-like", "falling", "nudity", "sexual", "nightmarish", "being chased",
+		 "paralysis", "being trapped", "difficulty moving", "difficulty breathing", "eating", "death",
+		 "violence", "testing/school exams", "aquatic", "demonic",
+		 "religious", "angelic", "heavenly", "fantasy", "sci-fi", "romance", "comedy",
+		 "being late", "missed appointment/event", "hellish",
 		 "being in a hurry", "travel", "futuristic", "in the past", "light", "darkness",
-		 "video game", "continuity error", "colorful", "black and white", "sepia",
-		 "recurring", "magic", "extra ability", "illness", "medical", "floating",
-		 "low gravity", "superpower"]
+		 "video game-like", "continuity error", "colorful", "black and white", "sepia",
+		 "recurring", "magical", "extra ability", "illness", "medical", "floating",
+		 "low gravity", "superpower", "driving", "peeing", "pooping"]
 
 BEINGS = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
 		  "son", "daughter", "neice", "nephew", "cousin", "grandfather",
@@ -180,7 +184,9 @@ PLACES = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
 		  "forest", "boat", "cave", "office building", "abandoned building",
 		  "stadium", "open field", "farm", "mountain", "airport", "school",
 		  "classroom", "hospital", "doctor's office", "science facility",
-		  "outer space", "alien world"]
+		  "outer space", "alien world", "Paris", "New York City", "Africa",
+		  "USA", "France", "Germany", "Thailand", "Kuala Lumpur", "Bangkok", "Berlin",
+		  "England", "London", "golf course"]
 
 OBJECTS = ["bowl", "door", "hat", "chair",
 		  "staircase", "flag", "gun", "knife", "car",
@@ -210,7 +216,8 @@ EMOTIONS = ["happiness", "ecstacy", "sadness", "sorrow/grief", "depression",
 SENSATIONS = ["pain", "discomfort", "pleasure", "orgasm", "taste", "color",
 			  "red", "yellow", "green", "blue", "white", "black", "violet", 
 			  "orange", "pink", "brown", "purple", "sour", "sweet", "salty",
-			  "bitter", "umami", "comfort", "heat" "cold", "numbness"]
+			  "bitter", "umami", "comfort", "heat", "cold", "numbness",
+			  "thirst", "hunger"]
 
 TAGS['type'] = TYPES
 TAGS['being'] = BEINGS
@@ -333,12 +340,13 @@ class Home(Handler):
 	def get(self, page=1):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
-		''' only do first time
+		'''
+		# only do first time
 		for group in TAGS:
 			group = TagGroup(name=group)
 			group.put()
 			for tagname in TAGS[group.name]:
-				tag = TagName(name=tagname, group=group)
+				tag = TagName(name=tagname, lc_name=tagname.lower(), group=group)
 				tag.put()
 		'''
 
@@ -381,7 +389,7 @@ class NewDream(Handler):
 			userDreamsigns.append(dreamsign.nickname)
 
 		tagsQ = TagName.all()
-		tagsQ.order("name")
+		tagsQ.order("lc_name")
 		groupsQ = TagGroup.all()
 		tagGroupToNames = {}
 		tagNameToGroup = {}
@@ -682,7 +690,7 @@ class NewDream(Handler):
 
 		# get existing tags in case redirect to form
 		tagsQ = TagName.all()
-		tagsQ.order("name")
+		tagsQ.order("lc_name")
 		groupsQ = TagGroup.all()
 		tagGroupToNames = {}
 		tagNameToGroup = {}
@@ -732,6 +740,8 @@ class NewDream(Handler):
 		dreamDict["user_isCommitted"] = user.isCommitted
 		dreamDict["user_satsifaction_ratings"] = user.satisfaction_ratings
 
+		dreamDict["lc_title"] = dreamDict["title"].lower()
+
 		dream = Dream(**dreamDict)
 		dream.put()
 
@@ -746,7 +756,7 @@ class NewDream(Handler):
 			assert tagGroupObj
 
 			if existingTagName == None:
-				tagNameObj = TagName(name=tag_name, group=tagGroupObj)
+				tagNameObj = TagName(name=tag_name, lc_name=tag_name.lower(), group=tagGroupObj)
 				tagNameObj.put()
 			else:
 				tagNameObj = existingTagName
@@ -758,11 +768,11 @@ class NewDream(Handler):
 class Register(Handler):
 	def get(self):
 
-		COUNTRIES.sort()
-		INDUSTRIES.sort()
-		PROFESSIONS.sort()
-		EDUCATION_LEVELS.sort()
-		SECTORS.sort()
+		sorted(COUNTRIES, key=lambda s: s.lower())
+		sorted(INDUSTRIES, key=lambda s: s.lower())
+		sorted(PROFESSIONS, key=lambda s: s.lower())
+		sorted(EDUCATION_LEVELS, key=lambda s: s.lower())
+		sorted(SECTORS, key=lambda s: s.lower())
 
 		self.render("register.html", countries=COUNTRIES, industries=INDUSTRIES,
 			professions=PROFESSIONS, educationLevels=EDUCATION_LEVELS, sectors=SECTORS,
@@ -1071,11 +1081,11 @@ class Register(Handler):
 		# could make more efficient by flagging boolean "hasInvalid" previously
 		if hasInvalid:
 
-			COUNTRIES.sort()
-			INDUSTRIES.sort()
-			PROFESSIONS.sort()
-			EDUCATION_LEVELS.sort()
-			SECTORS.sort()
+			sorted(COUNTRIES, key=lambda s: s.lower())
+			sorted(INDUSTRIES, key=lambda s: s.lower())
+			sorted(PROFESSIONS, key=lambda s: s.lower())
+			sorted(EDUCATION_LEVELS, key=lambda s: s.lower())
+			sorted(SECTORS, key=lambda s: s.lower())
 
 			# these are booleans right now.  str needed?
 			values['isCommitted'] = str(values['isCommitted'])
@@ -1095,6 +1105,8 @@ class Register(Handler):
 		userDict["password"] = saltedpasshash
 		userDict["useful_dreams"] = pickle.dumps(useful_dreams)
 		userDict["satisfaction_ratings"] = pickle.dumps(satisfactionRatings)
+
+		userDict["lc_username"] = userDict["username"].lower()
 
 		user = User(**userDict)
 		user.put()
@@ -1132,11 +1144,11 @@ class Register(Handler):
 
 		if duplicate:
 
-			COUNTRIES.sort()
-			INDUSTRIES.sort()
-			PROFESSIONS.sort()
-			EDUCATION_LEVELS.sort()
-			SECTORS.sort()
+			sorted(COUNTRIES, key=lambda s: s.lower())
+			sorted(INDUSTRIES, key=lambda s: s.lower())
+			sorted(PROFESSIONS, key=lambda s: s.lower())
+			sorted(EDUCATION_LEVELS, key=lambda s: s.lower())
+			sorted(SECTORS, key=lambda s: s.lower())
 
 			# these are booleans right now.  str needed?
 			values['isCommitted'] = str(values['isCommitted'])

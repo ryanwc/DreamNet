@@ -724,54 +724,221 @@ function resetMessage(inputName) {
     addAndRemoveClasses($("#"+inputName+"message"), "", "invalid");
 }
 
-function toggleRealityCheckTags() {
+function toggleRealityCheckTags(tagNameToGroup) {
 
     var selectedMechanism = $("#mechanism").val();
 
-    // set the beginning of the sentence
+    // have competing conditions with slow updates to DOM 
+    // so set booleans instead of, e.g., testing hasClass
+    var displayObjectList = false;
+    var displayEndIdentifier = false;
+    var displayFirstEnd = false;
+    var displaySecondEnd = false;
+    var displayIdentifier = false;
+    var displayAllCheckList = false;
+    var extraMechanismText = "";
+    var extraTagText = "";
+
+    // for fine grain control have different cases for each option
     switch (selectedMechanism) {
         // some cases do some of the same things
         case 'malfunction':
-            addAndRemoveClasses($("#objectmalfunction"), "", "displaynone");
-            addAndRemoveClasses($("#objectidentifier"), "", "displaynone"); 
-            addAndRemoveClasses($("#identifier"), "displaynone", ""); 
-            addAndRemoveClasses($("#allcheck"), "displaynone", ""); 
-            $("#extramechanismtext").html("");  
+            displayObjectList = true;
+            displayAllCheckList = false;
+            displayIdentifier = false;
+            displayEndIdentifier = true;
+            displayFirstEnd = false;
+            displaySecondEnd = true;
+            extraMechanismText = "";
             break;
         case 'impossibility/oddity':
-            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
-            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
-            addAndRemoveClasses($("#identifier"), "", "displaynone"); 
-            addAndRemoveClasses($("#allcheck"), "", "displaynone");  
-            $("#extramechanismtext").html(" involving ");
+            displayObjectList = false;
+            displayAllCheckList = true;
+            displayIdentifier = true;
+            displayEndIdentifier = false;
+            displayFirstEnd = true;
+            displaySecondEnd = false;
+            extraMechanismText = " involving ";
             break;
         case 'presence':
-            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
-            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
-            addAndRemoveClasses($("#identifier"), "", "displaynone"); 
-            addAndRemoveClasses($("#allcheck"), "", "displaynone");  
-            $("#extramechanismtext").html("");
+            displayObjectList = false;
+            displayAllCheckList = true;
+            displayIdentifier = true;
+            displayEndIdentifier = false;
+            displayFirstEnd = true;
+            displaySecondEnd = false; 
+            extraMechanismText = "";
             break;
         case 'absence':
-            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
-            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
-            addAndRemoveClasses($("#identifier"), "", "displaynone"); 
-            addAndRemoveClasses($("#allcheck"), "", "displaynone");  
-            $("#extramechanismtext").html("");
+            displayObjectList = false;
+            displayAllCheckList = true;
+            displayIdentifier = true;
+            displayEndIdentifier = false;
+            displayFirstEnd = true;
+            displaySecondEnd = false; 
+            extraMechanismText = "";
             break;
         case '-1':
-            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
-            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
-            addAndRemoveClasses($("#identifier"), "displaynone", ""); 
-            addAndRemoveClasses($("#allcheck"), "displaynone", "");  
-            $("#extramechanismtext").html("");
+            displayObjectList = false;
+            displayAllCheckList = false;
+            displayIdentifier = false;
+            displayEndIdentifier = false;
+            displayFirstEnd = true;
+            displaySecondEnd = false; 
+            extraMechanismText = "";
             break;          
         default:
-            addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
-            addAndRemoveClasses($("#objectidentifier"), "displaynone", ""); 
+            displayObjectList = false;
+            displayAllCheckList = false;
+            displayIdentifier = false;
+            displayEndIdentifier = false;
+            displayFirstEnd = true;
+            displaySecondEnd = false; 
+            extraMechanismText = "";
+            break;
+    }
+
+    // if did not choose 'malfunction'
+    if (selectedMechanism == "presence" ||
+        selectedMechanism == "absence" ||
+        selectedMechanism == "impossibility/oddity") {
+
+        var selectedPhenomenon = $("#allcheck").val();
+
+        // have case for each option for fine grain control
+        switch (tagNameToGroup[selectedPhenomenon]) {
+
+            case 'type':
+                displayIdentifier = false;
+                displayEndIdentifier = false;
+                displayFirstEnd = true;
+                displaySecondEnd = false;
+                extraTagText = " themes/activities";
+                break;
+            case 'place':
+                extraTagText = "";
+                break;
+            case 'object':
+                displayIdentifier = false;
+                displayEndIdentifier = true;
+                displayFirstEnd = false;
+                displaySecondEnd = true;
+                extraTagText = "";
+                break;
+            case 'being':
+                extraTagText = "";
+                break;
+            case 'emotion':
+                displayIdentifier = false;
+                displayEndIdentifier = true;
+                displayFirstEnd = false;
+                displaySecondEnd = true;
+                extraTagText = "";
+                break;
+            case 'sensation':
+                displayIdentifier = false;
+                displayEndIdentifier = false;
+                displayFirstEnd = true;
+                displaySecondEnd = false;
+                extraTagText = " sensations";
+                break;
+            default:
+                extraTagText = "";
+                break;
+        }
+    }
+
+    if (displayObjectList) {
+
+        addAndRemoveClasses($("#objectmalfunction"), "", "displaynone");
+    }
+    else {
+
+        addAndRemoveClasses($("#objectmalfunction"), "displaynone", "");
+    }
+
+    if (displayAllCheckList) {
+
+        addAndRemoveClasses($("#allcheck"), "", "displaynone"); 
+    }
+    else {
+
+        addAndRemoveClasses($("#allcheck"), "displaynone", ""); 
+    }
+
+    if (displayIdentifier) {
+
+        addAndRemoveClasses($("#identifier"), "", "displaynone"); 
+    }
+    else {
+
+        addAndRemoveClasses($("#identifier"), "displaynone", ""); 
+    }
+
+    if (displayEndIdentifier) {
+
+        addAndRemoveClasses($("#endidentifier"), "", "displaynone"); 
+    }
+    else {
+
+        addAndRemoveClasses($("#endidentifier"), "displaynone", ""); 
+    }
+
+    if (displayFirstEnd) {
+
+        addAndRemoveClasses($("#firstend"), "", "displaynone"); 
+    }
+    else {
+
+        addAndRemoveClasses($("#firstend"), "displaynone", ""); 
+    }
+
+    if (displaySecondEnd) {
+
+        addAndRemoveClasses($("#secondend"), "", "displaynone"); 
+    }
+    else {
+
+        addAndRemoveClasses($("#secondend"), "displaynone", ""); 
+    }
+
+    $("#extramechanismtext").html(extraMechanismText);  
+    $("#extratagtext").html(extraTagText);
+}
+
+function togglePhenomenon(tagNameToGroup) {
+
+    var selectedRCTag = $("#allcheck").val();
+
+    switch (tagNameToGroup[selectedRCTag]) {
+
+        case 'type':
             addAndRemoveClasses($("#identifier"), "displaynone", ""); 
-            addAndRemoveClasses($("#allcheck"), "displaynone", "");  
-            $("#extramechanismtext").html("");
+            addAndRemoveClasses($("#endidentifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#firstend"), "", "displaynone"); 
+            addAndRemoveClasses($("#secondend"), "displaynone", ""); 
+            $("#extratagtext").html(" themes/activities");
+            break;
+        case 'emotion':
+            addAndRemoveClasses($("#identifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#endidentifier"), "", "displaynone"); 
+            addAndRemoveClasses($("#firstend"), "displaynone", ""); 
+            addAndRemoveClasses($("#secondend"), "", "displaynone");
+            $("#extratagtext").html("");
+            break;
+        case 'sensation':
+            addAndRemoveClasses($("#identifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#endidentifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#firstend"), "", "displaynone"); 
+            addAndRemoveClasses($("#secondend"), "displaynone", "");
+            $("#extratagtext").html(" sensations");
+            break;
+        default:
+            addAndRemoveClasses($("#identifier"), "", "displaynone"); 
+            addAndRemoveClasses($("#endidentifier"), "displaynone", ""); 
+            addAndRemoveClasses($("#firstend"), "", "displaynone"); 
+            addAndRemoveClasses($("#secondend"), "displaynone", "");
+            $("#extratagtext").html("");
             break;
     }
 }
@@ -801,4 +968,23 @@ function toggleProfessionQuestions() {
     }
 }
 
+function toggleSomethingSpecific() {
+
+    var specificQs = $(".somethingspecificquestion");
+
+    if ($("#lucidreason").val() == "reality check") {
+
+        specificQs.each(function() {
+
+            addAndRemoveClasses($(this), "", "displaynone");
+        });
+    }
+    else {
+
+        specificQs.each(function () {
+
+            addAndRemoveClasses($(this), "displaynone", "");
+        });
+    }
+}
 
