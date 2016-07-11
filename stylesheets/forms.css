@@ -143,6 +143,11 @@ option {
 	font-weight: bold;
 }
 
+#extra {
+	width: 100%;
+	overflow-y: scroll;
+}
+
 
 /* tags */
 
@@ -227,6 +232,22 @@ legend {
 
 #headlines {
 	background-color: #262626;
+}
+
+#dreamtagsection {
+	border: none;
+}
+
+#tags {
+	background-color: #8080ff;
+}
+
+#narrative {
+	border: none;
+}
+
+#extras {
+	border: none;
 }
 
 @media screen and (max-width: 767px) {
@@ -338,7 +359,7 @@ legend {
     left: -10px;
 }
 
-#persontagtip {
+#beingtagtip {
     left: -40px;
 }
 
@@ -346,7 +367,7 @@ legend {
     left: -80px;
 }
 
-#thingtagtip {
+#objecttagtip {
     left: -120px;
 }
 
@@ -411,11 +432,32 @@ legend {
 	font-weight: bold;
 }
 
+#tagidentifiers {
+	border: 2px dotted red;
+	background-color: black;
+	padding: 5px;
+	color: white;
+	text-shadow: none;
+}
+
+#tagidentifiers .hint {
+	color: white;
+	text-shadow: none;
+}
+
+#tagidentifiers .inputlabel {
+	color: white;
+}
+
+#tagidentifiers .inputlabel .tagidentifiername {
+
+}
+
 .type {
 	background-color: lightblue;
 }
 
-.person {
+.being {
 	background-color: lightgreen;
 }
 
@@ -423,7 +465,7 @@ legend {
 	background-color: yellow;
 }
 
-.thing {
+.object {
 	background-color: orange;
 }
 

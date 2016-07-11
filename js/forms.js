@@ -4,6 +4,7 @@ function readyTags(tagNameToGroup, tagGroupToName) {
     $("#add").click(function() {
 
         var newtag = false;
+        var needsIdentifier = false;
 
         // if the #newtagquestion is displayed, the user already tried to enter a tag, but
         // it wasn't in our system yet, so prompted them to tell us more about the tag,
@@ -13,8 +14,17 @@ function readyTags(tagNameToGroup, tagGroupToName) {
         if (!$("#newtagquestion").hasClass("displaynone")) {
 
             newtag = true;
+            $("#chosentaggroup").html($("input:radio[name=tagtype]:checked").val());
             toggleDisplay($("#newtagquestion"));
         }
+
+        if (!$("#tagidentifiers").hasClass("displaynone")) {
+
+            needsIdentifier = true;
+            $("#chosentagidentifier").html($("input:radio[name=tagidentifier]:checked").val());
+            toggleDisplay($("#tagidentifiers"));
+        }
+
         // keep rest of validation in case user tries to insert weird stuff when newtag=true
 
         var inputTag = $("#tagname").val().toLowerCase();
@@ -51,46 +61,54 @@ function readyTags(tagNameToGroup, tagGroupToName) {
                 return;
             }
 
-            var type;
+            var tagGroup;
 
-            // should verify on backend to that no tags repeated
-            var alreadyHave = false;
-
-            dreamTags.each(function() {
-
-                if ($(this).html() == inputTag) {
-
-                    alreadyHave = true;
-                    return false;
-                }
-            });
-
-            if (alreadyHave) {
-                addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("<br> You already added that tag. ");
-                return;
-            }
-
+            // if the tag name exists, assign the tag group
+            // if not, check if we know about its group yet, and if not, ask about its group
+            // if so, get the group already input
             if (tagNameToGroup[inputTag]) {
 
-                type = tagNameToGroup[inputTag];
+                tagGroup = tagNameToGroup[inputTag];
             }
-            else if (newtag == false){
+            else if (newtag == false && $("#chosentaggroup").html() == "none") {
                 
                 toggleDisplay($("#newtagquestion"));
+                $("#defaulttagtype").prop("checked", true);
                 addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
-                $("#tagnamemessage").html("<br> Gathering information about the new '" + inputTag + "' dream tag... ");
+                $("#tagnamemessage").html("Gathering information about the new '" + inputTag + "' dream tag... ");
                 return;
             }
             else {
 
-                type = $("input:radio[name=tagtype]:checked").val();
+                tagGroup = $("#chosentaggroup").html();
             }
 
-            createAndAppendTagButton(inputTag, type);
+            var identifier;
+
+            // if it needs an identifier, ask for it
+            if ( (tagGroup == "object" || tagGroup == "place" ||
+                  tagGroup == "being" || tagGroup == "emotion") &&
+                needsIdentifier == false) {
+
+                toggleDisplay($("#tagidentifiers"));
+                $("#defaulttagidentifier").prop("checked", true);
+                $("#tagtobeidentified").html("'"+inputTag+"' "+tagGroup);
+                addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
+                $("#tagnamemessage").html("Getting identifier for the '" + inputTag + "' dream tag... ");
+                return;  
+            }
+            else {
+
+                identifier = $("#chosentagidentifier").html();
+            }
+
+            // create the tag button and then reset everything
+            createAndAppendTagButton(inputTag, tagGroup, identifier);
             
+            $("#chosentaggroup").html("none");
+            $("#chosentagidentifier").html("none");          
             addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
-            $("#tagnamemessage").html("<br> Added the '" + type + ": " + inputTag + "' tag ");
+            $("#tagnamemessage").html("Added the '" + tagGroup + ": " + inputTag + "' tag ");
             $("#tagname").val("");
             $("#tagname").focus();
         }
@@ -127,15 +145,34 @@ function readyTags(tagNameToGroup, tagGroupToName) {
     }
 }
 
-function createAndAppendTagButton(tagname, type) {
+function createAndAppendTagButton(tagname, type, identifier) {
 
-    id = tagname+"Button";
+    var id = tagname+"Button";
 
-    var removeTagButton = $("<button id=\""+id+"\" class=\"tag tagbutton remove "+type+"\" value=\""+tagname+"|"+type+"\"><span class=\"dreamtag\">"+tagname+"</span> <span class=\"removetext\">(remove)</span></button>");
+    var identifierText;
+
+    switch (identifier) {
+
+        case "definite":
+            identifierText = "(the)";
+            break;
+        case "indefinite":
+            identifierText = "(a(n)/another's)";
+            break;
+        case "possesive":
+            identifierText = "(my)";
+            break;
+        default:
+            identifierText = "";
+            identifier = "none";
+            break;
+    }
+
+    var removeTagButton = $("<button id=\""+id+"\" class=\"tag tagbutton remove "+type+"\" value=\""+tagname+"|"+identifier+"@"+type+"\"><span class=\"dreamtag\">"+identifierText+" "+tagname+"</span> <span class=\"removetext\">(remove)</span></button>");
 
     removeTagButton.click(function() {
 
-        $("#tagnamemessage").html("<br> Removed '" + type + ": " +  tagname + "' tag ");
+        $("#tagnamemessage").html("Removed '" + type + ": " +  tagname + "' tag ");
         $(this).remove();
         $("#tagname").focus();
     });
@@ -662,8 +699,8 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
             return false;
         }
 
-        if (!$(this).hasClass("type") && !$(this).hasClass("person") &&
-            !$(this).hasClass("place") && !$(this).hasClass("thing") &&
+        if (!$(this).hasClass("type") && !$(this).hasClass("being") &&
+            !$(this).hasClass("place") && !$(this).hasClass("object") &&
             !$(this).hasClass("emotion") && !$(this).hasClass("sensation")) {
 
             addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
@@ -986,7 +1023,11 @@ function toggleSomethingSpecific() {
             addAndRemoveClasses($(this), "displaynone", "");
         });
 
-        $("input:radio[name=dreamsignbool]:checked").prop("checked", false);
+        // if there are any dream signs, make user select yes or no dream sign again
+        if ($("#dreamsign").children("option").length > 1) {
+         
+            $("input:radio[name=dreamsignbool]:checked").prop("checked", false);
+        }
 
         addAndRemoveClasses($("#dreamsignquestion"), "displaynone", "");
         addAndRemoveClasses($("#realitycheckquestion"), "displaynone", "");

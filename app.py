@@ -74,6 +74,7 @@ class Dream(db.Model):
 	lucid_reason = db.StringProperty()
 	control = db.IntegerProperty(required = True)
 	enjoyability = db.IntegerProperty(required = True)
+	extras = db.StringProperty(required = True)
 	awareness_level = db.IntegerProperty(required = True)
 	aware_users = db.StringProperty(multiline = True)
 
@@ -82,7 +83,11 @@ class Dream(db.Model):
 		self._render_text = self.content.replace("\n", "<br>")
 		return render_str(self._render_text)
 
-# types, places, people, things, emotions, sensations
+# identifier ("a(n)", "my") for tags
+class Identifier(db.Model):
+	type = db.StringProperty(required = True)
+
+# types, places, beings, objects, emotions, sensations
 class TagGroup(db.Model):
 	name = db.StringProperty(required = True)
 	description = db.StringProperty()
@@ -99,20 +104,23 @@ class Tag(db.Model):
 								 collection_name = "tags")
 	name = db.ReferenceProperty(TagName,
 						    	collection_name = "tags")
+	identifier = db.ReferenceProperty(Identifier,
+									  collection_name = "tags")
 
 # e.g., impossibility
 class RealityCheckMechanism(db.Model):
-
 	name = db.StringProperty(required = True)
-	description = db.StringProperty(required = True)
+	description = db.StringProperty()
 
 # a specific user's unique dreamsigns
 class DreamSign(db.Model):
 	nickname = db.StringProperty(required = True)
 	mechanism = db.ReferenceProperty(RealityCheckMechanism,
 									 collection_name = "dream_signs")
-	tag = db.ReferenceProperty(Tag,
-							   collection_name = "dream_signs")
+	tag_name = db.ReferenceProperty(TagName,
+							   		collection_name = "dream_signs")
+	identifier = db.ReferenceProperty(Identifier,
+									  collection_name = "dream_signs")
 	user = db.ReferenceProperty(User,
 								collection_name = "dream_signs")
 	description = db.ReferenceProperty(required = True)
@@ -121,6 +129,8 @@ class DreamSign(db.Model):
 class RealityCheck(db.Model):
 	tag = db.ReferenceProperty(Tag,
 							   collection_name = "reality_checks")
+	mechanism = db.ReferenceProperty(RealityCheckMechanism,
+									 collection_name = "reality_checks")
 	dream_sign = db.ReferenceProperty(DreamSign,
 									  collection_name = "reality_checks")
 	user = db.ReferenceProperty(User,
@@ -128,6 +138,8 @@ class RealityCheck(db.Model):
 	dream = db.ReferenceProperty(Dream,
 								 collection_name = "reality_checks")
 	description = db.StringProperty()
+	# would be cool to come up with a way to track rc failures vs successes
+	# which would also allow multiple rcs in same dream
 	#success = db.BooleanProperty(required = True)
 	# 0 = 1st RC in a specific dream, 3 = 4th, etc 
 	#index = db.IntegerProperty(required = True)
@@ -151,6 +163,9 @@ GENDERS = ["Male", "Female", "Non-binary"]
 # set mechanisms by which reality checks work
 MECHANISMS = ["malfunction", "impossibility/oddity", "presence", "absence"]
 
+# set up identifiers for tags/rcs
+IDENTIFIERS = ["possesive", "indefinite", "definite"]
+
 # set some initial tags
 TAGS = {}
 
@@ -164,7 +179,7 @@ TYPES = ["flying", "superhero-like", "falling", "nudity", "sexual", "nightmarish
 		 "recurring", "magical", "extra ability", "illness", "medical", "floating",
 		 "low gravity", "superpower", "driving", "peeing", "pooping"]
 
-BEINGS = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
+BEINGS = ["mother", "father", "brother", "sister", "aunt", "uncle",
 		  "son", "daughter", "neice", "nephew", "cousin", "grandfather",
     	  "grandmother", "grandson", "granddaughter", "mother-in-law",
 		  "father-in-law", "brother-in-law", "sister-in-law", "son-in-law",
@@ -175,7 +190,8 @@ BEINGS = ["mother", "father", "brother", "sister", "cousin", "aunt", "uncle",
 		  "person from college", "teacher/professor", "specific fictional character",
 		  "ghost", "caterpillar", "dog", "vampire", "angel", "demon", "spider",
 		  "alien", "unicorn", "horse", "tiger", "lion", "bear", "God", "elf", "dwarf",
-		  "orc", "wizard", "witch"]
+		  "orc", "wizard", "witch", "William Shakespeare", "Adolf Hitler",
+		  "Jesus of Nazareth", "Christiano Ronaldo", "Barack Obama", "Michael Jordan"]
 
 PLACES = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
 		  "bedroom", "livingroom", "bathroom", "hallway", "ruins", "religious building",
@@ -192,9 +208,9 @@ OBJECTS = ["bowl", "door", "hat", "chair",
 		  "staircase", "flag", "gun", "knife", "car",
 		  "boat", "airplane", "spoon", "fork", "table", "wall", "present",
 		  "strawberry", "food", "blueberry", "analog timepiece", "digital timepiece", 
-		  "light switch", "lightbulb", "mirror", "book", "door",
+		  "light switch", "lightbulb", "mirror", "book",
 		  "window", "train", "elevator", "escalator", 
-		  "bowl", "pants", "shirt", "dress", "skirt", 
+		  "pants", "shirt", "dress", "skirt", 
 		  "shoes", "cell phone", "laptop computer", "desktop computer", 
 		  "tablet (computer)", "camera", "radio", "video player", "music player",
 		  "spaceship", "teeth", "plate", "box", "can", "napkin", "video game console",
@@ -334,13 +350,23 @@ class Home(Handler):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
 		'''
-		# only do first time
+		#
+		# only do after datastore clear to re-populate defaults
+		#
 		for group in TAGS:
 			group = TagGroup(name=group)
 			group.put()
 			for tagname in TAGS[group.name]:
 				tag = TagName(name=tagname, lc_name=tagname.lower(), group=group)
 				tag.put()
+
+		for identifier in IDENTIFIERS:
+			identifier = Identifier(type=identifier)
+			identifier.put()
+
+		for mechanism in MECHANISMS:
+			mechanism = RealityCheckMechanism(name=mechanism)
+			mechanism.put()
 		'''
 
 		# get/set a cookie that tracks number of visits
@@ -754,6 +780,9 @@ class NewDream(Handler):
 				tagNameObj = existingTagName
 
 			dreamTag = Tag(dream=dream, name=tagNameObj)
+
+		# create each reality check object
+		# TO-DO
 
 		return redirect_to("viewdream", id=str(dream.key().id()))
 
