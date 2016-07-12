@@ -124,7 +124,7 @@
 
 											<div class="col-xs-12 col-sm-6 question somethingspecificquestion displaynone">
 												<div class="prompt">
-													<span>{% if userDreamsigns|length > 0 %}Was the specific thing that helped you realize you were dreaming one of your "dream signs"?{% else %}Just so you know, you haven't created any "dream signs" yet.  You can dream signs at your profile page.{% endif %}</span>
+													<span>{% if userDreamsigns|length > 0 %}Was the specific thing that helped you realize you were dreaming one of your "dream signs"?{% else %}Just so you know, you haven't created any "dream signs" yet.  You can create dream signs at your profile page.{% endif %}</span>
 												</div>
 												<div class="input">
 													<input type="radio" name="dreamsignbool" value="False" onclick="toggleSpecificCheck(); resetMessage('dreamsignbool');" {% if dreamDict['dreamsign_bool'] == "False" %}checked{% elif userDreamsigns|length < 1 %}checked{% endif %}> <span class="inputlabel"> {% if userDreamsigns|length < 1 %}OK{% else %}No{% endif %}</span>
@@ -167,10 +167,10 @@
 													</select>
 													<span id="extramechanismtext"></span>
 													<select id="identifier" name="identifier" class="displaynone" oninput="resetMessage('identifier');">
-														<option value="-1">-Select identifier-</option>
-														<option value="indefinite">a(n)</option>
-														<option value="possesive">my</option>
-														<option value="definite">the (one and only)</option>
+														<option value="-1" {% if dreamDict %}{% if dreamDict['reality_check_identifier'] %}{% if dreamDict['reality_check_identifier'] == "-1" %}selected{% endif %}{% endif %}{% endif %}>-Select identifier-</option>
+														<option value="indefinite" {% if dreamDict %}{% if dreamDict['reality_check_identifier'] %}{% if dreamDict['reality_check_identifier'] == "indefinite" %}selected{% endif %}{% endif %}{% endif %}>a(n)</option>
+														<option value="possesive" {% if dreamDict %}{% if dreamDict['reality_check_identifier'] %}{% if dreamDict['reality_check_identifier'] == "possesive" %}selected{% endif %}{% endif %}{% endif %}>my</option>
+														<option value="definite" {% if dreamDict %}{% if dreamDict['reality_check_identifier'] %}{% if dreamDict['reality_check_identifier'] == "definite" %}selected{% endif %}{% endif %}{% endif %}>the (one and only)</option>
 													</select>
 													<select id="objectmalfunction" name="objectmalfunction" class="displaynone" oninput="resetMessage('realitychecktag');">
 														<option value="-1" {% if dreamDict %}{% if dreamDict['reality_check_tag'] %}{% if dreamDict['reality_check_tag'] == "-1" %}selected{% endif %}{% endif %}{% endif %}>-Select an object-</option>
@@ -188,9 +188,9 @@
 														{% endfor %}
 													</select><span id="extratagtext"></span><span id="firstend">."</span>
 													<select id="endidentifier" name="endidentifier" class="displaynone" oninput="resetMessage('identifier');">
-														<option value="-1">-Select identifier-</option>
-														<option value="indefinite">(someone else's)</option>
-														<option value="possesive">(mine)</option>
+														<option value="-1" {% if dreamDict %}{% if dreamDict['reality_check_end_identifier'] %}{% if dreamDict['reality_check_end_identifier'] == "-1" %}selected{% endif %}{% endif %}{% endif %}>-Select identifier-</option>
+														<option value="indefinite" {% if dreamDict %}{% if dreamDict['reality_check_end_identifier'] %}{% if dreamDict['reality_check_end_identifier'] == "indefinite" %}selected{% endif %}{% endif %}{% endif %}>(someone else's)</option>
+														<option value="possesive" {% if dreamDict %}{% if dreamDict['reality_check_end_identifier'] %}{% if dreamDict['reality_check_end_identifier'] == "possesive" %}selected{% endif %}{% endif %}{% endif %}>(mine)</option>
 													</select><span id="secondend" class="displaynone">."</span>
 													<span id="mechanismmessageprefix">{% if messages %}{% if messages['mechanism'] %}<br>{% endif %}{% endif %}</span><span id="mechanismmessage" {% if messages %}{% if messages['mechanism'] %}class="{{messages['mechanism']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['mechanism'] %}{{messages['mechinism']['message']}}{% endif %}{% endif %}</span>
 													<span id="identifiermessageprefix">{% if messages %}{% if messages['identifier'] %}<br>{% endif %}{% endif %}</span><span id="identifiermessage" {% if messages %}{% if messages['identifier'] %}class="{{messages['identifier']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['identifier'] %}{{messages['identifier']['message']}}{% endif %}{% endif %}</span>
@@ -355,7 +355,7 @@
 											    <input type="text" id="tagname" oninput="resetMessage('tagname'); hide($('#newtagquestion')); hide($('#tagidentifiers'))" autocomplete="off" placeholder="Dream tag">
 												<input type="button" value="Add tag" class="input add" id="add">
 												<br>
-												<span class="hint">*You must enter at least one "type" and "place" tag, and there is no limit to the total number of tags a dream can have.  For examples of each kind of tag, hover over or click on the colored icons below.</span>
+												<span class="hint">*You must enter at least one "type" tag.  There is no limit to the total number of tags a dream can have.  For examples of each kind of tag, hover over or click on the colored icons below.</span>
 
 												<div class="row displaynone" id="newtagquestion">
 													<div class="col-xs-12 prompt">

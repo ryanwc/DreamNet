@@ -125,7 +125,7 @@ class DreamSign(db.Model):
 								collection_name = "dream_signs")
 	description = db.ReferenceProperty(required = True)
 
-# specific instance of a reality check name, which could also be a dream sign
+# specific instance of a reality check, which could also be a dream sign
 class RealityCheck(db.Model):
 	tag = db.ReferenceProperty(Tag,
 							   collection_name = "reality_checks")
@@ -504,21 +504,138 @@ class NewDream(Handler):
 
 					messages["lucid_reason"] = {"message": "Reason selection OK",
 							 	 	    		"validity": "valid"}	
+		else:
+			messages["lucidity"] = {"message": "Please indicate whether you were aware you were dreaming at any point during the dream",
+							 	 	"validity": "invalid"}	
 
-					if dreamDict["lucid_reason"] == "something else":
+		realityCheckTagName = None
+		if ("lucid_reason" in dreamDict and
+			dreamDict["lucid_reason"] == "reality check"):
 
-						dreamDict["something_else"] = bleach.clean(self.request.get("somethingelse"))
+			dreamDict["reality_check_description"] = bleach.clean(self.request.get("realitycheckdescription"))
+			if dreamDict["reality_check_description"]:
+				# reality_check_description can be None
 
-						if dreamDict["something_else"]:
-							if len(dreamDict["something_else"]) < 301:
-								messages["something_else"] = {"message": "Custom reason for awareness OK",
-								 	 	    			  	  "validity": "valid"}			
-							else:
-								messages["something_else"] = {"message": "Custom reason for awareness is too long (300 char max)",
-								 	 	    			  	  "validity": "invalid"}			
-						else:
-							messages["something_else"] = {"message": "Please enter your custom reason for becomming aware that you were dreaming",
-								 	 	    			  "validity": "invalid"}		
+				if len(dreamDict["reality_check_description"]) > 1000:
+					messages["reality_check_description"] = {"message": "Awareness description has 1000 char limit",
+				 	 	    					 			 "validity": "invalid"}
+				else:
+					messages["reality_check_description"] = {"message": "Awareness description OK",
+				 	 	    					 			 "validity": "valid"}								
+
+			if bleach.clean(self.request.get("dreamsignbool")) == "False":
+				# just a regular reality check
+				# need to validate these: 
+				# mechanism, if identifier, if objectmalfunction, if allcheck, if endidentifier
+				dreamDict["mechanism"] = bleach.clean(self.request.get("mechanism"))
+				if dreamDict["mechanism"]:
+
+					if mechanism in MECHANISMS:
+						messages["mechanism"] = {"message": "Mechanism OK","validity": "valid"}
+
+						realityCheckTagName = TagName.all().filter("name =", dreamDict["reality_check_tag"]).get()	
+						dreamDict["reality_check_tag_name_obj"] = realityCheckTagName
+				 	else:
+						messages["mechanism"] = {"message": "Select a mechanism that helped you become aware you were dreaming",
+				 	 	    				 	 "validity": "invalid"}						 										
+				else:
+					messages["mechanism"] = {"message": "Select a mechanism that helped you become aware you were dreaming",
+				 	 	    				 "validity": "invalid"}
+
+				inputRealityCheck = bleach.clean(self.request.get("reality"))
+			else:
+				# dream sign so check if input in user's dream signs
+				dreamDict["dream_sign"] = bleach.clean(self.request.get("dreamsign"))
+
+				if dreamDict["dream_sign"] and inputDreamSign in users.dream_signs:
+
+					messages["dream_sign"] = {"message": "Dream sign OK",
+				 	 	    				  "validity": "valid"}	
+				else:
+					messages["dream_sign"] = {"message": "Dream sign invalid; select one of your dream signs from the list",
+				 	 	    				  "validity": "invalid"}	
+
+		if realityCheckTagName:
+			''' 
+			four cases.  one for "malfunction" and three for others:
+			1) malfunction; object; end identifier
+			2) impossible / presence / absence; sensation / type
+			3) impossible / presence / absence; identifier; object / being / place
+			4) impossible / presence / absence; emotion; end identifier
+			'''
+			# case 1 above
+	 		if mechanism == "malfunction":
+	 			dreamDict["reality_check_tag"] = bleach.clean(self.request.get("objectmalfunction"))
+	 			if (realityCheckTagName and realityCheckTagName.group.name == "object"):
+	 				messages["reality_check_tag"] = {"message": "Awareness object OK","validity": "valid"}
+	 				dreamDict["reality_check_end_identifier"] = bleach.clean(self.request.get("endidentifier"))
+	 				if (dreamDict["reality_check_end_identifier"] and dreamDict["reality_check_end_identifier"] in IDENTIFIERS and dreamDict["reality_check_end_identifier"] != "definite"):
+	 					messages["identifier"] = {"message": "Awareness object identifier OK","validity": "valid"}		
+	 				else:
+	 					messages["identifier"] = {"message": "Please select an identifier for the awareness object","validity": "invalid"}
+	 			else:
+	 	 			messages["reality_check_tag"] = {"message": "Select an object that made you become aware you were dreaming","validity": "invalid"}
+	 	 	else:
+	 	 		# case 2-4 above
+	 	 		dreamDict["reality_check_tag"] = bleach.clean(self.request.get("allcheck"))
+	 	 		if (realityCheckTagName and realityCheckTagName in TAGS):
+	 	 			# all we need for case 2 above (do not need identifier)
+	 	 			messages["reality_check_tag"] = {"message": "Awareness object OK","validity": "valid"}
+	 	 			groupName = realityCheckTagName.group.name
+	 	 			if (groupName == "object" or groupName == "being" or groupName == "place"):
+	 	 				# case 3 above
+	 	 				dreamDict["reality_check_identifier"] = bleach.clean(self.request.get("identifier"))
+	 	 				identifier = dreamDict["reality_check_identifier"]
+		 	 	    	if (identifier and identifier in IDENTIFIERS):
+		 	 	    		messages["identifier"] = {"message": "Awareness identifier OK","validity": "valid"}	
+		 	 	    	else:
+		 	 	    		messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon","validity": "invalid"}
+		 	 	    		'''
+		 	 	    python does not accept the following acceptable syntax and says:
+		 	 	    "IndentationError: unindent does not match any outer indentation level"
+		 	 	    i already butchered my logic 
+		 	 	    and spent an hour indenting and unindenting to get to this point 
+		 	 	    so i will do more butchering but leave this mystery here
+
+		 	 	    if groupName == "emotion":
+		 	 	    	# case 4 above
+		 	 	    	dreamDict["reality_check_end_identifier"] = bleach.clean(self.request.get("endidentifier"))
+		 	 	    	identifier = dreamDict["reality_check_end_identifier"]
+		 	 	    	if (identifier and identifier in IDENTIFIERS and identifier != "definite"):
+		 	 	    		messages["identifier"] = {"message": "Awareness identifier OK","validity": "valid"}		
+		 	 	    	else:
+		 	 	    		messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon","validity": "invalid"}
+		 	 	    '''
+		 	 	else:
+		 	 		messages["reality_check_tag"] = {"message": "Select a phenomenon that made you become aware you were dreaming","validity": "invalid"}
+
+		# because python compiler complaining about fine indentation so behold this butchered logic
+		if realityCheckTagName and realityCheckTagName.group.name: 
+
+	 	    if realityCheckTagName.group.name == "emotion":
+	 	    	# case 4 above
+	 	    	dreamDict["reality_check_end_identifier"] = bleach.clean(self.request.get("endidentifier"))
+	 	    	identifier = dreamDict["reality_check_end_identifier"]
+	 	    	if (identifier and identifier in IDENTIFIERS and identifier != "definite"):
+	 	    		messages["identifier"] = {"message": "Awareness identifier OK","validity": "valid"}		
+	 	    	else:
+	 	    		messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon","validity": "invalid"}
+
+		if ("lucid_reason" in dreamDict and
+			dreamDict["lucid_reason"] == "something else"):
+
+			dreamDict["something_else"] = bleach.clean(self.request.get("somethingelse"))
+
+			if dreamDict["something_else"]:
+				if len(dreamDict["something_else"]) < 301:
+					messages["something_else"] = {"message": "Custom reason for awareness OK",
+					 	 	    			  	  "validity": "valid"}			
+				else:
+					messages["something_else"] = {"message": "Custom reason for awareness is too long (300 char max)",
+					 	 	    			  	  "validity": "invalid"}			
+			else:
+				messages["something_else"] = {"message": "Please enter your custom reason for becomming aware that you were dreaming",
+					 	 	    			  "validity": "invalid"}		
 
 				dreamDict["lucid_length"] = bleach.clean(self.request.get("lucidlength"))
 
@@ -534,9 +651,6 @@ class NewDream(Handler):
 
 					messages["lucid_length"] = {"message": "Please indicate how long you remained aware you were dreaming after becoming aware",
 							 	 	    		"validity": "invalid"}	
-		else:
-			messages["lucidity"] = {"message": "Please indicate whether you were aware you were dreaming at any point during the dream",
-							 	 	"validity": "invalid"}	
 
 		dreamDict["control"] = bleach.clean(self.request.get("control"))
 		if dreamDict["control"]:
@@ -619,21 +733,25 @@ class NewDream(Handler):
 
 			inputTags_array = inputTags.split(",")
 
-			# validate each name|value pair, stopping before last array entry 
+			# validate each tagName|tagIdentifier@tagGroup pair, stopping before last array entry 
 			# due to "," being the last character in inputTags when splitting on ","
 			for i in range(0, len(inputTags_array)-1):
 
 				inputTag = inputTags_array[i]
 
-				tag_array = inputTag.split("|")
+				name_identifiergroup = inputTag.split("|")
 
-				if len(tag_array) != 2:
+				if len(name_identifiergroup) != 2:
 					messages["dream_tags"] = {"message": "One of the tags contains an illegal '|' character",
 							 	 	 		  "validity": "invalid"}
 					break
 
-				tag_name = tag_array[0]
-				tag_group = tag_array[1]
+				tag_name = name_identifiergroup[0]
+
+				identifier_group = name_identifiergroup[1].split("@")
+
+				tag_identifier = identifier_group[0]
+				tag_group = identifier_group[1]
 
 				# check if already exists (but do not add yet)
 				# think have to all() each time thru for loop but not sure, playing safe
@@ -645,6 +763,7 @@ class NewDream(Handler):
 							 	 	 			  "validity": "invalid"}
 						break				
 
+				# validate name
 				if len(tag_name) < 1:
 					messages["dream_tags"] = {"message": "One of the tags has no name",
 							 	 	 			"validity": "invalid"}
@@ -670,6 +789,12 @@ class NewDream(Handler):
 		 	 	 							  "validity": "invalid"}
 					break
 
+				# validate identifier
+				if (tag_identifier not in IDENTIFIERS):
+					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an invalid identifier ('"+tag_identifier+"')",
+		 	 	 							  "validity": "invalid"}				
+
+				# validate group
 				if (tag_group not in TAGS):
 					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an invalid tag group ('"+tag_group+"')",
 		 	 	 							  "validity": "invalid"}
@@ -677,7 +802,7 @@ class NewDream(Handler):
 				elif tag_group == "type":
 					hasTypeTag = True
 
-				dreamDict["dream_tags"][tag_name] = tag_group
+				dreamDict["dream_tags"][tag_name] = {"group":tag_group, "identifier":tag_identifier}
 
 		 	if not hasTypeTag:
 				messages["dream_tags"] = {"message": "Please enter at least one 'type' tag",
@@ -697,11 +822,39 @@ class NewDream(Handler):
 				messages["content"] = {"message": "Dream narrative OK",
 						 			   "validity": "valid"}
 			else:
-				messages["content"] = {"message": "Dream narrative was too long (50000 char max)",
+				messages["content"] = {"message": "Dream narrative too long (50000 char max)",
 						 			   "validity": "invalid"}	
 		else:
 			messages["content"] = {"message": "Please provide a narrative of what happened in the dream",
 								   "validity": "invalid"}
+
+		dreamDict["extras"] = bleach.clean(self.request.get("extras"))
+		if dreamDict["extras"]:
+			if len(dreamDict["extras"]) < 5001:
+				messages["extras"] = {"message": "Extras OK",
+						 			   "validity": "valid"}	
+			else:
+				messages["extras"] = {"message": "Extras too long (5000 char max)",
+						 			   "validity": "invalid"}
+		else:
+				dreamDict["extras"] = None
+				messages["extras"] = {"message": "Extras OK",
+						 			   "validity": "valid"}	
+
+		dreamDict["interruption"] = bleach.clean(self.request.get("interruption"))
+		if dreamDict["interruption"]:
+			
+			if (dreamDict["interruption"] != "True" and 
+				dreamDict["interruption"] != "False"):
+
+				messages["interruption"] = {"message": "Answer 'Yes' or 'No'",
+							 	 	   	    "validity": "invalid"}
+			else:
+				messages["interruption"] = {"message": "Interruption answer OK",
+							 	 	    "validity": "valid"}
+		else:
+				messages["interruption"] = {"message": "Please indicate whether your sleep was interrupted (for example, whether you woke up during the middle of the night) the night you had the dream",
+							 	 	   	    "validity": "invalid"}		
 
 		dreamDict["awareness_level"] = 0
 		aware_users = "None yet"
@@ -743,6 +896,11 @@ class NewDream(Handler):
 		else:
 			dreamDict["lucidity"] = False
 
+		if dreamDict["interruption"] == "True":
+			dreamDict["interruption"] = True
+		else:
+			dreamDict["interruption"] = False
+
 		dreamDict["control"] = int(dreamDict["control"])
 		dreamDict["enjoyability"] = int(dreamDict["enjoyability"])
 
@@ -768,21 +926,64 @@ class NewDream(Handler):
 		for tag_name in dreamDict["dream_tags"]:
 			existingTagName = TagName.all().filter("name =", tag_name).get()
 
-			tag_group = dreamDict["dream_tags"][tag_name]
+			tag_group = dreamDict["dream_tags"][tag_name]["group"]
+			tag_identifier = dreamDict["dream_tags"][tag_name]["identifier"]
+
 			tagGroupObj = TagGroup.all().filter("name =", tag_group).get()
+			identifierObj = Identifier.all().filer("type =", tag_identifier).get()
 
 			assert tagGroupObj
+			assert identifierObj
 
 			if existingTagName == None:
-				tagNameObj = TagName(name=tag_name, lc_name=tag_name.lower(), group=tagGroupObj)
+				tagNameObj = TagName(name=tag_name, lc_name=tag_name.lower(), 
+									 group=tagGroupObj)
 				tagNameObj.put()
 			else:
 				tagNameObj = existingTagName
 
-			dreamTag = Tag(dream=dream, name=tagNameObj)
+			dreamTag = Tag(dream=dream, name=tagNameObj, identifier=identifierObj)
+			dreamTag.put()
 
-		# create each reality check object
-		# TO-DO
+		# if needed, create and add the reality check object
+		# create and put object
+		if dreamDict["reality_check_tag_name_obj"]:
+
+			# create and put the tag
+			thisIdentifier = None
+
+			if dreamDict["reality_check_identifier"]:
+				thisIdentifier = dreamDict["reality_check_identifier"]
+			else:
+				thisIdentifier = dreamDict["reality_check_end_identifier"]
+
+			realityCheckTagObj = Tag(dream=dream,
+							  	  tag=dreamDict["reality_check_tag_name_obj"],
+							  	  identifier=thisIdentifier)
+
+			realityCheckTagObj.put()
+
+			thisMechanism = dreamDict["mechanism"]
+
+			thisDreamsign = None
+			# get the dream sign, if applicable
+			if "dream_sign" in dreamDict:
+				
+				inputDreamsign = dreamDict["dream_sign"]
+				userDreamsigns = user.dream_signs
+
+				for dreamSign in userDreamsigns:
+
+					if dreamSign.nickname == inputDreamsign:
+						thisDreamsign = dreamSign
+						break
+
+			realityCheckObj = RealityChek(tag=realityCheckTagObj,
+										  mechanism=thisMechanism,
+										  dream_sign=thisDreamsign,
+										  user=user,
+										  dream=dream,
+										  description=dreamDict["reality_check_description"])
 
 		return redirect_to("viewdream", id=str(dream.key().id()))
 
