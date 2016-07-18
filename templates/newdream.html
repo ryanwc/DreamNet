@@ -127,10 +127,10 @@
 													<span>{% if userDreamsigns|length > 0 %}Was the specific thing that helped you realize you were dreaming one of your "dream signs"?{% else %}Just so you know, you haven't created any "dream signs" yet.  You can create dream signs at your profile page.{% endif %}</span>
 												</div>
 												<div class="input">
-													<input type="radio" name="dreamsignbool" value="False" onclick="toggleSpecificCheck(); resetMessage('dreamsignbool');" {% if dreamDict['dreamsign_bool'] == "False" %}checked{% elif userDreamsigns|length < 1 %}checked{% endif %}> <span class="inputlabel"> {% if userDreamsigns|length < 1 %}OK{% else %}No{% endif %}</span>
+													<input type="radio" name="dreamsignbool" value="False" onclick="toggleSpecificCheck(); resetMessage('dreamsignbool');" {% if userDreamsigns|length < 1 %}checked{% elif dreamDict %}{% if dreamDict['dream_sign_bool'] == "False" %}checked{% endif %}{% endif %}> <span class="inputlabel"> {% if userDreamsigns|length < 1 %}OK{% else %}No{% endif %}</span>
 													{% if userDreamsigns|length > 0 %}
 													<br>
-													<input type="radio" name="dreamsignbool" value="True" onclick="toggleSpecificCheck(); resetMessage('dreamsignbool');" {% if dreamDict['dreamsign_bool'] == "True" %}checked{% endif %}> <span class="inputlabel"> Yes</span><span id="dreamsignboolmessageprefix">{% if messages %}<br>{% endif %}</span>{% endif %}<span id="dreamsignboolmessage" {% if messages %}class="{{messages['dreamsign_bool']['validity']}}"{% endif %}>{% if messages %}{{messages['dreamsign']['message']}}{% endif %}</span>
+													<input type="radio" name="dreamsignbool" value="True" onclick="toggleSpecificCheck(); resetMessage('dreamsignbool');" {% if dreamDict %}{% if dreamDict['dream_sign_bool'] == "True" %}checked{% endif %}{% endif %}> <span class="inputlabel"> Yes</span><span id="dreamsignboolmessageprefix">{% if messages %}<br>{% endif %}</span>{% endif %}<span id="dreamsignboolmessage" {% if messages %}class="{{messages['dream_sign_bool']['validity']}}"{% endif %}>{% if messages %}{{messages['dream_sign_bool']['message']}}{% endif %}</span>
 												</div>
 											</div>
 
@@ -191,8 +191,9 @@
 														<option value="-1" {% if dreamDict %}{% if dreamDict['reality_check_end_identifier'] %}{% if dreamDict['reality_check_end_identifier'] == "-1" %}selected{% endif %}{% endif %}{% endif %}>-Select identifier-</option>
 														<option value="indefinite" {% if dreamDict %}{% if dreamDict['reality_check_end_identifier'] %}{% if dreamDict['reality_check_end_identifier'] == "indefinite" %}selected{% endif %}{% endif %}{% endif %}>(someone else's)</option>
 														<option value="possesive" {% if dreamDict %}{% if dreamDict['reality_check_end_identifier'] %}{% if dreamDict['reality_check_end_identifier'] == "possesive" %}selected{% endif %}{% endif %}{% endif %}>(mine)</option>
+														<option value="definite" id="endobjectidentifier" class="displaynone" {% if dreamDict %}{% if dreamDict['reality_check_end_identifier'] %}{% if dreamDict['reality_check_end_identifier'] == "definite" %}selected{% endif %}{% endif %}{% endif %}>(the one and only)</option>
 													</select><span id="secondend" class="displaynone">."</span>
-													<span id="mechanismmessageprefix">{% if messages %}{% if messages['mechanism'] %}<br>{% endif %}{% endif %}</span><span id="mechanismmessage" {% if messages %}{% if messages['mechanism'] %}class="{{messages['mechanism']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['mechanism'] %}{{messages['mechinism']['message']}}{% endif %}{% endif %}</span>
+													<span id="mechanismmessageprefix">{% if messages %}{% if messages['mechanism'] %}<br>{% endif %}{% endif %}</span><span id="mechanismmessage" {% if messages %}{% if messages['mechanism'] %}class="{{messages['mechanism']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['mechanism'] %}{{messages['mechanism']['message']}}{% endif %}{% endif %}</span>
 													<span id="identifiermessageprefix">{% if messages %}{% if messages['identifier'] %}<br>{% endif %}{% endif %}</span><span id="identifiermessage" {% if messages %}{% if messages['identifier'] %}class="{{messages['identifier']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['identifier'] %}{{messages['identifier']['message']}}{% endif %}{% endif %}</span>
 													<span id="realitychecktagmessageprefix">{% if messages %}{% if messages['reality_check_tag'] %}<br>{% endif %}{% endif %}</span><span id="realitychecktagmessage" {% if messages %}{% if messages['reality_check_tag'] %}class="{{messages['reality_check_tag']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['reality_check_tag'] %}{{messages['reality_check_tag']['message']}}{% endif %}{% endif %}</span>
 												</div>
@@ -462,7 +463,7 @@
 													<span>Is there anything else about the dream you think is worth mentioning that we didn't ask about above?</span>
 												</div>
 												<div class="input">
-													<textarea name="extra" id="extra" rows="3" autocomplete="off" placeholder="Other notable info about the dream" oninput="resetMessage('extra');">{% if dreamDict %}{{dreamDict['extra']}}{% endif %}</textarea><span id="extramessageprefix">{% if messages %}<br>{% endif %}</span><span id="extramessage" {% if messages %}class="{{messages['extra']['validity']}}"{% endif %}>{% if messages %}{{messages['extra']['message']}}{% endif %}</span>
+													<textarea name="extras" id="extras" rows="3" autocomplete="off" placeholder="Other notable info about the dream" oninput="resetMessage('extras');">{% if dreamDict %}{{dreamDict['extras']}}{% endif %}</textarea><span id="extrasmessageprefix">{% if messages %}<br>{% endif %}</span><span id="extrasmessage" {% if messages %}class="{{messages['extras']['validity']}}"{% endif %}>{% if messages %}{{messages['extras']['message']}}{% endif %}</span>
 												</div>
 											</div>
 
@@ -494,14 +495,14 @@
     {% if dreamDict %}
 		{% for dreamtagname in dreamDict['dream_tags'] %}
 		<script>
-			createAndAppendTagButton("{{dreamtagname}}", "{{dreamDict['dream_tags'][dreamtagname]}}");
+			createAndAppendTagButton("{{dreamtagname}}", "{{dreamDict['dream_tags'][dreamtagname]['group']}}", "{{dreamDict['dream_tags'][dreamtagname]['identifier']}}");
 		</script>
 		{% endfor %}
-		// display correct branching questions based on existing user input
+		<!-- display correct branching questions based on existing user input -->
 		<script>
 			toggleSomethingElse();
 			toggleSpecificCheck();
-			toggleRealityCheckTags();
+			toggleRealityCheckTags("{{tagNameToGroup}}");
 		</script>
 	{% endif %}
 	</body>

@@ -497,14 +497,14 @@ function validateLucidReason(lucid_reason) {
 
         // HAS TWO BREAKS AFTER MESSAGE TO MAKE 'somethingelse' BOX NICELY SPACED IF IT'S THERE
         addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.<br><br>");
+        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.");
         return false;
     }
 
     if (lucid_reason == "-1") {
 
         addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming. ");
+        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.");
         return false;
     }
 
@@ -512,7 +512,7 @@ function validateLucidReason(lucid_reason) {
         lucid_reason != "something else" && lucid_reason != "off") {
 
         addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming. ");
+        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming.");
         return false;
     }
 
@@ -526,8 +526,8 @@ function validateLucidReason(lucid_reason) {
         }
     }
 
-    addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-    $("#lucidreasonmessage").html("<br>  Lucid reason OK. ");
+    addAndRemoveClasses($("#lucidreasonmessage"), "valid", "invalid");
+    $("#lucidreasonmessage").html("Lucid reason OK. ");
     return true;
 }
 
@@ -805,6 +805,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
     // so set booleans instead of, e.g., testing hasClass
     var displayObjectList = false;
     var displayEndIdentifier = false;
+    var displayEndObjectIdentifier = false;
     var displayFirstEnd = false;
     var displaySecondEnd = false;
     var displayIdentifier = false;
@@ -820,6 +821,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
             displayAllCheckList = false;
             displayIdentifier = false;
             displayEndIdentifier = true;
+            displayEndObjectIdentifier = true;
             displayFirstEnd = false;
             displaySecondEnd = true;
             extraMechanismText = "";
@@ -829,6 +831,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
             displayAllCheckList = true;
             displayIdentifier = true;
             displayEndIdentifier = false;
+            displayEndObjectIdentifier = false;
             displayFirstEnd = true;
             displaySecondEnd = false;
             extraMechanismText = " involving ";
@@ -838,6 +841,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
             displayAllCheckList = true;
             displayIdentifier = true;
             displayEndIdentifier = false;
+            displayEndObjectIdentifier = false;
             displayFirstEnd = true;
             displaySecondEnd = false; 
             extraMechanismText = "";
@@ -847,6 +851,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
             displayAllCheckList = true;
             displayIdentifier = true;
             displayEndIdentifier = false;
+            displayEndObjectIdentifier = false;
             displayFirstEnd = true;
             displaySecondEnd = false; 
             extraMechanismText = "";
@@ -856,6 +861,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
             displayAllCheckList = false;
             displayIdentifier = false;
             displayEndIdentifier = false;
+            displayEndObjectIdentifier = false;
             displayFirstEnd = true;
             displaySecondEnd = false; 
             extraMechanismText = "";
@@ -865,6 +871,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
             displayAllCheckList = false;
             displayIdentifier = false;
             displayEndIdentifier = false;
+            displayEndObjectIdentifier = false;
             displayFirstEnd = true;
             displaySecondEnd = false; 
             extraMechanismText = "";
@@ -894,6 +901,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
             case 'object':
                 displayIdentifier = false;
                 displayEndIdentifier = true;
+                displayEndObjectIdentifier = true;
                 displayFirstEnd = false;
                 displaySecondEnd = true;
                 extraTagText = "";
@@ -904,6 +912,7 @@ function toggleRealityCheckTags(tagNameToGroup) {
             case 'emotion':
                 displayIdentifier = false;
                 displayEndIdentifier = true;
+                displayEndObjectIdentifier = false;
                 displayFirstEnd = false;
                 displaySecondEnd = true;
                 extraTagText = "";
@@ -955,6 +964,15 @@ function toggleRealityCheckTags(tagNameToGroup) {
     else {
 
         addAndRemoveClasses($("#endidentifier"), "displaynone", ""); 
+    }
+
+    if (displayEndObjectIdentifier) {
+
+        addAndRemoveClasses($("#endobjectidentifier"), "", "displaynone"); 
+    }
+    else {
+        
+        addAndRemoveClasses($("#endobjectidentifier"), "displaynone", ""); 
     }
 
     if (displayFirstEnd) {

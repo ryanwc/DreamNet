@@ -54,8 +54,8 @@ class Dream(db.Model):
 	user = db.ReferenceProperty(User,
 							 	collection_name = "dreams")
 	user_age = db.IntegerProperty(required = True)
-	user_area = db.IntegerProperty(required = True)
-	user_residence = db.IntegerProperty(required = True)
+	user_area = db.StringProperty(required = True)
+	user_residence = db.StringProperty(required = True)
 	user_education_level = db.StringProperty(required = True)
 	user_profession = db.StringProperty(required = True)
 	user_sector = db.StringProperty(required = True)
@@ -164,7 +164,7 @@ GENDERS = ["Male", "Female", "Non-binary"]
 MECHANISMS = ["malfunction", "impossibility/oddity", "presence", "absence"]
 
 # set up identifiers for tags/rcs
-IDENTIFIERS = ["possesive", "indefinite", "definite"]
+IDENTIFIERS = ["possesive", "indefinite", "definite", "none"]
 
 # set some initial tags
 TAGS = {}
@@ -186,7 +186,7 @@ BEINGS = ["mother", "father", "brother", "sister", "aunt", "uncle",
 		  "daughter-in-law", "boss/manager", "direct report", "employee", 
 		  "coworker", "wife", "girlfriend", "husband", "boyfriend", 
 		  "best friend", "friend", "aquaintance", "business partner", "crush",
-		  "person from childhood", "person from highschool", "lover",
+		  "person from childhood", "person from highschool", "lover", "cat"
 		  "person from college", "teacher/professor", "specific fictional character",
 		  "ghost", "caterpillar", "dog", "vampire", "angel", "demon", "spider",
 		  "alien", "unicorn", "horse", "tiger", "lion", "bear", "God", "elf", "dwarf",
@@ -202,7 +202,7 @@ PLACES = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
 		  "classroom", "hospital", "doctor's office", "science facility",
 		  "outer space", "alien world", "Paris", "New York City", "Africa",
 		  "USA", "France", "Germany", "Thailand", "Kuala Lumpur", "Bangkok", "Berlin",
-		  "England", "London", "golf course"]
+		  "England", "London", "golf course", "Paris"]
 
 OBJECTS = ["bowl", "door", "hat", "chair",
 		  "staircase", "flag", "gun", "knife", "car",
@@ -527,10 +527,10 @@ class NewDream(Handler):
 			if (dreamDict["dream_sign_bool"] == "False" or
 				dreamDict["dream_sign_bool"] == "True"):
 				
-				messages["mechanism"] = {"message": "Dream sign response OK",
+				messages["dream_sign_bool"] = {"message": "Dream sign response OK",
 				 	 	    			 "validity": "valid"}
 			else:
-				messages["mechanism"] = {"message": "Please indicate whether or not the specific thing that made you aware you were dreaming was one of your dream signs",
+				messages["dream_sign_bool"] = {"message": "Please indicate whether or not the specific thing that made you aware you were dreaming was one of your dream signs",
 				 	 	    			 "validity": "valid"}				
 
 		# validate dream sign or reality check mechanism, if appropriate
@@ -544,7 +544,8 @@ class NewDream(Handler):
 
 				if dreamDict['mechanism'] in MECHANISMS:
 
-					messages["mechanism"] = {"message": "Mechanism OK","validity": "valid"}
+					messages["mechanism"] = {"message": "Mechanism OK",
+											 "validity": "valid"}
 			 	else:
 					messages["mechanism"] = {"message": "Select a mechanism that helped you become aware you were dreaming",
 			 	 	    				 	 "validity": "invalid"}						 										
@@ -570,82 +571,108 @@ class NewDream(Handler):
 				messages["dream_sign"] = {"message": "Select one of your dream signs from the list",
 			 	 	    				  "validity": "invalid"}	
 
-
-					dreamDict["reality_check_tag_name_obj"] = realityCheckTagNameObj
-
-		# validate reality check tag and identifier, if appropriate
+		# validate reality check tag, if appropriate
+		realityCheckGroupName = None
 		if "mechanism" in dreamDict:
-			''' 
-			four cases.  one for "malfunction" and three for others:
-			1) malfunction; object; end identifier
-			2) impossible / presence / absence; sensation / type
-			3) impossible / presence / absence; identifier; object / being / place
-			4) impossible / presence / absence; emotion; end identifier
-			'''
-			# case 1 above
+
+			# get the tag object
 	 		if dreamDict['mechanism'] == "malfunction":
-	 			dreamDict["reality_check_tag"] = bleach.clean(self.request.get("objectmalfunction"))
-				realityCheckTagNameObj = TagName.all().filter("name =", dreamDict["reality_check_tag"]).get()	
-				dreamDict["reality_check_tag_name_obj"] = realityCheckTagNameObj
-	 			if (realityCheckTagNameObj and realityCheckTagNameObj.group.name == "object"):
-	 				messages["reality_check_tag"] = {"message": "Awareness object OK","validity": "valid"}
-	 				dreamDict["reality_check_end_identifier"] = bleach.clean(self.request.get("endidentifier"))
-	 				if (dreamDict["reality_check_end_identifier"] == "definite"):
-	 					messages["identifier"] = {"message": "Please select an identifier for the awareness object","validity": "invalid"}
-	 				else:
-	 					messages["identifier"] = {"message": "Awareness object identifier OK","validity": "valid"}
-	 			else:
-	 	 			messages["reality_check_tag"] = {"message": "Select an object that made you become aware you were dreaming","validity": "invalid"}
-	 	 	else:
-	 	 		# case 2-4 above
-	 	 		dreamDict["reality_check_tag"] = bleach.clean(self.request.get("allcheck"))
-				realityCheckTagNameObj = TagName.all().filter("name =", dreamDict["reality_check_tag"]).get()	
-				dreamDict["reality_check_tag_name_obj"] = realityCheckTagNameObj
-	 	 		if (realityCheckTagNameObj and
-	 	 			realityCheckTagNameObj.name in TAGS):
-	 	 			# all we need for case 2 above (do not need identifier)
-	 	 			messages["reality_check_tag"] = {"message": "Awareness object OK","validity": "valid"}
-	 	 			groupName = realityCheckTagName.group.name
-	 	 			if (groupName == "object" or groupName == "being" or groupName == "place"):
-	 	 				# case 3 above
-	 	 				dreamDict["reality_check_identifier"] = bleach.clean(self.request.get("identifier"))
-	 	 				identifier = dreamDict["reality_check_identifier"]
-		 	 	    	if (identifier and identifier in IDENTIFIERS):
-		 	 	    		messages["identifier"] = {"message": "Awareness identifier OK","validity": "valid"}	
-		 	 	    	else:
-		 	 	    		messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon","validity": "invalid"}
-		 	 	    		'''
-		 	 	    python does not accept the following acceptable syntax and says:
-		 	 	    "IndentationError: unindent does not match any outer indentation level"
-		 	 	    i already butchered my logic 
-		 	 	    and spent an hour indenting and unindenting to get to this point 
-		 	 	    so i will do more horribe butchering to forcefeed python,
-		 	 	    but i will also leave this mystery here
-		 	 	    should be elif but python complained about that too
 
-		 	 	    if groupName == "emotion":
-		 	 	    	# case 4 above
-		 	 	    	dreamDict["reality_check_end_identifier"] = bleach.clean(self.request.get("endidentifier"))
-		 	 	    	identifier = dreamDict["reality_check_end_identifier"]
-		 	 	    	if (identifier and identifier in IDENTIFIERS and identifier != "definite"):
-		 	 	    		messages["identifier"] = {"message": "Awareness identifier OK","validity": "valid"}		
-		 	 	    	else:
-		 	 	    		messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon","validity": "invalid"}
-		 	 	    '''
-		 	 	else:
-		 	 		messages["reality_check_tag"] = {"message": "Select a phenomenon that made you become aware you were dreaming","validity": "invalid"}
+	 			dreamDict["reality_check_tag"] = bleach.\
+	 				clean(self.request.get("objectmalfunction"))
+				dreamDict["reality_check_tag_name_obj"] = TagName.all().\
+					filter("name =", dreamDict["reality_check_tag"]).get()	
+	 	 	elif dreamDict["mechanism"] in MECHANISMS:
 
-		# because python compiler complaining about indentation so behold more convoluted logic
-		if realityCheckTagName and realityCheckTagName.group.name: 
+	 	 		dreamDict["reality_check_tag"] = bleach.\
+	 	 			clean(self.request.get("allcheck"))
+				dreamDict["reality_check_tag_name_obj"] = TagName.all().\
+					filter("name =", dreamDict["reality_check_tag"]).get()	
 
-	 	    if realityCheckTagName.group.name == "emotion":
-	 	    	# case 4 above
-	 	    	dreamDict["reality_check_end_identifier"] = bleach.clean(self.request.get("endidentifier"))
-	 	    	identifier = dreamDict["reality_check_end_identifier"]
-	 	    	if (identifier and identifier in IDENTIFIERS and identifier != "definite"):
-	 	    		messages["identifier"] = {"message": "Awareness identifier OK","validity": "valid"}		
-	 	    	else:
-	 	    		messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon","validity": "invalid"}
+			# confirm tag object exists and has appropriate group
+			# could do in logic above but this way seems cleaner
+			if ("reality_check_tag_name_obj" in dreamDict and
+				dreamDict["reality_check_tag_name_obj"]):
+
+				if dreamDict["mechanism"] == "malfunction":
+					
+					if dreamDict["reality_check_tag_name_obj"].group.name == "object":
+
+ 						messages["reality_check_tag"] = {"message": "Awareness object OK",
+ 												 	 	 "validity": "valid"}
+ 					else:
+ 	 					messages["reality_check_tag"] = {"message": "Select an object that made you become aware you were dreaming",
+ 	 											 		 "validity": "invalid"}
+	 	 		elif dreamDict["mechanism"] in MECHANISMS:
+
+	 	 			if dreamDict["reality_check_tag_name_obj"].group.name in TAGS:
+
+						messages["reality_check_tag"] = {"message": "Awareness object OK",
+														 "validity": "valid"}
+		 	 		else:
+		 	 			messages["reality_check_tag"] = {"message": "Select the phenomenon that made you become aware you were dreaming",
+		 	 										 	 "validity": "invalid"}
+		 	 	# set the group name for validating identifier
+		 	 	realityCheckGroupName = dreamDict["reality_check_tag_name_obj"].group.name
+		 	else:
+ 	 			messages["reality_check_tag"] = {"message": "Select the phenomenon that made you become aware you were dreaming",
+ 	 										 	 "validity": "invalid"}		 		
+
+		# validate identifier, if appropriate
+		''' 
+		four cases.  one for "malfunction" and three for others:
+		1) malfunction; object; end identifier
+		2) impossible / presence / absence; sensation / type
+			NOTE 2) does not need an identifier
+		3) impossible / presence / absence; identifier; object / being / place
+		4) impossible / presence / absence; emotion; end identifier
+		'''		
+ 	 	if (realityCheckGroupName == "object" or 
+ 	 		realityCheckGroupName == "being" or 
+ 	 		realityCheckGroupName == "place"):
+
+ 	 		if ("mechanism" in dreamDict and
+				dreamDict["mechanism"] == "malfunction" and
+				realityCheckGroupName == "object"):
+				# case 1 above
+				dreamDict["reality_check_end_identifier"] = bleach.\
+					clean(self.request.get("endidentifier"))
+
+				if (dreamDict["reality_check_end_identifier"] in IDENTIFIERS and
+					dreamDict["reality_check_end_identifier"] != "none"):
+
+					messages["identifier"] = {"message": "Awareness object identifier OK",
+											  "validity": "valid"}
+				else:
+					messages["identifier"] = {"message": "Please select a valid identifier for the awareness object",
+											  "validity": "invalid"}	
+			else:
+				# case 3 above
+				dreamDict["reality_check_identifier"] = bleach.clean(self.request.get("identifier"))
+
+				if (dreamDict["reality_check_identifier"] in IDENTIFIERS and
+					dreamDict["reality_check_identifier"] != "none"):
+
+					messages["identifier"] = {"message": "Awareness identifier OK",
+											  "validity": "valid"}	
+				else:
+					messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon",
+											  "validity": "invalid"}
+		elif realityCheckGroupName == "emotion":
+			# case 4 above
+			dreamDict["reality_check_end_identifier"] = bleach.clean(self.request.get("endidentifier"))
+
+			if (dreamDict["reality_check_end_identifier"] in IDENTIFIERS and 
+				dreamDict["reality_check_end_identifier"] != "definite" and
+				dreamDict["reality_check_end_identifier"] != "none"):
+
+				messages["identifier"] = {"message": "Awareness identifier OK",
+										  "validity": "valid"}		
+			else:
+				messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon",
+										  "validity": "invalid"}
+ 	    # if neither above top level logic is true, then the user did not select a valid 
+ 	    # reality check tag and so there will be an error anyway
 
 		if ("lucid_reason" in dreamDict and
 			dreamDict["lucid_reason"] == "something else"):
@@ -815,11 +842,6 @@ class NewDream(Handler):
 		 	 	 							  "validity": "invalid"}
 					break
 
-				# validate identifier
-				if (tag_identifier not in IDENTIFIERS):
-					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an invalid identifier ('"+tag_identifier+"')",
-		 	 	 							  "validity": "invalid"}				
-
 				# validate group
 				if (tag_group not in TAGS):
 					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an invalid tag group ('"+tag_group+"')",
@@ -827,6 +849,32 @@ class NewDream(Handler):
 		 	 	 	break
 				elif tag_group == "type":
 					hasTypeTag = True
+
+				# validate identifier
+		 	 	if tag_identifier in IDENTIFIERS:
+
+		 	 		if (tag_group == "sensation" or
+						tag_group == "type"):
+		 	 			
+		 	 			if tag_identifier != "none":
+
+		 	 				messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot have an identifier because it is a(n) "+tag_group,
+		 	 	 							  "validity": "invalid"}
+		 	 	 	elif tag_group == "emotion":
+
+		 	 	 		 if tag_identifier == "definite":
+
+		 	 				messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot have a definite identifier because it is an emotion",
+		 	 	 							  "validity": "invalid"}	
+		 	 	 	else:
+
+		 	 	 		if tag_identifier == "none":
+
+		 	 				messages["dream_tags"] = {"message": "tag '"+tag_name+"' must have an identifier",
+		 	 	 							  "validity": "invalid"} 		 	 	 	
+		 	 	else:
+					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an invalid identifier ('"+tag_identifier+"')",
+		 	 	 							  "validity": "invalid"}
 
 				dreamDict["dream_tags"][tag_name] = {"group":tag_group, "identifier":tag_identifier}
 
@@ -914,7 +962,7 @@ class NewDream(Handler):
 					return self.render("newdream.html", dreamDict=dreamDict, 
 						messages=messages, tagGroupToNames=json.dumps(tagGroupToNames),
 						tagNameToGroup=json.dumps(tagNameToGroup),
-						userDreamsigns=userDreamsigns)
+						userDreamsigns=userDreamsigns, realityChecks=tagGroupToNames)
 
 		# set values for datastore (some cannot be string)
 		if dreamDict["lucidity"] == "True":
@@ -956,7 +1004,7 @@ class NewDream(Handler):
 			tag_identifier = dreamDict["dream_tags"][tag_name]["identifier"]
 
 			tagGroupObj = TagGroup.all().filter("name =", tag_group).get()
-			identifierObj = Identifier.all().filer("type =", tag_identifier).get()
+			identifierObj = Identifier.all().filter("type =", tag_identifier).get()
 
 			assert tagGroupObj
 			assert identifierObj
@@ -980,16 +1028,24 @@ class NewDream(Handler):
 
 			if dreamDict["reality_check_identifier"]:
 				thisIdentifier = dreamDict["reality_check_identifier"]
-			else:
+			elif dreamDict["reality_check_end_identifier"]:
 				thisIdentifier = dreamDict["reality_check_end_identifier"]
+			else:
+				thisIdentifier = "none"
+
+			thisIdentifierObj = Identifier.all().filter("type =", thisIdentifier).get()
 
 			realityCheckTagObj = Tag(dream=dream,
 							  	  tag=dreamDict["reality_check_tag_name_obj"],
-							  	  identifier=thisIdentifier)
+							  	  identifier=thisIdentifierObj)
 
 			realityCheckTagObj.put()
 
 			thisMechanism = dreamDict["mechanism"]
+
+			mechanismObj = RealityCheckMechanism.all().filter("name =", thisMechanism).get()		
+
+			assert mechanismObj
 
 			thisDreamsign = None
 			# get the dream sign, if applicable
@@ -1004,12 +1060,14 @@ class NewDream(Handler):
 						thisDreamsign = dreamSign
 						break
 
-			realityCheckObj = RealityChek(tag=realityCheckTagObj,
-										  mechanism=thisMechanism,
-										  dream_sign=thisDreamsign,
-										  user=user,
-										  dream=dream,
-										  description=dreamDict["reality_check_description"])
+			thisDescription = dreamDict["reality_check_description"]
+
+			realityCheckObj = RealityCheck(tag=realityCheckTagObj,
+										   mechanism=mechanismObj,
+										   dream_sign=thisDreamsign,
+										   user=user,
+										   dream=dream,
+										   description=thisDescription)
 
 		return redirect_to("viewdream", id=str(dream.key().id()))
 
