@@ -61,14 +61,16 @@
 
 				<div class="row">
 					<div class="col-xs-12">
-						<p class="content">{{dream.content}}</p>
+						<p class="content">{{dream.description}}</p>
 					</div>
 				</div>
 
 				<div class="row">
 					<div class="col-xs-12">
 						<div class="awarenesslevel">
-							<a href="{{url_for('likedream', id=dream.key().id()|string)}}" id="awarenessbutton"><img class="likedream" id="awarenessicon" src="/images/awareness.svg" alt="[awareness.sgv]"></a>> <span id="awarenessnumber">{{dream.awareness_level}}</span> dreamers now more aware</span><br><a class="dreamlink" id="likedream" href="{{url_for('likedream', id=dream.key().id()|string)}}" id="awarenessupvote">+ awareness</a>
+							<a href="{{url_for('likedream', id=dream.key().id()|string)}}" id="awarenessbutton"><img class="likedream" id="awarenessicon" src="/images/awareness.svg" alt="[awareness.sgv]"></a>
+							<br>
+							> <span id="awarenessnumber">{{dream.awareness_level}}</span> dreamers now more aware</span>
 						</div>
 					</div>
 				</div>

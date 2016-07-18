@@ -24,7 +24,6 @@
 					</div>
 				</div>
 
-				{% if username == dream.user.username %}
 				<div class="row byline">
 					<div class="col-xs-12">
 						<p>
@@ -62,23 +61,24 @@
 				<div class="row">
 					<div class="col-xs-12">
 						<ul class="dreamstatslist">
-							<li class="lucidity">Dreamer {% if dream.lucidity == "True" %}{% if dream.lucid_reason == "WILD" %}entered the dream from directly from being awake without losing awareness/consciousness.  This is sometimes called a "Wake Induced Lucid Dream" (WILD).{% elif dream.lucid_reason == "reality check" %}became aware they were dreaming after performing a reality check ("{{dream.reality_check}}") that failed.{% elif dream.lucid_reason == "dream sign" %}became aware they were dreaming after recognizing a "dream sign" ("{{dream.dream_sign}}").{% endif %}  After becoming aware they were dreaming, Dreamer remained aware they were dreaming for {% if dream.lucid_length == "very short"}{% elif dream.lucid_length == "in between"}{% elif dream.lucid_length == "entire"}the entire rest of the dream.{% endif %}{% else %}was never aware that they were dreaming during the dream.{% endif %}</li>
-							<li class="control">The dreamer rater their control level over their actions and your surroundings during the dream as {{dream.control}}/10 (where </li>
+							<li class="lucidity">Dreamer {% if dream.lucidity == "True" %}{% if dream.lucid_reason == "WILD" %}entered the dream from directly from being awake without losing awareness/consciousness.  This is sometimes called a "Wake Induced Lucid Dream" (WILD).{% elif dream.lucid_reason == "reality check" %}became aware they were dreaming after performing a reality check ("{{dream.reality_check}}") that failed.{% elif dream.lucid_reason == "dream sign" %}became aware they were dreaming after recognizing a "dream sign" ("{{dream.dream_sign}}").{% endif %}  After becoming aware they were dreaming, Dreamer remained aware they were dreaming for {% if dream.lucid_length == "very short" %}{% elif dream.lucid_length == "in between" %}{% elif dream.lucid_length == "entire" %}the entire rest of the dream.{% endif %}{% else %}was never aware that they were dreaming during the dream.{% endif %}</li>
+							<li class="control">The dreamer rated their control level over their actions and surroundings during the dream as {{dream.control}}/10 (where 0/10 is "none", 5/10 is "some", and 10/10 is "complete"</li>
 							<li class="enjoyability">The dreamer rated this dream's enjoyability as {{dream.enjoyability}}/10 (where 0/10 is 'unenjoyable", 5/10 is "neutral", and 10/10 is "enjoyable").</li>
 							<li class="types">Dream "types" that describe this dream:
 								<br>
-								{% for genre in dream.genres %}<span class="genre">{{genre}} | </span>{% endfor %}</li>
-							<li class="people">People that appeared in this dream:
-								<br>{% for person in dream.people %}<span class="person">{{person}} | </span>{% endfor %}</li>
+								{% for genre in dream.types %}<span class="type">{{type}} | </span>{% endfor %}</li>
+							<li class="beings">Beings that appeared in this dream:
+								<br>{% for being in dream.beings %}<span class="being">{{being}} | </span>{% endfor %}</li>
 							<li class="places">Places from this dream:
 								<br>
 								{% for place in dream.places %}<span class="place">{{place}} | </span>{% endfor %}</li>
-							<li class="places">Things (objects/creatures) that appeared in this dream:
+							<li class="objects">Objects that appeared in this dream:
 								<br>
-								{% for place in dream.things %}<span class="things">{{thing}} | </span>{% endfor %}</li>
+								{% for object in dream.objects %}<span class="object">{{object}} | </span>{% endfor %}</li>
 							<li class="emotions">Emotions felt during dream:
 								<br>{% for emotion in dream.emotions %}<span class="emotion">{{emotion}} | </span>{% endfor %}</li>
-							<li class="sensations">Sensations perceived during this dream: remembering dream: {% for emotion in dream.emotions_remembering %}<span class="emotion">{{emotion}} | </span>{% endfor %}</li>
+							<li class="sensations">Sensations perceived during this dream:
+								<br>{% for emotion in dream.emotions %}<span class="sensation">{{sensation}} | </span>{% endfor %}</li>
 						</ul>
 					</div>
 				</div>
@@ -100,7 +100,7 @@
 							{% if username %}
 								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
 							{% else %}
-								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a href="{{url_for('signin')}}">Sign in to an existing account</a>
+								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a class="dreamlink" href="{{url_for('signin')}}">Sign in to an existing account</a>
 							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
 						</p>
 					</div>
