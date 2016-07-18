@@ -352,11 +352,9 @@
 											</div>
 
 											<div class="col-xs-12 input">
-											    <input type="text" id="tagname" oninput="resetMessage('tagname'); hide($('#newtagquestion')); hide($('#tagidentifiers'))" autocomplete="off" placeholder="Dream tag">
-												<input type="button" value="Add tag" class="input add" id="add">
+											    <input type="text" id="tagname" oninput="resetTagTextInput();" autocomplete="off" placeholder="Dream tag">
+												<input type="button" value="Add tag" class="input add" id="add"><span id="tagnamemessageprefix">{% if messages %}<br>{% endif %}</span><span id="tagnamemessage" {% if messages %}class="{{messages['dream_tags']['validity']}}"{% endif %}>{% if messages %}{{messages['dream_tags']['message']}}{% endif %}</span>
 												<br>
-												<span class="hint">*You must enter at least one "type" tag.  There is no limit to the total number of tags a dream can have.  For examples of each kind of tag, hover over or click on the colored icons below.</span>
-
 												<div class="row displaynone" id="newtagquestion">
 													<div class="col-xs-12 prompt">
 													    <span>We haven't seen this dream tag yet.  What kind of tag is it?</span>
@@ -382,16 +380,16 @@
 													    <span>Please describe the <span id="tagtobeidentified"></span> a bit further:</span>
 													</div>
 													<div class="col-xs-12 input">
-														<input type="radio" id="defaulttagidentifier" name="tagidentifier" value="possesive" onclick="$('#tagname').focus();"><span class="inputlabel objectidentifiertext beingidentifiertext placeidentifiertext emotionidentifiertext"> <span class="tagidentifiername"><span class="objectidentifiertext beingidentifiertext placeidentifiertext">it is/was mine</span><span class="emotionidentifiertext">I felt it</span>
+														<input type="radio" id="defaulttagidentifier" name="tagidentifier" value="possesive" onclick="$('#tagname').focus();"><span class="inputlabel objectidentifiertext beingidentifiertext placeidentifiertext emotionidentifiertext"> <span class="tagidentifiername"><span class="tagidentifiertext objectidentifiertext beingidentifiertext placeidentifiertext displaynone">it is/was mine</span><span class="tagidentifiertext emotionidentifiertext displaynone">I felt it</span>
 														<br>
-														<input type="radio" name="tagidentifier" value="indefinite" onclick="$('#tagname').focus();"><span class="inputlabel objectidentifiertext beingidentifiertext placeidentifiertext emotionidentifiertext"> <span class="tagidentifiername"><span class="objectidentifiertext beingidentifiertext placeidentifiertext">it is/was someone else's</span><span class="emotionidentifiertext">someone else felt it</span>
+														<input type="radio" name="tagidentifier" value="indefinite" onclick="$('#tagname').focus();"><span class="inputlabel objectidentifiertext beingidentifiertext placeidentifiertext emotionidentifiertext"> <span class="tagidentifiername"><span class="tagidentifiertext objectidentifiertext beingidentifiertext placeidentifiertext displaynone">it is/was someone else's</span><span class="tagidentifiertext emotionidentifiertext displaynone">someone else felt it</span>
 														<br>
-														<input type="radio" name="tagidentifier" value="definite" onclick="$('#tagname').focus();"><span class="inputlabel "> <span class="tagidentifiername">it the unique name for a unique <span class="beingidentifiertext">being (like "Shakespeare")</span><span class="placeidentifiertext">being (like "Paris")</span><span class="objectidentifiertext">object (like "Excalibur")</span>
+														<input type="radio" name="tagidentifier" value="definite" onclick="$('#tagname').focus();" class="tagidentifiertext objectidentifiertext placeidentifiertext beingidentifiertext"><span class="inputlabel"> <span class="tagidentifiername"><span class="tagidentifiertext objectidentifiertext placeidentifiertext beingidentifiertext">it is the unique name of a unique</span> <span class="tagidentifiertext beingidentifiertext displaynone">being (like "Shakespeare")</span><span class="tagidentifiertext placeidentifiertext displaynone">place (like "Paris")</span><span class="tagidentifiertext objectidentifiertext displaynone">object (like "Excalibur")</span>
 														<br>
 													    <span class="hint">(After making a selection, click the "Add tag" button above again.)</span>
 													</div>
 												</div>
-												<span id="tagnamemessageprefix">{% if messages %}{% endif %}</span><span id="tagnamemessage" {% if messages %}class="{{messages['dream_tags']['validity']}}"{% endif %}>{% if messages %}{{messages['dream_tags']['message']}}{% endif %}</span>
+												<span class="hint">*You must enter at least one "type" tag.  There is no limit to the total number of tags a dream can have.  For examples of each kind of tag, hover over or click on the colored icons below.</span>
 											</div>
 
 											<span id="chosentaggroup" class="displaynone">none</span>

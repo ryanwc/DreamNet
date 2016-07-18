@@ -35,29 +35,33 @@ function readyTags(tagNameToGroup, tagGroupToName) {
             // to try to accomodate other languages, do not do something like "[^a-zA-Z ]"
             if (inputTag.match(/[1234567890~!@#\$\+=%\^&\*\(\)<>,\.\/\?;:\[\]\{\}\|_\\]/)) {
 
+                $("#tagnamemessageprefix").html("<br>");
                 addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("<br> Tag name contains an illegal character. Try using only letters, spaces, hyphens, and apostrophes. ");
+                $("#tagnamemessage").html("Tag name contains an illegal character. Try using only letters, spaces, hyphens, and apostrophes. ");
                 return;
             }
 
             if (inputTag.match(/  /)) {
 
+                $("#tagnamemessageprefix").html("<br>");
                 addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("<br> Tag name cannot contain more than one space in a row. ");
+                $("#tagnamemessage").html("Tag name cannot contain more than one space in a row. ");
                 return;
             }
 
             if (inputTag.match(/''/)) {
 
+                $("#tagnamemessageprefix").html("<br>");
                 addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("<br> Tag name cannot contain more than one apostrophe in a row. ");
+                $("#tagnamemessage").html("Tag name cannot contain more than one apostrophe in a row. ");
                 return;
             }
 
             if (inputTag.match(/--/)) {
 
+                $("#tagnamemessageprefix").html("<br>");
                 addAndRemoveClasses($("#tagnamemessage"), "invalid", "valid");
-                $("#tagnamemessage").html("<br> Tag name cannot contain more than one hypen in a row. ");
+                $("#tagnamemessage").html("Tag name cannot contain more than one hypen in a row. ");
                 return;
             }
 
@@ -75,6 +79,7 @@ function readyTags(tagNameToGroup, tagGroupToName) {
                 toggleDisplay($("#newtagquestion"));
                 $("#defaulttagtype").prop("checked", true);
                 addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
+                $("#tagnamemessageprefix").html("<br>");         
                 $("#tagnamemessage").html("Gathering information about the new '" + inputTag + "' dream tag... ");
                 return;
             }
@@ -85,6 +90,7 @@ function readyTags(tagNameToGroup, tagGroupToName) {
 
             var identifier;
 
+            // candidate for refactor (let's be honest, a lot of this file is a candidate)
             // if it needs an identifier, ask for it
             if ( (tagGroup == "object" || tagGroup == "place" ||
                   tagGroup == "being" || tagGroup == "emotion") &&
@@ -94,7 +100,10 @@ function readyTags(tagNameToGroup, tagGroupToName) {
                 $("#defaulttagidentifier").prop("checked", true);
                 $("#tagtobeidentified").html("'"+inputTag+"' "+tagGroup);
                 addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
+                $("#tagnamemessageprefix").html("<br>");
                 $("#tagnamemessage").html("Getting identifier for the '" + inputTag + "' dream tag... ");
+
+                displayTagIdentifierText(tagGroup);
                 return;  
             }
             else {
@@ -108,6 +117,7 @@ function readyTags(tagNameToGroup, tagGroupToName) {
             $("#chosentaggroup").html("none");
             $("#chosentagidentifier").html("none");          
             addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
+            $("#tagnamemessageprefix").html("<br>");
             $("#tagnamemessage").html("Added the '" + tagGroup + ": " + inputTag + "' tag ");
             $("#tagname").val("");
             $("#tagname").focus();
@@ -145,6 +155,31 @@ function readyTags(tagNameToGroup, tagGroupToName) {
     }
 }
 
+function resetTagTextInput() {
+
+    resetMessage('tagname'); 
+    hide($('#newtagquestion'));
+    hide($('#tagidentifiers'));
+    $("#chosentaggroup").html("none");
+
+}
+
+function displayTagIdentifierText(tagGroup) {
+
+    // toggle off all specific identifier text, then display the correct text
+    $(".tagidentifiertext").each(function() {
+
+        addAndRemoveClasses($(this), "displaynone", "");
+    });
+
+    var tagGroupToDisplay = tagGroup + "identifiertext";
+
+    $("."+tagGroupToDisplay).each(function() {
+
+        addAndRemoveClasses($(this), "", "displaynone");
+    });
+}
+
 function createAndAppendTagButton(tagname, type, identifier) {
 
     var id = tagname+"Button";
@@ -172,6 +207,7 @@ function createAndAppendTagButton(tagname, type, identifier) {
 
     removeTagButton.click(function() {
 
+        $("#tagnamemessageprefix").html("<br>");
         $("#tagnamemessage").html("Removed '" + type + ": " +  tagname + "' tag ");
         $(this).remove();
         $("#tagname").focus();
@@ -468,19 +504,19 @@ function validateLucidReason(lucid_reason) {
     if (lucid_reason == "-1") {
 
         addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-        $("#lucidreasonmessage").html("<br>  Please indicate how you became aware you were dreaming. ");
+        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming. ");
         return false;
     }
 
-    if (lucid_reason != "0" && lucid_reason != "1" && lucid_reason != "2" &&
-        lucid_reason != "3" && lucid_reason != "4") {
+    if (lucid_reason != "WILD" && lucid_reason != "reality check" &&
+        lucid_reason != "something else" && lucid_reason != "off") {
 
         addAndRemoveClasses($("#lucidreasonmessage"), "invalid", "valid");
-        $("#lucidreasonmessage").html("<br>  Please indicate how you became aware you were dreaming. ");
+        $("#lucidreasonmessage").html("Please indicate how you became aware you were dreaming. ");
         return false;
     }
 
-    if (lucid_reason == "4") {
+    if (lucid_reason == "something else") {
 
         var somethingElse = $("#somethingelse").val();
 
@@ -502,7 +538,7 @@ function validateSomethingElse(somethingElse) {
     if (somethingElse.length < 1) {
 
         addAndRemoveClasses($("#somethingelsemessage"), "invalid", "valid");
-        $("#somethingelsemessage").html("<br>  Please enter your own reason you became aware you were dreaming. ");
+        $("#somethingelsemessage").html("Please enter your own reason you became aware you were dreaming. ");
         return false;
     } 
 
@@ -536,7 +572,7 @@ function validateLucidLength(lucid_length) {
         return false;
     }
 
-    if (lucid_length != "0" && lucid_length != "1" && lucid_length != "2") {
+    if (lucid_length != "very short" && lucid_length != "in between" && lucid_length != "entire") {
 
         addAndRemoveClasses($("#lucidlengthmessage"), "invalid", "valid");
         $("#lucidlengthmessage").html("Please indicate how long you remained aware you were dreaming.");
@@ -736,7 +772,7 @@ function validateContent(content) {
     if (content.length < 1) {
 
         addAndRemoveClasses($("#contentmessage"), "invalid", "valid");
-        $("#contentmessage").html("Please write an (as in-depth as possible) account of what happened during the dream.  This can be in whatever form you like, but it may be easiest to write the dream like a story.");
+        $("#contentmessage").html("Please write an (as in-depth as possible) account of what happened during the dream.  This can be in whatever form you like, but it may be easiest to tell the dream like a story.");
         return false;
     }
 
