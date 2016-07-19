@@ -485,6 +485,30 @@
 				</div>
 			</div>
 
+			<div class="nondream">
+
+				<div class="row">
+					<div class="col-xs-12">
+						<h4 class="dreamheader">Menu</h4>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-xs-12">
+						<p>
+							<a class="dreamlink" href="{{url_for('index')}}">Home</a> | 
+							{% if username %}
+								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
+							{% else %}
+								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a class="dreamlink" href="{{url_for('signin')}}">Sign in to an existing account</a>
+							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
+						</p>
+					</div>
+				</div>
+
+			</div>
+
+
 		</div>
 
 	<script src="/js/forms.js"></script>

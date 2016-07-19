@@ -28,7 +28,7 @@ function readyTags(tagNameToGroup, tagGroupToName) {
         // keep rest of validation in case user tries to insert weird stuff when newtag=true
 
         var inputTag = $("#tagname").val().toLowerCase();
-        var dreamTags = $(".dreamtag");
+        var dreamTags = $(".dreamtagname");
 
         if (inputTag.length > 0) {
 
@@ -189,13 +189,13 @@ function createAndAppendTagButton(tagname, type, identifier) {
     switch (identifier) {
 
         case "definite":
-            identifierText = "(the)";
+            identifierText = "(the) ";
             break;
         case "indefinite":
-            identifierText = "(a(n)/another's)";
+            identifierText = "(a(n)/another's) ";
             break;
         case "possesive":
-            identifierText = "(my)";
+            identifierText = "(my) ";
             break;
         default:
             identifierText = "";
@@ -203,7 +203,7 @@ function createAndAppendTagButton(tagname, type, identifier) {
             break;
     }
 
-    var removeTagButton = $("<button id=\""+id+"\" class=\"tag tagbutton remove "+type+"\" value=\""+tagname+"|"+identifier+"@"+type+"\"><span class=\"dreamtag\">"+identifierText+" "+tagname+"</span> <span class=\"removetext\">(remove)</span></button>");
+    var removeTagButton = $("<button id=\""+id+"\" class=\"tag tagbutton remove "+type+"\" value=\""+tagname+"|"+identifier+"@"+type+"\"><span class=\"dreamtag\">"+identifierText+"<span class=\"dreamtagname\">"+tagname+"</span></span> <span class=\"removetext\">(remove)</span></button>");
 
     removeTagButton.click(function() {
 
@@ -361,9 +361,12 @@ function validateDream(tagNameToGroup, userDreamsigns) {
     var enjoyability = $("#enjoyability").val();
     var title = $("#title").val();
     var description = $("#description").val();
-    var tagButtonClass = $(".tagbutton");
     var content = $("#content").val();
     var extras = $("#extras").val();
+
+    var tagButtonClass = $(".tagbutton");
+
+    console.log(tagButtonClass);
 
     var containsError = false;
 
@@ -445,7 +448,6 @@ function validateDream(tagNameToGroup, userDreamsigns) {
                         identifier = $("#identifier").val();
                         phenomenon = $("#allcheck").val();                       
                     default:
-                        containsError = true;
                         break;
                 }
 
@@ -508,8 +510,6 @@ function validateDream(tagNameToGroup, userDreamsigns) {
 
         containsError = true;
     }
-
-    validateTagsAndSetHiddenVal(tagButtonClass);
 
     if (!validateContent(content)) {
 
@@ -971,7 +971,8 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
 
     tagButtonClass.each(function() {
 
-        tagtext = $(this).find(".dreamtag").html();
+        tagtext = $(this).find(".dreamtagname").html();
+        console.log(tagtext);
 
         if (tagtext.length < 1) {
 
@@ -1040,6 +1041,7 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
         return false;             
     }
 
+    console.log($("#dreamtags").val());
     addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
     $("#tagnamemessage").html("Dream tags OK.");
     return true;

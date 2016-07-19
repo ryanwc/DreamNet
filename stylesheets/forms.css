@@ -488,3 +488,19 @@ legend {
 .nopadding {
 	padding: 0;
 }
+
+/* menu */
+
+a {
+	color: white;
+}
+
+.dreamlink {
+	text-decoration: underline;
+}
+
+.dreamheader {
+	border-top: 2px solid white;
+	padding-top: 5px;
+}
+

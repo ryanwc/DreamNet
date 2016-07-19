@@ -65,6 +65,7 @@ class Dream(db.Model):
 	user_satsifaction_ratings = db.StringProperty(required = True, multiline = True)
 	title = db.StringProperty(required = True)
 	lc_title = db.StringProperty(required = True)
+	description = db.StringProperty(required = True)
 	content = db.TextProperty(required = True)
 	date_dreamt = db.DateProperty(required = True)
 	date_posted = db.DateTimeProperty(auto_now_add=True)
@@ -74,7 +75,7 @@ class Dream(db.Model):
 	lucid_reason = db.StringProperty()
 	control = db.IntegerProperty(required = True)
 	enjoyability = db.IntegerProperty(required = True)
-	extras = db.StringProperty(required = True)
+	extras = db.StringProperty()
 	awareness_level = db.IntegerProperty(required = True)
 	aware_users = db.StringProperty(multiline = True)
 
@@ -807,6 +808,8 @@ class NewDream(Handler):
 
 				tag_name = name_identifiergroup[0]
 
+				print tag_name
+
 				identifier_group = name_identifiergroup[1].split("@")
 
 				tag_identifier = identifier_group[0]
@@ -1006,10 +1009,13 @@ class NewDream(Handler):
 		# create each dream tag object
 		# (consists of an id, a reference to a dream, and a reference to a tag name)
 		for tag_name in dreamDict["dream_tags"]:
+			print tag_name
 			existingTagName = TagName.all().filter("name =", tag_name).get()
 
 			tag_group = dreamDict["dream_tags"][tag_name]["group"]
 			tag_identifier = dreamDict["dream_tags"][tag_name]["identifier"]
+			print tag_group
+			print tag_identifier
 
 			tagGroupObj = TagGroup.all().filter("name =", tag_group).get()
 			identifierObj = Identifier.all().filter("type =", tag_identifier).get()
@@ -1559,7 +1565,11 @@ class ViewDream(Handler):
 		tagGroupToName = {"object":[], "being":[], "place":[],
 						  "emotion":[], "sensation":[], "type":[]}
 		for tag in dream.tags:
-			tagGroupToName[tag.name.group.name].append(tag)
+			#
+			# bug: why are there any tags that have "none" as name?
+			#
+			if tag.name:
+				tagGroupToName[tag.name.group.name].append(tag)
 
 		self.render("viewdream.html", dream=dream, username=username, 
 			tagGroupToName=tagGroupToName)

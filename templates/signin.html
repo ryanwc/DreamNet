@@ -2,6 +2,9 @@
 <html lang="en-US">
 	<head>
 		<meta charset="UTF-8">
+    	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    	<script src="/js/bootstrap.min.js"></script>
+       	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
 		<link type="text/css" rel="stylesheet" href="/stylesheets/forms.css">
 		<title>
 			Dreamer Signin
@@ -10,20 +13,73 @@
 
 	<body>
 
-		<h1>Signin to DreamNet</h1>
+		<!-- start bootstrap container -->
+		<div class="container">
 
-		<form action="/signin" method="post">
+			<div class="row">
+				<div class="col-xs-12">
+					<h1>Signin to DreamNet</h1>
+				</div>
+			</div>
 
-			<p>Enter username:</p>
-			<input type="text" label="Enter name:" name="name" placeholder="Name" {% if values %}value="{{values['name']}}"{% endif %}>{% if messages %}<span class="{{messages['name']['validity']}}">{{messages['name']['message']}}</span>{% endif %}
-			<br>
+			<div class="row">
+				<div class="col-xs-12">
 
-			<p>Enter password:</p>
-			<input type="password" name="password" placeholder="Password" {% if values %}value="{{values['password']}}"{% endif %}>{% if messages %}<span class="{{messages['password']['validity']}}">{{messages['password']['message']}}</span>{% endif %}
-			<br>		
+					<form action="/signin" method="post">
 
-			<br>
-			<input type="submit">
-		</form>
+						<div class="row">
+							<div class="col-xs-12 question">
+								<div class="prompt">
+									<span>Enter username:</span>
+								</div>
+								<div class="input">
+									<input type="text" label="Enter name:" name="name" placeholder="Name" {% if values %}value="{{values['name']}}"{% endif %}>{% if messages %}<span class="{{messages['name']['validity']}}">{{messages['name']['message']}}</span>{% endif %}
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-xs-12 question">
+								<div class="prompt">
+									<span>Enter password:</span>
+								</div>
+								<div class="input">
+									<input type="password" name="password" placeholder="Password" {% if values %}value="{{values['password']}}"{% endif %}>{% if messages %}<span class="{{messages['password']['validity']}}">{{messages['password']['message']}}</span>{% endif %}
+								</div>
+							</div>
+						</div>
+
+						<br>
+						<input class="submit" type="submit" value="Sign in">
+					</form>
+
+				</div>
+			</div>
+
+
+			<div class="nondream">
+
+				<div class="row">
+					<div class="col-xs-12">
+						<h4 class="dreamheader">Menu</h4>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-xs-12">
+						<p>
+							<a class="dreamlink" href="{{url_for('index')}}">Home</a> | 
+							{% if username %}
+								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
+							{% else %}
+								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a class="dreamlink" href="{{url_for('signin')}}">Sign in to an existing account</a>
+							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
+						</p>
+					</div>
+				</div>
+
+			</div>
+
+		</div>
 	</body>
 </html>
