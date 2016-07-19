@@ -623,7 +623,7 @@ class NewDream(Handler):
 		four cases.  one for "malfunction" and three for others:
 		1) malfunction; object; end identifier
 		2) impossible / presence / absence; sensation / type
-			NOTE 2) does not need an identifier
+			NOTE 2) needs "none" identifier
 		3) impossible / presence / absence; identifier; object / being / place
 		4) impossible / presence / absence; emotion; end identifier
 		'''		
@@ -671,8 +671,13 @@ class NewDream(Handler):
 			else:
 				messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon",
 										  "validity": "invalid"}
- 	    # if neither above top level logic is true, then the user did not select a valid 
- 	    # reality check tag and so there will be an error anyway
+		elif (realityCheckGroupName == "type" or
+			  realityCheckGroupName == "sensation"):
+			# do not validate, just assign.  maybe leads to confusion on user part if there is a bug in
+			# what options are displayed on screen.
+			dreamDict["assigned_reality_check_identifier"] = "none"
+ 	    # do not need "else" because if none of above logic is true,
+ 	    # user already needs to fix errors.
 
 		if ("lucid_reason" in dreamDict and
 			dreamDict["lucid_reason"] == "something else"):
@@ -690,20 +695,21 @@ class NewDream(Handler):
 				messages["something_else"] = {"message": "Please enter your custom reason for becomming aware that you were dreaming",
 					 	 	    			  "validity": "invalid"}		
 
-				dreamDict["lucid_length"] = bleach.clean(self.request.get("lucidlength"))
+		# validate lucid length, if appropriate
+		if dreamDict["lucidity"] == "True":
 
-				# would it be best to have the forms return the text instead of a number code?
-				# originally thought code best so backend could be independent of front end text
-				if (dreamDict["lucid_length"] == "very short" or 
-					dreamDict["lucid_length"] == "in between" or
-					dreamDict["lucid_length"] == "entire"):
+			dreamDict["lucid_length"] = bleach.clean(self.request.get("lucidlength"))
 
-					messages["lucid_length"] = {"message": "Lucid length OK",
-							 	 	    		"validity": "valid"}
-				else:
+			if (dreamDict["lucid_length"] == "very short" or 
+				dreamDict["lucid_length"] == "in between" or
+				dreamDict["lucid_length"] == "entire"):
 
-					messages["lucid_length"] = {"message": "Please indicate how long you remained aware you were dreaming after becoming aware",
-							 	 	    		"validity": "invalid"}	
+				messages["lucid_length"] = {"message": "Lucid length OK",
+						 	 	    		"validity": "valid"}
+			else:
+
+				messages["lucid_length"] = {"message": "Please indicate how long you remained aware you were dreaming after becoming aware",
+						 	 	    		"validity": "invalid"}	
 
 		dreamDict["control"] = bleach.clean(self.request.get("control"))
 		if dreamDict["control"]:
@@ -1020,10 +1026,12 @@ class NewDream(Handler):
 
 			dreamTag = Tag(dream=dream, name=tagNameObj, identifier=identifierObj)
 			dreamTag.put()
+			print dreamTag.name.name
+			print dreamTag.name.group.name
 
 		# if needed, create and add the reality check object
 		# create and put object
-		if dreamDict["reality_check_tag_name_obj"]:
+		if "reality_check_tag_name_obj" in dreamDict:
 
 			# create and put the tag
 			thisIdentifier = None
@@ -1034,10 +1042,10 @@ class NewDream(Handler):
 				thisIdentifier = dreamDict["reality_check_identifier"]
 			elif ("reality_check_end_identifier" in dreamDict and
 				  dreamDict["reality_check_end_identifier"]):
-			
+
 				thisIdentifier = dreamDict["reality_check_end_identifier"]
 			else:
-				thisIdentifier = "none"
+				thisIdentifier = dreamDict["assigned_reality_check_identifier"]
 
 			thisIdentifierObj = Identifier.all().filter("type =", thisIdentifier).get()
 
@@ -1542,7 +1550,19 @@ class ViewDream(Handler):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
-		self.render("viewdream.html", dream=dream, username=username)
+		'''
+		for realityCheck in dream.reality_checks:
+			print realityCheck.mechanism.name
+			print realityCheck.tag.name.name
+			print realityCheck.tag.identifier.type
+		'''
+		tagGroupToName = {"object":[], "being":[], "place":[],
+						  "emotion":[], "sensation":[], "type":[]}
+		for tag in dream.tags:
+			tagGroupToName[tag.name.group.name].append(tag)
+
+		self.render("viewdream.html", dream=dream, username=username, 
+			tagGroupToName=tagGroupToName)
 
 class EditDream(Handler):
 	def get(self, id=None):

@@ -350,28 +350,31 @@ function validateUser(satisfactionAreas) {
 
         //if (!validate)
     });
-
-
 }
 
-function validateDream() {
+function validateDream(tagNameToGroup, userDreamsigns) {
 
     var date_dreamt = $("#datedreamt").val();
+    var interruption = $("input:radio[name=interruption]:checked").val();
     var lucidity = $("input:radio[name=lucidity]:checked").val();
-    var lucid_reason = $("#lucidreason").val();
-    var lucid_length = $("#lucidlength").val();
     var control = $("#control").val();
     var enjoyability = $("#enjoyability").val();
     var title = $("#title").val();
     var description = $("#description").val();
     var tagButtonClass = $(".tagbutton");
     var content = $("#content").val();
+    var extras = $("#extras").val();
 
     var containsError = false;
 
     if (!validateDate(date_dreamt)) {
 
-         containsError = true;
+        containsError = true;
+    }
+
+    if (!validateInterruption(interruption)) {
+
+        containsError = true;
     }
 
     if (!validateLucidity(lucidity)) {
@@ -387,6 +390,87 @@ function validateDream() {
         if (!validateLucidReason(lucid_reason)) {
 
             containsError = true;
+        }
+
+        if (lucid_reason == "reality check") {
+            
+            var dream_sign_bool = $("input:radio[name=dreamsignbool]:checked").val();
+
+            if (!validateDreamSignBool(dream_sign_bool)) {
+
+                containsError = true;
+            }
+
+            if (dream_sign_bool == "True") {
+
+                var dream_sign = $("#dreamsign").val();
+
+                if (!validateDreamSign(dream_sign, userDreamsigns)) {
+
+                    containsError = true;
+                }
+            }
+            else if (dream_sign_bool == "False") {
+
+                var mechanism = $("#mechanism").val();
+                var rc_description = $("#realitycheckdescription").val();
+                
+                var identifier;
+                var phenomenon;
+
+                if (!validateMechanism(mechanism)) {
+
+                    containsError = true;
+                }
+
+                switch (mechanism) {
+
+                    case 'malfunction':
+
+                        identifier = $("#endidentifier").val();
+                        phenomenon = $("#objectmalfunction").val(); 
+                        break;
+                    case 'impossibility/oddity':
+
+                        identifier = $("#identifier").val();
+                        phenomenon = $("#allcheck").val();
+                        break;
+                    case 'presence':
+
+                        identifier = $("#identifier").val();
+                        phenomenon = $("#allcheck").val(); 
+                        break;
+                    case 'absence':
+
+                        identifier = $("#identifier").val();
+                        phenomenon = $("#allcheck").val();                       
+                    default:
+                        containsError = true;
+                        break;
+                }
+
+                if (tagNameToGroup[phenomenon] == "emotion") {
+
+                    identifier = $("#endidentifier").val();                    
+                }
+
+                if (!validatePhenomenon(phenomenon, tagNameToGroup)) {
+
+                    containsError = true;
+                }          
+
+                var group = tagNameToGroup[phenomenon];
+
+                if (!validateIdentifier(identifier, group)) {
+
+                    containsError = true;
+                }
+            }
+
+            if (!validateRCDescription(rc_description)) {
+
+                containsError = true;
+            }
         }
 
         if (!validateLucidLength(lucid_length)) {
@@ -420,7 +504,12 @@ function validateDream() {
         containsError = true;
     }
 
-    validateTagsAndSetHiddenVal(tagButtonClass)
+    if (!validateExtras(extras)) {
+
+        containsError = true;
+    }
+
+    validateTagsAndSetHiddenVal(tagButtonClass);
 
     if (!validateContent(content)) {
 
@@ -433,6 +522,197 @@ function validateDream() {
         return false;
     }
 
+    return true;
+}
+
+function validateRCDescription(rc_description) {
+
+    $("#realitycheckdescriptionmessageprefix").html("<br>");
+
+    if (rc_description.length > 1000) {
+
+        addAndRemoveClasses($("#realitycheckdescriptionmessage"), "invalid", "valid");
+        $("#realitycheckdescriptionmessage").html("Description too long (1000 char limit).");    
+        return false;   
+    }
+
+    addAndRemoveClasses($("#realitycheckdescriptionmessage"), "valid", "invalid");
+    $("#realitycheckdescriptionmessage").html("Description OK.");    
+    return true;
+}
+
+function validateDreamSignBool(dream_sign_bool) {
+
+    $("#dreamsignboolmessageprefix").html("<br>");
+
+    if (typeof dream_sign_bool == 'undefined') {
+
+        addAndRemoveClasses($("#dreamsignboolmessage"), "invalid", "valid");
+        $("#dreamsignboolmessage").html("Please indicate whether the thing that made you aware you were dreaming was one of your dream signs.");
+        return false;
+    }
+
+    if (dream_sign_bool.length < 1) {
+
+        addAndRemoveClasses($("#dreamsignboolmessage"), "invalid", "valid");
+        $("#dreamsignboolmessage").html("Please indicate whether the thing that made you aware you were dreaming was one of your dream signs.");
+        return false;
+    }
+
+    if (dream_sign_bool != "False" && dream_sign_bool != "True") {
+
+        addAndRemoveClasses($("#dreamsignboolmessage"), "invalid", "valid");
+        $("#dreamsignboolmessage").html("Please select either 'Yes' or 'No'.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#dreamsignboolmessage"), "valid", "invalid");
+    $("#dreamsignboolmessage").html("Dream sign yes/no answer OK.");
+    return true; 
+}
+
+function validateInterruption(interruption) {
+
+    $("#interruptionmessageprefix").html("<br>");
+
+    if (typeof interruption == 'undefined') {
+
+        addAndRemoveClasses($("#interruptionmessage"), "invalid", "valid");
+        $("#interruptionmessage").html("Please indicate whether anything interrupted your sleep the night you had the dream.");
+        return false;
+    }
+
+    if (interruption.length < 1) {
+
+        addAndRemoveClasses($("#interruptionmessage"), "invalid", "valid");
+        $("#interruptionmessage").html("Please indicate whether anything interrupted your sleep the night you had the dream.");
+        return false;
+    }
+
+    if (interruption != "False" && interruption != "True") {
+
+        addAndRemoveClasses($("#interruptionmessage"), "invalid", "valid");
+        $("#interruptionmessage").html("Please select either 'Yes' or 'No'.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#interruptionmessage"), "valid", "invalid");
+    $("#interruptionmessage").html("Interruption yes/no answer OK.");
+    return true; 
+}
+
+function validateDreamSign(dream_sign, userDreamsigns) {
+
+    $("#dreamsignmessageprefix").html("<br>");
+
+    var isDreamsign = false;
+
+    for (i = 0; i < userDreamsigns.length; i++) {
+
+        if (dream_sign == userDreamsigns[i]) {
+
+            isDreamsign = true;
+            break;
+        }
+    }
+
+    if (!isDreamsign) {
+
+        addAndRemoveClasses($("#dreamsignmessage"), "invalid", "valid");
+        $("#dreamsignmessage").html("Please select one of your dream signs.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#dreamsignmessage"), "valid", "invalid");
+    $("#dreamsignmessage").html("Dream sign OK.");
+    return true;
+}
+
+function validatePhenomenon(phenomenon, tagNameToGroup) {
+
+    $("#realitychecktagmessageprefix").html("<br>");
+
+    if (phenomenon.length < 1) {
+
+        addAndRemoveClasses($("#realitychecktagmessage"), "invalid", "valid");
+        $("#realitychecktagmessage").html("Select the phenomenon/object that made you aware you were dreaming.");
+        return false;
+    }
+
+    if (!(phenomenon in tagNameToGroup)) {
+
+        addAndRemoveClasses($("#realitychecktagmessage"), "invalid", "valid");
+        $("#realitychecktagmessage").html("Select the phenomenon/object that made you aware you were dreaming.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#realitychecktagmessage"), "valid", "invalid");
+    $("#realitychecktagmessage").html("Awareness phenomenon/object OK.");
+    return true;
+}
+
+function validateMechanism(mechanism) {
+
+    $("#mechanismmessageprefix").html("<br>");
+
+    if (mechanism.length < 1) {
+
+        addAndRemoveClasses($("#mechanismmessage"), "invalid", "valid");
+        $("#interruptionmessage").html("Please select the mechanism by which you became aware you were dreaming.");
+        return false;
+    }
+
+    if (mechanism != "malfunction" && mechanism != "impossibility/oddity" &&
+        mechanism != "presence" && mechanism != "absence") {
+
+        addAndRemoveClasses($("#mechanismmessage"), "invalid", "valid");
+        $("#mechanismmessage").html("Please select the mechanism by which you became aware you were dreaming.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#mechanismmessage"), "valid", "invalid");
+    $("#mechanismmessage").html("Awareness mechanism OK.");
+    return true;  
+}
+
+function validateIdentifier(identifier, group) {
+
+    $("#identifiermessageprefix").html("<br>");
+
+    // do not need to validate if group is "type" or "sensation"
+    // because identifier will be assigned "none" on backend regardless of user input
+    if (!(group == "type" && group == "sensation")) {
+
+        if (identifier.length < 1) {
+
+            addAndRemoveClasses($("#identifiermessage"), "invalid", "valid");
+            $("#identifiermessage").html("Please select an identifier for the awareness phenomenon/object.");
+            return false;
+        }
+    }
+
+    if (group == "emotion") {
+
+        if (identifier != "possesive" && identifier != "indefinite") {
+
+            addAndRemoveClasses($("#identifiermessage"), "invalid", "valid");
+            $("#identifiermessage").html("An emotion identifier must either be possesive or indefinite.");
+            return false;          
+        }
+    }
+
+    if (group == "being" || group == "place" || group == "object") {
+
+        if (identifier != "possesive" && identifier != "indefinite" && identifier != "definite") {
+
+            addAndRemoveClasses($("#identifiermessage"), "invalid", "valid");
+            $("#identifiermessage").html("The awareness phenomenon/object has an invalid identifier.");
+            return false;
+        }
+    }
+
+    addAndRemoveClasses($("#identifiermessage"), "valid", "invalid");
+    $("#identifiermessage").html("Identifier OK.");
     return true;
 }
 
@@ -786,6 +1066,22 @@ function validateContent(content) {
     addAndRemoveClasses($("#contentmessage"), "valid", "invalid");
     $("#contentmessage").html("Dream narrative OK.");
     return true;
+}
+
+function validateExtras(extras) {
+
+    $("#extrasmessageprefix").html("<br>");
+
+    if (extras.length > 1000) {
+
+        addAndRemoveClasses($("#extrasmessage"), "invalid", "valid");
+        $("#contentmessage").html("Extras is too long (max 1,000 chars).");
+        return false;
+    }
+
+    addAndRemoveClasses($("#extrasmessage"), "valid", "invalid");
+    $("#extrasmessage").html("Extras OK.");
+    return true;  
 }
 
 function resetMessage(inputName) {

@@ -81,3 +81,35 @@ a {
 .dreamstatslist {
 	padding-left: 20px;
 }
+
+.tag {
+	padding: 5px;
+	color: black;
+	text-shadow: none;
+	font-weight: bold;
+	font-family: "Arial";
+}
+
+.type {
+	background-color: lightblue;
+}
+
+.being {
+	background-color: lightgreen;
+}
+
+.place {
+	background-color: yellow;
+}
+
+.object {
+	background-color: orange;
+}
+
+.emotion {
+	background-color: violet;
+}
+
+.sensation {
+	background-color: #9f1aff;
+}
