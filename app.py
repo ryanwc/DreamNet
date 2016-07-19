@@ -1009,13 +1009,13 @@ class NewDream(Handler):
 		# create each dream tag object
 		# (consists of an id, a reference to a dream, and a reference to a tag name)
 		for tag_name in dreamDict["dream_tags"]:
-			print tag_name
+			#print tag_name
 			existingTagName = TagName.all().filter("name =", tag_name).get()
 
 			tag_group = dreamDict["dream_tags"][tag_name]["group"]
 			tag_identifier = dreamDict["dream_tags"][tag_name]["identifier"]
-			print tag_group
-			print tag_identifier
+			#print tag_group
+			#print tag_identifier
 
 			tagGroupObj = TagGroup.all().filter("name =", tag_group).get()
 			identifierObj = Identifier.all().filter("type =", tag_identifier).get()
@@ -1032,8 +1032,8 @@ class NewDream(Handler):
 
 			dreamTag = Tag(dream=dream, name=tagNameObj, identifier=identifierObj)
 			dreamTag.put()
-			print dreamTag.name.name
-			print dreamTag.name.group.name
+			#print dreamTag.name.name
+			#print dreamTag.name.group.name
 
 		# if needed, create and add the reality check object
 		# create and put object
@@ -1581,14 +1581,54 @@ class EditDream(Handler):
 
 		if not username:
 			return redirect_to("signin")
-		elif username != dream.username:
+		elif username != dream.user.username:
 			return redirect_to("home", page=1)
 
-		self.render("editdream.html", dream=dream)
+		self.render("editdream.html", dream=dream, dreamDict=None)
 
 	def post(self, id=None):
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		dream = Dream.get_by_id(int(id))
 
-		self.render("editdream.html", dream=dream)
+		if not username:
+			return redirect_to("signin")
+		elif username != dream.user.username:
+			return redirect_to("home", page=1)
+
+		dreamDict = {}
+		messages = {}
+
+		dreamDict["content"] = bleach.clean(self.request.get("content"))
+		if dreamDict["content"]:
+			if len(dreamDict["content"]) < 50001:
+				messages["content"] = {"message": "Dream narrative OK",
+						 			   "validity": "valid"}
+			else:
+				messages["content"] = {"message": "Dream narrative too long (50000 char max)",
+						 			   "validity": "invalid"}	
+		else:
+			messages["content"] = {"message": "Please provide a narrative of what happened in the dream",
+								   "validity": "invalid"}
+
+		for attr in dreamDict:
+			#print attr
+			#print dreamDict[attr]
+			#print type(dreamDict[attr])
+			if attr in messages:
+				if messages[attr]["validity"] == "invalid":
+
+					userDreamsigns = []
+
+					for dreamsign in user.dream_signs:
+						userDreamsigns.append(dreamsign.nickname)
+
+					return self.render("editdream.html", dreamDict=dreamDict, 
+						messages=messages)
+
+		dream.content = dreamDict["content"]
+		dream.put()
+
+		return redirect_to("viewdream", id=id)
 
 class DeleteDream(Handler):
 	def get(self, id=None):

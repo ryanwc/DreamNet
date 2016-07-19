@@ -250,6 +250,14 @@ legend {
 	border: none;
 }
 
+#editcontent {
+	background-color: #4d4d4d;
+}
+
+#edittocome {
+	background-color: #4d4d4d;	
+}
+
 @media screen and (max-width: 767px) {
 	#core {
     	width: 290px;
