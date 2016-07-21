@@ -113,3 +113,11 @@ a {
 .sensation {
 	background-color: #9f1aff;
 }
+
+.invalid {
+	background-color: black;
+	color: red;
+	padding: 2px;
+	border-radius: 5px;
+}
+

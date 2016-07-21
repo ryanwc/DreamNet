@@ -1386,3 +1386,31 @@ function toggleSomethingSpecific() {
     }
 }
 
+function revealCommentBox() {
+
+
+}
+
+function validateComment() {
+
+    var inputComment = $("#commentinput").val();
+
+    if (!validateInputComment(inputComment)) {
+
+        addAndRemoveClasses($("#commentinput"), "", "displaynone");
+        return false;
+    }
+
+    return true;
+}
+
+function validateInputComment(inputComment) {
+
+    if (inputComment < ) {
+
+        addAndRemoveClasses($("#commentinputmessageprefix"), "", "displaynone");     
+        addAndRemoveClasses($("#commentinputmessage"), "", "displaynone");        
+    }
+}
+
+

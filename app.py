@@ -84,6 +84,14 @@ class Dream(db.Model):
 		self._render_text = self.content.replace("\n", "<br>")
 		return render_str(self._render_text)
 
+class Comment(db.Model):
+	user = db.ReferenceProperty(User,
+								collection_name = "comments")
+	dream = db.ReferenceProperty(Dream,
+								 collection_name = "comments")
+	date_posted = db.DateTimeProperty(auto_now_add=True)
+	content = db.TextProperty(required=True)
+
 # identifier ("a(n)", "my") for tags
 class Identifier(db.Model):
 	type = db.StringProperty(required = True)
