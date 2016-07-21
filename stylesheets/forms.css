@@ -148,6 +148,11 @@ option {
 	overflow-y: scroll;
 }
 
+#deletedreambutton {
+	color: red;
+	font-weight: bold;
+}
+
 
 /* tags */
 
@@ -256,6 +261,10 @@ legend {
 
 #edittocome {
 	background-color: #4d4d4d;	
+}
+
+#deletedream {
+	background-color: #4d4d4d;
 }
 
 @media screen and (max-width: 767px) {

@@ -386,9 +386,10 @@ class Home(Handler):
 		self.response.set_cookie("visits", visit_cookie_val)
 
 		dreamQ = Dream.all()
-		#dreamQ.order("date_posted")
+		dreamQ.order("date_posted")
 		dreams = []
 		start = (int(page)-1)*10
+		# need to implement a "next/previous page" button
 		for dream in dreamQ.run(offset=start, limit=start+10):
 			dreams.append(dream)
 
@@ -426,7 +427,7 @@ class NewDream(Handler):
 		self.render("newdream.html", dreamDict=None, 
 					messages=None, tagGroupToNames=json.dumps(tagGroupToNames),
 					tagNameToGroup=json.dumps(tagNameToGroup), realityChecks=tagGroupToNames,
-					userDreamsigns=userDreamsigns)
+					userDreamsigns=userDreamsigns, username=username)
 
 	def post(self):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
@@ -973,7 +974,8 @@ class NewDream(Handler):
 					return self.render("newdream.html", dreamDict=dreamDict, 
 						messages=messages, tagGroupToNames=json.dumps(tagGroupToNames),
 						tagNameToGroup=json.dumps(tagNameToGroup),
-						userDreamsigns=userDreamsigns, realityChecks=tagGroupToNames)
+						userDreamsigns=userDreamsigns, realityChecks=tagGroupToNames,
+						username=username)
 
 		# set values for datastore (some cannot be string)
 		if dreamDict["lucidity"] == "True":
@@ -1494,10 +1496,18 @@ class Register(Handler):
 
 class Signin(Handler):
 	def get(self):
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
-		self.render("signin.html", values=None, messages=None)
+		if username:
+			return redirect_to("home", page=1)
+
+		self.render("signin.html", values=None, messages=None, username=None)
 
 	def post(self):
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+
+		if username:
+			return redirect_to("signin")
 
 		name = bleach.clean(self.request.get("name"))
 		password = bleach.clean(self.request.get("password"))
@@ -1542,7 +1552,7 @@ class Signin(Handler):
 		for field in messages:
 			if messages[field]["validity"] == "invalid":
 				return self.render("signin.html", values=values, 
-					messages=messages)
+					messages=messages, username=None)
 
 
 		username_cookie_val = make_secure_val(user.username)
@@ -1584,7 +1594,7 @@ class EditDream(Handler):
 		elif username != dream.user.username:
 			return redirect_to("home", page=1)
 
-		self.render("editdream.html", dream=dream, dreamDict=None)
+		self.render("editdream.html", dream=dream, dreamDict=None, username=username)
 
 	def post(self, id=None):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
@@ -1623,7 +1633,7 @@ class EditDream(Handler):
 						userDreamsigns.append(dreamsign.nickname)
 
 					return self.render("editdream.html", dreamDict=dreamDict, 
-						messages=messages)
+						messages=messages, username=username)
 
 		dream.content = dreamDict["content"]
 		dream.put()
@@ -1635,16 +1645,27 @@ class DeleteDream(Handler):
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
-		if not username:
-			return redirect_to("signin")
-		elif username != dream.username:
-			return redirect_to("home", page=1)
+		if dream:
+			if not username:
+				return redirect_to("signin")
+			elif username != dream.user.username:
+				return redirect_to("home", page=1)
 
-		self.render("deletedream.html", dream=dream)
+		self.render("deletedream.html", dream=dream, username=username)
 
 	def post(self, id=None):
 
-		self.render("deletedream.html", dream=dream)
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		dream = Dream.get_by_id(int(id))
+
+		if not username:
+			return redirect_to("signin")
+		elif username != dream.user.username:
+			return redirect_to("home", page=1)
+
+		dream.delete()
+
+		return redirect_to("deletedream", id=id)
 
 class LikeDream(Handler):
 	def get(self, id=None):
@@ -1655,7 +1676,7 @@ class LikeDream(Handler):
 		dream = Dream.get_by_id(int(id))
 
 		if not username:
-			return redirect_to("viewdream", id=id)
+			return redirect_to("signin")
 
 		if user.key().id() == dream.user.key().id():
 			return redirect_to("viewdream", id=id)
@@ -1680,8 +1701,9 @@ class LikeDream(Handler):
 
 class About(Handler):
 	def get(self):
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
-		self.render("about.html")
+		self.render("about.html", username=username)
 
 class Logout(Handler):
 	def get(self):
