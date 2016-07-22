@@ -410,7 +410,7 @@ class NewDream(Handler):
 		if not username:
 			return redirect_to("signin")
 
-		user = User.all().filter("username =", username).get();
+		user = User.all().filter("username =", username).get()
 
 		userDreamsigns = []
 
@@ -1589,8 +1589,120 @@ class ViewDream(Handler):
 			if tag.name:
 				tagGroupToName[tag.name.group.name].append(tag)
 
+		# probably could be faster, rather than looping thru comments twice
+		commentList = []
+		for comment in dream.comments:
+			commentList.append(comment)
+
+		commentList = sorted(commentList, key=lambda s: s.date_posted)
+
 		self.render("viewdream.html", dream=dream, username=username, 
-			tagGroupToName=tagGroupToName)
+			tagGroupToName=tagGroupToName, commentList = commentList)
+
+	def post(self, id=None):
+		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		dream = Dream.get_by_id(int(id))
+
+		if not username:
+			return redirect_to("signin")
+		elif not dream:
+			return redirect_to("home", page=1)
+
+		'''
+		for realityCheck in dream.reality_checks:
+			print realityCheck.mechanism.name
+			print realityCheck.tag.name.name
+			print realityCheck.tag.identifier.type
+		'''
+		tagGroupToName = {"object":[], "being":[], "place":[],
+						  "emotion":[], "sensation":[], "type":[]}
+		for tag in dream.tags:
+			#
+			# bug: why are there any tags that have "none" as name?
+			#
+			if tag.name:
+				tagGroupToName[tag.name.group.name].append(tag)
+
+		inputComment = bleach.clean(self.request.get("newcommentinput"))
+		containsError = False
+		if inputComment:
+			# it was a new comment
+			if len(inputComment) < 1:
+				containsError = True
+
+			if len(inputComment) > 1000:
+				containsError = True
+
+		editCommentID = bleach.clean(self.request.get("commenteditforminputid"))
+		commentToEdit = None
+		if editCommentID:
+			commentToEdit = Comment.get_by_id(int(editCommentID))
+
+			if username != commentToEdit.user.username:
+				containsError = True
+
+		deletionStatus = bleach.clean(self.request.get("commenteditforminputdelete"))
+
+		isDeletion = False
+		if deletionStatus:
+			if deletionStatus == "yes":
+				isDeletion = True
+
+		editedComment = bleach.clean(self.request.get("commenteditforminputcontent"))
+
+		if editedComment:
+			# it was an edited comment
+			if len(editedComment) < 1:
+				containsError = True
+
+			if len(editedComment) > 1000:
+				containsError = True
+
+		if containsError:
+			# re-render dream with error messages because has inputComment
+			self.render("viewdream.html", dream=dream, username=username, 
+				tagGroupToName=tagGroupToName, inputComment=inputComment)
+		else:
+
+			commentList = []
+
+			# google datastore is very bad at making updates immediately available,
+			# so have to do some trickery. not sure if would break down on scaling
+			if isDeletion:
+
+				deletedID = commentToEdit.key().id()
+				commentToEdit.delete()
+
+				for comment in dream.comments:
+					if str(comment.key().id()) != str(deletedID):
+						commentList.append(comment)
+			elif inputComment:
+				# add comment and re-render dream
+				user = User.all().filter("username =", username).get()
+
+				newComment = Comment(user=user, dream=dream, content=inputComment)
+				newComment.put()
+
+				for comment in dream.comments:
+					commentList.append(comment)
+
+				commentList.append(newComment)
+			elif editedComment:
+
+				commentToEdit.content = editedComment
+				editedCommentKey = commentToEdit.put()
+				editedComment = Comment.get_by_id(int(editedCommentKey.id()))
+
+				for comment in dream.comments:
+					if str(comment.key().id()) != str(editedCommentKey.id()):
+						commentList.append(comment)
+
+				commentList.append(editedComment)
+
+			commentList = sorted(commentList, key=lambda s: s.date_posted)				
+
+			self.render("viewdream.html", dream=dream, username=username, 
+				tagGroupToName=tagGroupToName, commentList=commentList)
 
 class EditDream(Handler):
 	def get(self, id=None):

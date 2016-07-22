@@ -347,9 +347,259 @@ function validateUser(satisfactionAreas) {
     satisfaction_rating_input_divs.each(function() {
 
         thisRating = $(this).val();
+        thisID = $(this).id();
 
-        //if (!validate)
+        if (!validateSatisfactionRating(thisRating, thisID)) {
+
+            containsError = true;
+        }
     });
+
+    if (!validateUsername(username)) {
+
+        containsError = true;
+    }
+
+    if (!validatePassword(password)) {
+
+        containsError = true;
+    }
+
+    if (!validateVerifyPassword(password, verifypassword)) {
+
+        containsError = true;
+    }
+
+    if (!validateGender(gender)) {
+
+        containsError = true;
+    }
+
+    if (!validateBirthdate(birthdate)) {
+
+        containsError = true;
+    }
+
+    if (!validateNationality(nationality)) {
+
+        containsError = true;
+    }
+
+    if (!validateResidence(residence)) {
+
+        containsError = true;
+    }
+
+    if (!validateEmail(email)) {
+
+        containsError = true;
+    }
+
+    if (!validateProfession(profession)) {
+
+        containsError = true;
+    }
+
+    if (!validateArea(area)) {
+
+        containsError = true;
+    }
+
+    if (!validateIndustry(industry)) {
+
+        containsError = true;
+    }
+
+    if (!validateSector(sector)) {
+
+        containsError = true;
+    }
+
+    if (!validateEducationLevel(education_level)) {
+
+        containsError = true;
+    }
+
+    if (!validateParent(isParent)) {
+
+        containsError = true;
+    }
+
+    if (!validateCommitted(isCommitted)) {
+
+        containsError = true;
+    }
+
+    if (containsError) {
+
+        window.alert("One of the values you entered is in the wrong format or contains an error.  Please look for red text near each question for guidance, then revise and re-submit.");
+        return false;
+    }
+
+    return true;
+}
+
+function validateSatisfactionRating(ratingString, id) {
+
+    if (ratingString.length < 1) {
+
+        addAndRemoveClasses($("#"+id+"message"), "invalid", "valid");
+        $("#"+id+"message").html("Please use the slider to pick a value. ");
+        return false;
+    }
+
+    var rating = parseInt(rating);
+
+    // will return false if NaN
+    if (rating < 0 || rating > 10) {
+
+        addAndRemoveClasses($("#"+id+"messageprefix"), "invalid", "valid");
+        $("#"+id+"message").html("Please rate how enjoyable the dream was.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#"+id+"message"), "valid", "invalid");
+    $("#"+id+"message").html("Rating OK.");
+    return true;
+}
+
+function validateUsername(username) {
+
+    if (username.length < 1) {
+
+        addAndRemoveClasses($("#usernamemessage"), "invalid", "valid");
+        $("#usernamemessage").html("Username too short.");
+        return false;
+    }
+
+    if (username.length > 20) {
+
+        addAndRemoveClasses($("#usernamemessage"), "invalid", "valid");
+        $("#usernamemessage").html("Username too long.");
+        return false;
+    }
+
+    if (username.match(/[^a-zA-Z0-9_-]/)) {
+
+        addAndRemoveClasses($("#usernamemessage"), "inalid", "valid");
+        $("#usernamemessage").html("Username contains illegal character.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#usernamemessage"), "valid", "invalid");
+    $("#usernamemessage").html("Username OK.");
+    return true;
+}
+
+function validatePassword(password) {
+
+    if (password.length < 6) {
+
+        addAndRemoveClasses($("#passwordmessage"), "invalid", "valid");
+        $("#passwordmessage").html("Password too short.");
+        return false;
+    }
+
+    if (password.length > 20) {
+
+        addAndRemoveClasses($("#passwordmessage"), "invalid", "valid");
+        $("#passwordmessage").html("Password too long.");
+        return false;
+    }
+
+    if (!password.match(/[\!@\#\$%\^&\*]/)) {
+
+        addAndRemoveClasses($("#passwordmessage"), "invalid", "valid");
+        $("#passwordmessage").html("Password must have a special character.");
+        return false;
+    }
+
+    if (!password.match(/[0-9]/)) {
+
+        addAndRemoveClasses($("#passwordmessage"), "invalid", "valid");
+        $("#passwordmessage").html("Password must have a number.");
+        return false;
+    }
+
+    if (!password.match(/[a-z]/)) {
+
+        addAndRemoveClasses($("#passwordmessage"), "invalid", "valid");
+        $("#passwordmessage").html("Password must have a lower case letter.");
+        return false;
+    }
+
+    if (!password.match(/[A-Z]/)) {
+
+        addAndRemoveClasses($("#passwordmessage"), "invalid", "valid");
+        $("#passwordmessage").html("Password must have an upper case letter.");
+        return false;
+    }    
+
+    addAndRemoveClasses($("#passwordmessage"), "valid", "invalid");
+    $("#passwordmessage").html("Password OK.");
+    return true;
+}
+
+function validateVerifyPassword(password, verifypassword) {
+
+    if (password != verifypassword) {
+
+        addAndRemoveClasses($("#verifypasswordmessage"), "invalid", "valid");
+        $("#verifypasswordmessage").html("Passwords do not match.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#verifypasswordmessage"), "valid", "invalid");
+    $("#verifypasswordmessage").html("Password match OK.");
+    return true;
+}
+
+function validateGender(gender) {
+
+}
+
+function validateBirthdate(birthdate) {
+
+}
+
+function validateNationality(nationality) {
+
+}
+
+function validateResidence(residence) {
+
+}
+
+function validateEmail(email) {
+
+}
+
+function validateProfession(profession) {
+
+}
+
+function validateArea(area) {
+
+}
+
+function validateIndustry(industry) {
+
+}
+
+function validateSector(sector) {
+
+}
+
+function validateEducationLevel(education_level) {
+
+}
+
+function validateParent(isParent) {
+
+}
+
+function validateCommitted(isCommitted) {
+
 }
 
 function validateDream(tagNameToGroup, userDreamsigns) {
@@ -365,8 +615,6 @@ function validateDream(tagNameToGroup, userDreamsigns) {
     var extras = $("#extras").val();
 
     var tagButtonClass = $(".tagbutton");
-
-    console.log(tagButtonClass);
 
     var containsError = false;
 
@@ -972,7 +1220,6 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
     tagButtonClass.each(function() {
 
         tagtext = $(this).find(".dreamtagname").html();
-        console.log(tagtext);
 
         if (tagtext.length < 1) {
 
@@ -1041,7 +1288,6 @@ function validateTagsAndSetHiddenVal(tagButtonClass) {
         return false;             
     }
 
-    console.log($("#dreamtags").val());
     addAndRemoveClasses($("#tagnamemessage"), "valid", "invalid");
     $("#tagnamemessage").html("Dream tags OK.");
     return true;
@@ -1386,18 +1632,31 @@ function toggleSomethingSpecific() {
     }
 }
 
-function revealCommentBox() {
+function toggleNewCommentForm() {
 
+    toggleDisplay($("#newcommentformrow"));
+    toggleDisplay($("#addcommentbutton"));
 
+    if ($("#newcommentformrow").hasClass("displaynone")) {
+
+        $("#newcommentinput").blur();
+    }
+    else {
+
+        $("#newcommentinput").focus();
+    }
 }
 
 function validateComment() {
 
-    var inputComment = $("#commentinput").val();
+    var inputComment = $("#newcommentinput").val();
 
     if (!validateInputComment(inputComment)) {
 
-        addAndRemoveClasses($("#commentinput"), "", "displaynone");
+        $("#newcommentinputmessageprefix").html("<br>");
+
+        addAndRemoveClasses($("#newcommentinputmessage"), "invalid", "");
+        $("#newcommentinputmessage").html("Error posting comment. Comment cannot be blank, and there is a 1,000 char limit.");
         return false;
     }
 
@@ -1406,11 +1665,77 @@ function validateComment() {
 
 function validateInputComment(inputComment) {
 
-    if (inputComment < ) {
+    if (inputComment.length < 1) {
+ 
+        return false; 
+    }
 
-        addAndRemoveClasses($("#commentinputmessageprefix"), "", "displaynone");     
-        addAndRemoveClasses($("#commentinputmessage"), "", "displaynone");        
+    if (inputComment.length > 1000) {
+    
+        return false; 
+    }
+
+    return true;
+}
+
+function toggleEditComment(commentID) {
+
+    toggleDisplay($("#comment"+commentID));
+    toggleDisplay($("#editcommentbox"+commentID));
+    toggleDisplay($("#comment"+commentID+"links"));
+
+    if ($("#editcommentbox"+commentID).hasClass("displaynone")) {
+
+        $("#editcomment"+commentID).blur();
+    }
+    else {
+
+        $("#editcomment"+commentID).focus();
     }
 }
 
+function submitCommentEdit(commentID) {
+
+    var currentCommentEdits = $("#editcomment"+commentID).val();
+
+    $("#commenteditforminputcontent").val(currentCommentEdits);
+    $("#commenteditforminputid").val(commentID);
+    $("#commenteditforminputdelete").val("no");
+    $("#submitcommentedit").click();
+}
+
+function clearCommentEdits() {
+
+    $("#commenteditforminputid").val("");
+    $("#commenteditforminputdelete").val("");   
+}
+
+function deleteComment(commentID) {
+
+    $("#commenteditforminputdelete").val("yes");
+    $("#commenteditforminputid").val(commentID);
+    $("#submitcommentedit").click();
+}
+
+function validateCommentEdit() {
+
+    var commentID = $("#commenteditforminputid").val();
+    var commentEdit = $("#commenteditforminputcontent").val();
+    var isDelete = $("#commenteditforminputdelete").val();
+
+    if (isDelete == "yes") {
+
+        return true;
+    }
+    else if (!validateInputComment(commentEdit)) {
+
+        $("#comment"+commentID+"messageprefix").html("<br>");
+
+        addAndRemoveClasses($("#comment"+commentID+"message"), "invalid", "");
+        $("#comment"+commentID+"message").html("Error editing comment. Comment cannot be blank, and there is a 1,000 char limit.");
+        return false;
+    }
+
+    return true;
+}
 

@@ -98,24 +98,44 @@
 					</div>
 				</div>
 
+				{% if username %}
+
+				<br>
+
 				<div class="row">
 					<div class="col-xs-12">
-						<button id="addcommentbutton" value="none">Add Comment</button>
+						<button id="addcommentbutton" value="none" onclick="toggleNewCommentForm();">Add Comment</button>
 					</div>
 				</div>
 
-				<div class="row displaynone" id="formrow">
-					<div class="col-xs-12 formcol">
+				<div class="row displaynone" id="newcommentformrow">
+					<div class="col-xs-12 newcommentformcol">
+
+						<br>
+
 						<form role="form" action="/dream/view/{{dream.key().id()|string}}" method="post" onsubmit="return validateComment();">
+
 							<div>
 								<span>Write comment in box below (1,000 char limit).</span>
 							</div>
 							<div>
-								<textarea name="commentinput" id="commentinput" rows="3" autocomplete="off" placeholder="Comment" oninput="resetMessage('commentinput');">{% if inputComment %}{{inputComment}}{% endif %}</textarea><span id="commentinputmessageprefix">{% if inputComment %}<br>{% endif %}</span><span id="commentinputmessage" {% if messages %}class="invalid"{% endif %}>{% if inputComment %}Error posting comment. There is a 1,000 char limit.{% endif %}</span>
+								<textarea name="newcommentinput" id="newcommentinput" class="commentinput" rows="3" cols="30" autocomplete="off" placeholder="Comment" oninput="resetMessage('newcommentinput');">{% if inputComment %}{{inputComment}}{% endif %}</textarea><span id="newcommentinputmessageprefix">{% if inputComment %}<br>{% endif %}</span><span id="newcommentinputmessage" {% if inputComment %}class="invalid"{% endif %}>{% if inputComment %}Error posting comment. There is a 1,000 char limit.{% endif %}</span>
 							</div>
+
+							<div class="col-xs-12 commentbuttondiv">
+								<input class="submitcomment" type="submit" class="submit" value="Post Comment"></input>
+							</div>
+
+						</form>
+
+						<div class="col-xs-12 commentbuttondiv">
+							<button  class="cancelcomment" value="none" onclick="toggleNewCommentForm();">Cancel</button>
 						</div>
+
 					</div>
 				</div>
+
+				{% endif %}
 
 				<div class="row">
 					<div class="col-xs-12">
@@ -123,17 +143,44 @@
 					</div>
 				</div>
 
-				{% for comment in dream.comments %}
+				<div class="commentcontent">
+
+				{% for comment in commentList %}
 				<div class="row commentrow">
 					<div class="col-xs-12">
-						<p class="commentcontent">{{comment.content}}</p>
+						<p class="commentcontenttext" id="comment{{comment.key().id()}}">> {{comment.content}}</p>
+						<!-- edit/delete comment box -->
+						<span class="displaynone" id="editcommentbox{{comment.key().id()}}">
+							<textarea class="commentinput" name="editcomment{{comment.key().id()}}" id="editcomment{{comment.key().id()}}" rows="3" cols="30" autocomplete="off" placeholder="Comment">{{comment.content}}</textarea><span id="comment{{comment.key().id()}}messageprefix">{% if editedComments %}{% if comment.key().id() in editedComments %}<br>{% endif %}{% endif %}</span><span id="comment{{comment.key().id()}}message" {% if editedComments %}{% if comment.key().id() in editedComments %}class="invalid"{% endif %}{% endif %}>{% if editedComments %}{% if comment.key().id() in editedComments %}Error editing comment. There is a 1,000 char limit.{% endif %}{% endif %}</span>
+
+							<br>
+
+							<div class="commentbuttondiv">
+								<button class="submitcomment" id="submitcommentedit{{comment.key().id()}}" value="none" onclick="submitCommentEdit({{comment.key().id()}})">Submit Edits</button>
+								<button class="cancelcomment" id="cancelcommentedit{{comment.key().id()}}" value="none" onclick="toggleEditComment({{comment.key().id()}});">Cancel</button>
+							</div>
+						</span>
+						<!-- end editcommentbox -->
 						<span class="commentbyline">by {{comment.user.username}} on {{comment.date_posted}}</span>
-						{% if {{comment.user.username}} == username %}
+
+						{% if comment.user.username == username %}
 						<br>
-						<a class="dreamlink" href="{{url_for('editcomment', id=dream.key().id()|string)}}">Edit comment</a> | <a class="dreamlink" href="{{url_for('deletedream', id=dream.key().id()|string)}}">Delete comment</a>
+						<span class="commentlinks" id="comment{{comment.key().id()}}links"><a class="dreamlink" href="javascript:;" onclick="toggleEditComment({{comment.key().id()}}); clearCommentEdits();">Edit comment</a> | <a class="dreamlink" href="javascript:;" onclick="deleteComment({{comment.key().id()}});">Delete comment</a></span>
+						{% endif %}
 					</div>
 				</div>
+				<br>
 				{% endfor %}
+
+				</div>
+
+				<!-- form that actually submits the comment edit/delete -->
+				<form role="form" class="displaynone" action="/dream/view/{{dream.key().id()|string}}" method="post" onsubmit="return validateCommentEdit();">
+					<input id="commenteditforminputcontent" name="commenteditforminputcontent" type="hidden" value="">
+					<input id="commenteditforminputid" name="commenteditforminputid" type="hidden" value="">
+					<input id="commenteditforminputdelete" name="commenteditforminputdelete" type="hidden" value="">
+					<input id="submitcommentedit" type="submit" class="submit" value="submit"></input>
+				</form>
 
 			</div>
 

@@ -74,6 +74,7 @@ a {
 #likedream:hover {
 	color: white;
 	font-weight: normal;
+	cursor: pointer;
 }
 
 /* others */
@@ -119,5 +120,63 @@ a {
 	color: red;
 	padding: 2px;
 	border-radius: 5px;
+}
+
+#addcommentbutton {
+	color: black;
+}
+
+.commentbuttondiv {
+	padding: 0;
+}
+
+.submitcomment {
+	color: black;
+}
+
+.cancelcomment {
+	color: red;
+}
+
+.commentinput {
+	color: black;
+	font-family: "Courier";
+}
+
+.commentcontent {
+	font-family: "Courier";
+	max-height: 400px;
+	overflow-y: scroll;
+	max-width: 500px;
+	color: green;
+	font-weight: bold;
+	background-color: black;
+	text-shadow: 0 0;
+	padding: 10px;
+}
+
+.commentcontenttext{
+	margin-bottom: 0;
+}
+
+/*
+.commentbyline {
+	font-weight: normal;
+	color: white;
+}
+*/
+
+.commentlinks a {
+	color: green;
+}
+
+.commentlinks a:hover {
+	color: white;
+	font-weight: normal;
+	cursor: pointer;
+}
+
+.displaynone {
+	display: none !important;
 }
 
