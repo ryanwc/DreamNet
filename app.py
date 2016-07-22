@@ -50,7 +50,8 @@ class User(db.Model):
 class Dream(db.Model):
 	# what other properties?
 	# do not need to record gender, nationality because those don't change
-	# (if someone has a sex change, we'll just say they were always the new sex)
+	# (if someone has a sex change, 
+	# we'll just say they were always the new sex)
 	user = db.ReferenceProperty(User,
 							 	collection_name = "dreams")
 	user_age = db.IntegerProperty(required = True)
@@ -62,7 +63,8 @@ class Dream(db.Model):
 	user_industry = db.StringProperty(required = True)
 	user_isParent = db.BooleanProperty(required = True)
 	user_isCommitted = db.BooleanProperty(required = True)
-	user_satsifaction_ratings = db.StringProperty(required = True, multiline = True)
+	user_satsifaction_ratings = db.StringProperty(required = True, 
+												  multiline = True)
 	title = db.StringProperty(required = True)
 	lc_title = db.StringProperty(required = True)
 	description = db.StringProperty(required = True)
@@ -309,10 +311,6 @@ def hash_str(s):
 def make_secure_val(s):
 	return "%s|%s" % (s, hash_str(s))
 
-def is_passowrd(password):
-
-	match
-
 # allows for '|' in the value
 def check_secure_val(h):
     li = h.split("|")
@@ -434,7 +432,8 @@ class NewDream(Handler):
 
 		self.render("newdream.html", dreamDict=None, 
 					messages=None, tagGroupToNames=json.dumps(tagGroupToNames),
-					tagNameToGroup=json.dumps(tagNameToGroup), realityChecks=tagGroupToNames,
+					tagNameToGroup=json.dumps(tagNameToGroup), 
+					realityChecks=tagGroupToNames,
 					userDreamsigns=userDreamsigns, username=username)
 
 	def post(self):
@@ -523,7 +522,8 @@ class NewDream(Handler):
 		if ("lucid_reason" in dreamDict and
 			dreamDict["lucid_reason"] == "reality check"):
 
-			dreamDict["reality_check_description"] = bleach.clean(self.request.get("realitycheckdescription"))
+			dreamDict["reality_check_description"] = bleach.\
+				clean(self.request.get("realitycheckdescription"))
 			messages["reality_check_description"] = {"message": "Awareness description OK",
 				 	 	    					 	 "validity": "valid"}	
 			if dreamDict["reality_check_description"]:
@@ -565,7 +565,8 @@ class NewDream(Handler):
 		elif ("dream_sign_bool" in dreamDict and
 			  dreamDict["dream_sign_bool"] == "True"):
 			# dream sign so check if input in user's dream signs
-			dreamDict["dream_sign"] = bleach.clean(self.request.get("dreamsign"))
+			dreamDict["dream_sign"] = bleach.\
+			clean(self.request.get("dreamsign"))
 
 			userDreamsigns = user.dream_signs
 			userDreamsignNicknames = []
@@ -816,8 +817,6 @@ class NewDream(Handler):
 					break
 
 				tag_name = name_identifiergroup[0]
-
-				print tag_name
 
 				identifier_group = name_identifiergroup[1].split("@")
 
@@ -1283,7 +1282,6 @@ class Register(Handler):
 			hasInvalid = True
 
 		if values['residence']:
-			print values["residence"]
 			if values['residence'] in COUNTRIES:
 				messages["residence"] = {"message": "Residence OK",
 									 	 "validity": "valid"}

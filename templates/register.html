@@ -23,7 +23,7 @@
 
 			<div class="row" id="formrow">
 				<div class="col-xs-12 formcol">
-					<form action="/register" onsubmit="return validateNewUser();" method="post">
+					<form action="/register" onsubmit="return validateNewUser({{countries}}, {{professions}}, {{industries}}, {{educationLevels}});" method="post">
 
 
 						<div class="row multisection">
@@ -42,7 +42,7 @@
 												<div class="input">					
 													<input type="text" name="username" placeholder="Username" id="username" oninput="resetMessage('username');" {% if values %}value="{{values['username']}}"{% endif %}><span class="hint">
 													<br>
-													Username must be at least 3 and less than 20 characters long and can only contain letters, numbers, hypens, and underscores.</span><span id="usernamemessageprefix">{% if messages %}<br>{% endif %}<span id="usernamemessage" {% if messages %}class="{{messages['username']['validity']}}"{% endif %}>{% if messages %}{{messages['username']['message']}}{% endif %}</span>
+													Username must be at least 3 and less than 20 characters long and can only contain letters, numbers, hypens, and underscores.</span><span id="usernamemessageprefix">{% if messages %}<br>{% endif %}</span><span id="usernamemessage" {% if messages %}class="{{messages['username']['validity']}}"{% endif %}>{% if messages %}{{messages['username']['message']}}{% endif %}</span>
 												</div>
 											</div>
 
@@ -51,7 +51,7 @@
 													<span>Email:</span>
 												</div>
 												<div class="input">	
-													<input type="text" name="email" placeholder="Email" id="email" oninput="resetMessage('email');" {% if values %}value="{{values['email']}}"{% endif %}><span id="emailmessageprefix">{% if messages %}<br>{% endif %}<span id="emailmessage" {% if messages %}class="{{messages['email']['validity']}}"{% endif %}>{% if messages %}{{messages['email']['message']}}{% endif %}</span>
+													<input type="text" name="email" placeholder="Email" id="email" oninput="resetMessage('email');" {% if values %}value="{{values['email']}}"{% endif %}><span id="emailmessageprefix">{% if messages %}<br>{% endif %}</span><span id="emailmessage" {% if messages %}class="{{messages['email']['validity']}}"{% endif %}>{% if messages %}{{messages['email']['message']}}{% endif %}</span>
 												</div>
 											</div>
 										</div>
@@ -62,9 +62,9 @@
 													<span>Password:</span>
 												</div>
 												<div class="input">	
-													<input type="password" name="password" placeholder="Password" id="password" oninput="resetMessage('password');" {% if values %}value="{{values['password']}}"{% endif %}>
+													<input type="password" name="password" placeholder="Password" id="password" oninput="resetMessage('password'); resetMessage('verifypassword');" {% if values %}value="{{values['password']}}"{% endif %}>
 													<br>
-													<span class="hint">Password must be at least 6 and less than 20 characters long and contain at least one numeral (0-9), one lower case letter, one upper case letter, and one special character (! @ # $ % ^ & *)</span><span id="passwordmessageprefix">{% if messages %}<br>{% endif %}<span id="passwordmessage" {% if messages %}class="{{messages['password']['validity']}}"{% endif %}>{% if messages %}{{messages['password']['message']}}{% endif %}</span>
+													<span class="hint">Password must be at least 6 and less than 20 characters long and contain at least one numeral (0-9), one lower case letter, one upper case letter, and one special character (! @ # $ % ^ & *)</span><span id="passwordmessageprefix">{% if messages %}<br>{% endif %}</span><span id="passwordmessage" {% if messages %}class="{{messages['password']['validity']}}"{% endif %}>{% if messages %}{{messages['password']['message']}}{% endif %}</span>
 												</div>
 											</div>	
 
@@ -73,7 +73,7 @@
 													<span>Verify Password:</span>
 												</div>
 												<div class="input">					
-													<input type="password" name="verifypassword" id="verifypassword" oninput="resetMessage('verifypassword');" placeholder="Verify password" {% if values %}value="{{values['verify_password']}}"{% endif %}><span id="verifypasswordmessageprefix">{% if messages %}<br>{% endif %}<span id="verifypasswordmessage" {% if messages %}class="{{messages['verify_password']['validity']}}"{% endif %}>{% if messages %}{{messages['verify_password']['message']}}{% endif %}</span>
+													<input type="password" name="verifypassword" id="verifypassword" oninput="resetMessage('verifypassword');" placeholder="Verify password" {% if values %}value="{{values['verify_password']}}"{% endif %}><span id="verifypasswordmessageprefix">{% if messages %}<br>{% endif %}</span><span id="verifypasswordmessage" {% if messages %}class="{{messages['verify_password']['validity']}}"{% endif %}>{% if messages %}{{messages['verify_password']['message']}}{% endif %}</span>
 												</div>
 											</div>
 										</div>
@@ -98,7 +98,7 @@
 												<div class="input">		
 													<input type="date" name="birthdate" id="birthdate" oninput="resetMessage('birthdate');" {% if values %}value="{{values['birthdate']}}"{% endif %}>
 													<br>
-													<span class="hint">(use mm/dd/yyyy format)</span><span id="birthdatemessageprefix">{% if messages %}<br>{% endif %}<span id="birthdatemessage" {% if messages %}class="{{messages['birthdate']['validity']}}"{% endif %}>{% if messages %}{{messages['birthdate']['message']}}{% endif %}</span>
+													<span class="hint">(use mm/dd/yyyy format)</span><span id="birthdatemessageprefix">{% if messages %}<br>{% endif %}</span><span id="birthdatemessage" {% if messages %}class="{{messages['birthdate']['validity']}}"{% endif %}>{% if messages %}{{messages['birthdate']['message']}}{% endif %}</span>
 												</div>
 											</div>
 
@@ -127,7 +127,7 @@
 														{% for country in countries %}
 														<option value="{{country}}" {% if values %}{% if values['nationality'] == country %}selected{% endif %}{% endif %}>{{country}}</option>
 														{% endfor %}
-													</select><span id="nationalitymessageprefix">{% if messages %}<br>{% endif %}<span id="nationalitymessage" {% if messages %}class="{{messages['nationality']['validity']}}"{% endif %}>{% if messages %}{{messages['nationality']['message']}}{% endif %}</span>
+													</select><span id="nationalitymessageprefix">{% if messages %}<br>{% endif %}</span><span id="nationalitymessage" {% if messages %}class="{{messages['nationality']['validity']}}"{% endif %}>{% if messages %}{{messages['nationality']['message']}}{% endif %}</span>
 												</div>
 											</div>
 
@@ -141,7 +141,7 @@
 														{% for country in countries %}
 														<option value="{{country}}" {% if values %}{% if values['residence'] == country %}selected{% endif %}{% endif %}>{{country}}</option>
 														{% endfor %}
-													</select><span id="residencemessageprefix">{% if messages %}<br>{% endif %}<span id="residencemessage" {% if messages %}class="{{messages['residence']['validity']}}"{% endif %}>{% if messages %}{{messages['residence']['message']}}{% endif %}</span>
+													</select><span id="residencemessageprefix">{% if messages %}<br>{% endif %}</span><span id="residencemessage" {% if messages %}class="{{messages['residence']['validity']}}"{% endif %}>{% if messages %}{{messages['residence']['message']}}{% endif %}</span>
 												</div>
 											</div>
 										</div>
@@ -188,7 +188,7 @@
 														{% for educationLevel in educationLevels %}
 														<option value="{{educationLevel}}" {% if values %}{% if values['education_level'] == educationLevel %}selected{% endif %}{% endif %}>{{educationLevel}}</option>
 														{% endfor %}
-													</select><span id="educationlevelmessageprefix">{% if messages %}<br>{% endif %}<span id="educationlevelmessage" {% if messages %}class="{{messages['education_level']['validity']}}"{% endif %}>{% if messages %}{{messages['education_level']['message']}}{% endif %}</span>
+													</select><span id="educationlevelmessageprefix">{% if messages %}<br>{% endif %}</span><span id="educationlevelmessage" {% if messages %}class="{{messages['education_level']['validity']}}"{% endif %}>{% if messages %}{{messages['education_level']['message']}}{% endif %}</span>
 												</div>
 											</div>
 
@@ -202,7 +202,7 @@
 														{% for profession in professions %}
 														<option value="{{profession}}" {% if values %}{% if values['profession'] == profession %}selected{% endif %}{% endif %}>{{profession}}</option>
 														{% endfor %}
-													</select><span id="professionmessageprefix">{% if messages %}<br>{% endif %}<span id="professionmessage" {% if messages %}class="{{messages['profession']['validity']}}"{% endif %}>{% if messages %}{{messages['profession']['message']}}{% endif %}</span>
+													</select><span id="professionmessageprefix">{% if messages %}<br>{% endif %}</span><span id="professionmessage" {% if messages %}class="{{messages['profession']['validity']}}"{% endif %}>{% if messages %}{{messages['profession']['message']}}{% endif %}</span>
 												</div>
 											</div>
 										</div>
@@ -218,7 +218,7 @@
 														{% for sector in sectors %}
 														<option value="{{sector}}" {% if values %}{% if values['sector'] == sector %}selected{% endif %}{% endif %}>{{sector}}</option>
 														{% endfor %}
-													</select><span id="sectormessageprefix">{% if messages %}{% if messages['sector'] %}<br>{% endif %}{% endif %}<span id="sectormessage" {% if messages %}{% if messages['sector'] %}class="{{messages['sector']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['sector'] %}{{messages['sector']['message']}}{% endif %}{% endif %}</span>
+													</select><span id="sectormessageprefix">{% if messages %}{% if messages['sector'] %}<br>{% endif %}{% endif %}</span><span id="sectormessage" {% if messages %}{% if messages['sector'] %}class="{{messages['sector']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['sector'] %}{{messages['sector']['message']}}{% endif %}{% endif %}</span>
 												</div>
 											</div>
 
@@ -233,7 +233,7 @@
 														{% for industry in industries %}
 														<option value="{{industry}}" {% if values %}{% if values['industry'] == industry %}selected{% endif %}{% endif %}>{{industry}}</option>
 														{% endfor %}
-													</select><span id="industrymessageprefix">{% if messages %}{% if messages['industry'] %}<br>{% endif %}{% endif %}<span id="industrymessage" {% if messages %}{% if messages['industry'] %}class="{{messages['industry']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['industry'] %}{{messages['industry']['message']}}{% endif %}{% endif %}</span>
+													</select><span id="industrymessageprefix">{% if messages %}{% if messages['industry'] %}<br>{% endif %}{% endif %}</span><span id="industrymessage" {% if messages %}{% if messages['industry'] %}class="{{messages['industry']['validity']}}"{% endif %}{% endif %}>{% if messages %}{% if messages['industry'] %}{{messages['industry']['message']}}{% endif %}{% endif %}</span>
 												</div>
 											</div>
 										</div>

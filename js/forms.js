@@ -323,23 +323,25 @@ function addAndRemoveClasses(element, classToAdd, classToRemove) {
     }
 }
 
-function validateUser(satisfactionAreas) {
+function validateNewUser(countries, professions, industries, educationLevels) {
 
     var username = $("#username").val();
     var password = $("#password").val();
     var verifyPassword = $("#verifypassword").val();
-    var gender = $("#gender").val();
+    var gender = $("input:radio[name=gender]:checked").val();
     var birthdate = $("#birthdate").val();
     var nationality = $("#nationality").val();
     var residence = $("#residence").val();
-    var area = $("#area").val();
+    var area = $("input:radio[name=area]:checked").val();
     var email = $("#email").val();
     var profession = $("#profession").val();
     var industry = $("#industry").val();
     var sector = $("#sector").val();
-    var education_level = $("#education").val();
-    var isParent = $("#isparent").val();
-    var isCommitted = $("#iscommitted").val();
+    var education_level = $("#educationlevel").val();
+    var isParent = $("input:radio[name=isparent]:checked").val();
+    var isCommitted = $("input:radio[name=iscommitted]:checked").val();
+
+    var containsError = false;
 
     // does not verify all that should be present are present, but verifies the ones that are
     var satisfaction_rating_input_divs = $(".ratingareaslider");
@@ -347,7 +349,7 @@ function validateUser(satisfactionAreas) {
     satisfaction_rating_input_divs.each(function() {
 
         thisRating = $(this).val();
-        thisID = $(this).id();
+        thisID = $(this).attr("id");
 
         if (!validateSatisfactionRating(thisRating, thisID)) {
 
@@ -365,7 +367,7 @@ function validateUser(satisfactionAreas) {
         containsError = true;
     }
 
-    if (!validateVerifyPassword(password, verifypassword)) {
+    if (!validateVerifyPassword(password, verifyPassword)) {
 
         containsError = true;
     }
@@ -380,12 +382,12 @@ function validateUser(satisfactionAreas) {
         containsError = true;
     }
 
-    if (!validateNationality(nationality)) {
+    if (!validateNationality(nationality, countries)) {
 
         containsError = true;
     }
 
-    if (!validateResidence(residence)) {
+    if (!validateResidence(residence, countries)) {
 
         containsError = true;
     }
@@ -395,7 +397,7 @@ function validateUser(satisfactionAreas) {
         containsError = true;
     }
 
-    if (!validateProfession(profession)) {
+    if (!validateProfession(profession, professions)) {
 
         containsError = true;
     }
@@ -405,17 +407,26 @@ function validateUser(satisfactionAreas) {
         containsError = true;
     }
 
-    if (!validateIndustry(industry)) {
+    if (profession != "Student" && 
+        profession != "Retired" && 
+        profession != "Unemployed") {
+        
+        if (!validateIndustry(industry, industries)) {
 
-        containsError = true;
+            containsError = true;
+        }
     }
 
-    if (!validateSector(sector)) {
+    if (profession != "Retired" && 
+        profession != "Unemployed") {
+    
+        if (!validateSector(sector)) {
 
-        containsError = true;
+            containsError = true;
+        }
     }
 
-    if (!validateEducationLevel(education_level)) {
+    if (!validateEducationLevel(education_level, educationLevels)) {
 
         containsError = true;
     }
@@ -465,7 +476,9 @@ function validateSatisfactionRating(ratingString, id) {
 
 function validateUsername(username) {
 
-    if (username.length < 1) {
+    $("#usernamemessageprefix").html("<br>");
+
+    if (username.length < 3) {
 
         addAndRemoveClasses($("#usernamemessage"), "invalid", "valid");
         $("#usernamemessage").html("Username too short.");
@@ -481,7 +494,7 @@ function validateUsername(username) {
 
     if (username.match(/[^a-zA-Z0-9_-]/)) {
 
-        addAndRemoveClasses($("#usernamemessage"), "inalid", "valid");
+        addAndRemoveClasses($("#usernamemessage"), "invalid", "valid");
         $("#usernamemessage").html("Username contains illegal character.");
         return false;
     }
@@ -492,6 +505,8 @@ function validateUsername(username) {
 }
 
 function validatePassword(password) {
+
+    $("#passwordmessageprefix").html("<br>");
 
     if (password.length < 6) {
 
@@ -542,6 +557,8 @@ function validatePassword(password) {
 
 function validateVerifyPassword(password, verifypassword) {
 
+    $("#verifypasswordmessageprefix").html("<br>");
+
     if (password != verifypassword) {
 
         addAndRemoveClasses($("#verifypasswordmessage"), "invalid", "valid");
@@ -556,50 +573,316 @@ function validateVerifyPassword(password, verifypassword) {
 
 function validateGender(gender) {
 
+    $("#gendermessageprefix").html("<br>");
+
+    if (typeof gender == 'undefined') {
+
+        addAndRemoveClasses($("#gendermessage"), "invalid", "valid");
+        $("#gendermessage").html("Please select your gender.");
+        return false;
+    }
+
+    if (gender.length < 1) {
+
+        addAndRemoveClasses($("#gendermessage"), "invalid", "valid");
+        $("#gendermessage").html("Please select your gender.");
+        return false;
+    }
+
+    if (gender != "Male" && gender != "Female" && gender != "Non-binary") {
+
+        addAndRemoveClasses($("#gendermessage"), "invalid", "valid");
+        $("#gendermessage").html("Please select your gender.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#gendermessage"), "valid", "invalid");
+    $("#gendermessage").html("Gender OK.");
+    return true; 
 }
 
 function validateBirthdate(birthdate) {
 
+    $("#birthdatemessageprefix").html("<br>");
+
+    if (birthdate.length < 1) {
+
+        addAndRemoveClasses($("#birthdatemessage"), "invalid", "valid");
+        $("#birthdatemessage").html("Please enter your birthdate.");
+        return false;
+    }
+
+    if (!Date.parse(birthdate)) {
+
+        addAndRemoveClasses($("#birthdatemessage"), "invalid", "valid");
+        $("#birthdatemessage").html("Birthdate is in wrong format.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#birthdatemessage"), "valid", "invalid");
+    $("#birthdatemessage").html("Birthdate dreamt OK.");
+    return true;
 }
 
-function validateNationality(nationality) {
+function validateNationality(nationality, countries) {
 
+    $("#nationalitymessageprefix").html("<br>");   
+
+    var found = false;
+
+    for (i = 0; i < countries.length && !found; i++) {
+      
+        if (countries[i] === nationality) {
+        
+            found = true;
+        }
+    }
+
+    if (!found) {
+
+        addAndRemoveClasses($("#nationalitymessage"), "invalid", "valid");
+        $("#nationalitymessage").html("Please select your nationality.");
+        return false;
+    }  
+
+    addAndRemoveClasses($("#nationalitymessage"), "valid", "invalid");
+    $("#nationalitymessage").html("Nationality OK.");
+    return true;   
 }
 
-function validateResidence(residence) {
+function validateResidence(residence, countries) {
 
+    $("#residencemessageprefix").html("<br>");    
+
+    var found = false;
+
+    for (i = 0; i < countries.length && !found; i++) {
+      
+        if (countries[i] === residence) {
+        
+            found = true;
+        }
+    }
+
+    if (!found) {
+
+        addAndRemoveClasses($("#residencemessage"), "invalid", "valid");
+        $("#residencemessage").html("Please select your country of residence.");
+        return false;
+    }  
+
+    addAndRemoveClasses($("#residencemessage"), "valid", "invalid");
+    $("#residencemessage").html("Country of residence OK.");
+    return true;  
 }
 
 function validateEmail(email) {
 
-}
+    $("#emailmessageprefix").html("<br>");   
 
-function validateProfession(profession) {
+    if (!email.match(/^[\S]+@[\S]+.[\S]+$/)) {
 
+        addAndRemoveClasses($("#emailmessage"), "invalid", "valid");
+        $("#emailmessage").html("Email is not valid.");
+        return false;
+    }  
+
+    addAndRemoveClasses($("#emailmessage"), "valid", "invalid");
+    $("#emailmessage").html("Email OK.");
+    return true; 
 }
 
 function validateArea(area) {
 
+    $("#areamessageprefix").html("<br>");
+
+    if (typeof area == 'undefined') {
+
+        addAndRemoveClasses($("#areamessage"), "invalid", "valid");
+        $("#areamessage").html("Please select the option that best describes the place you live.");
+        return false;
+    }
+
+    if (area.length < 1) {
+
+        addAndRemoveClasses($("#areamessage"), "invalid", "valid");
+        $("#areamessage").html("Please select the option that best describes the place you live.");
+        return false;
+    }
+
+    if (area != "Rural/Small Town" && 
+        area != "Small/Medium City" && 
+        area != "Large City") {
+
+        addAndRemoveClasses($("#areamessage"), "invalid", "valid");
+        $("#areamessage").html("Please select the option that best describes the place you live.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#areamessage"), "valid", "invalid");
+    $("#areamessage").html("Area OK.");
+    return true; 
 }
 
-function validateIndustry(industry) {
+function validateProfession(profession, professions) {
 
+    $("#professionmessageprefix").html("<br>");   
+
+    var found = false;
+
+    for (i = 0; i < professions.length && !found; i++) {
+      
+        if (professions[i] === profession) {
+        
+            found = true;
+        }
+    }
+
+    if (!found) {
+
+        addAndRemoveClasses($("#professionmessage"), "invalid", "valid");
+        $("#professionmessage").html("Please select your profession.");
+        return false;
+    }  
+
+    addAndRemoveClasses($("#professionmessage"), "valid", "invalid");
+    $("#professionmessage").html("Profession OK.");
+    return true;   
+}
+
+function validateIndustry(industry, industries) {
+
+    $("#industrymessageprefix").html("<br>");   
+
+    var found = false;
+
+    for (i = 0; i < industries.length && !found; i++) {
+      
+        if (industries[i] === industry) {
+        
+            found = true;
+        }
+    }
+
+    if (!found) {
+
+        addAndRemoveClasses($("#industrymessage"), "invalid", "valid");
+        $("#industrymessage").html("Please select your industry.");
+        return false;
+    }  
+
+    addAndRemoveClasses($("#industrymessage"), "valid", "invalid");
+    $("#industrymessage").html("Industry OK.");
+    return true;  
 }
 
 function validateSector(sector) {
 
+    $("#sectormessageprefix").html("<br>");
+
+    if (sector.length < 1) {
+
+        addAndRemoveClasses($("#sectormessage"), "invalid", "valid");
+        $("#sectormessage").html("Please select the sector you work in.");
+        return false;
+    }
+
+    if (sector != "Public" && sector != "Private" && sector != "Military") {
+
+        addAndRemoveClasses($("#sectormessage"), "invalid", "valid");
+        $("#sectormessage").html("Please select the sector you work in.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#sectormessage"), "valid", "invalid");
+    $("#sectormessage").html("Work sector OK.");
+    return true; 
 }
 
-function validateEducationLevel(education_level) {
+function validateEducationLevel(education_level, educationLevels) {
 
+    $("#educationlevelmessageprefix").html("<br>");   
+
+    var found = false;
+
+    for (i = 0; i < educationLevels.length && !found; i++) {
+      
+        if (educationLevels[i] === education_level) {
+        
+            found = true;
+        }
+    }
+
+    if (!found) {
+
+        addAndRemoveClasses($("#educationlevelmessage"), "invalid", "valid");
+        $("#educationlevelmessage").html("Please select your highest education level.");
+        return false;
+    }  
+
+    addAndRemoveClasses($("#educationlevelmessage"), "valid", "invalid");
+    $("#educationlevelmessage").html("Education level OK.");
+    return true;   
 }
 
 function validateParent(isParent) {
 
+    $("#isparentmessageprefix").html("<br>");
+
+    if (typeof isParent == 'undefined') {
+
+        addAndRemoveClasses($("#isparentmessage"), "invalid", "valid");
+        $("#isparentmessage").html("Please indicate whether you are a parent.");
+        return false;
+    }
+
+    if (isParent.length < 1) {
+
+        addAndRemoveClasses($("#isparentmessage"), "invalid", "valid");
+        $("#isparentmessage").html("Please indicate whether you are a parent.");
+        return false;
+    }
+
+    if (isParent != "False" && isParent != "True") {
+
+        addAndRemoveClasses($("#isparentmessage"), "invalid", "valid");
+        $("#isparentmessage").html("Please select either 'Yes' or 'No'.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#isparentmessage"), "valid", "invalid");
+    $("#isparentmessage").html("Parent answer OK.");
+    return true; 
 }
 
 function validateCommitted(isCommitted) {
 
+    $("#iscommittedmessageprefix").html("<br>");
+
+    if (typeof isCommitted == 'undefined') {
+
+        addAndRemoveClasses($("#iscommittedmessage"), "invalid", "valid");
+        $("#iscommittedmessage").html("Please indicate whether you are in a committed relationship.");
+        return false;
+    }
+
+    if (isCommitted.length < 1) {
+
+        addAndRemoveClasses($("#iscommittedmessage"), "invalid", "valid");
+        $("#iscommittedmessage").html("Please indicate whether you are in a committed relationship.");
+        return false;
+    }
+
+    if (isCommitted != "False" && isCommitted != "True") {
+
+        addAndRemoveClasses($("#iscommittedmessage"), "invalid", "valid");
+        $("#iscommittedmessage").html("Please select either 'Yes' or 'No'.");
+        return false;
+    }
+
+    addAndRemoveClasses($("#iscommittedmessage"), "valid", "invalid");
+    $("#iscommittedmessage").html("Committment answer OK.");
+    return true; 
 }
 
 function validateDream(tagNameToGroup, userDreamsigns) {
