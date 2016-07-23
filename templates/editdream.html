@@ -1,103 +1,77 @@
-<DOCTYPE !html>
-<html lang="en-US">
-	<head>
-		<meta charset="UTF-8">
-    	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    	<script src="/js/bootstrap.min.js"></script>
-       	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
-		<link type="text/css" rel="stylesheet" href="/stylesheets/forms.css">
-		<title>
-			Edit Dream
-		</title>
-	</head>
+{% extends "base.html" %}
 
-	<body>
+{% block head %}
 
-		<div class="container">
+	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="/js/bootstrap.min.js"></script>
+	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+	<link type="text/css" rel="stylesheet" href="/stylesheets/forms.css">
+	<title>
+		Edit Dream
+	</title>
 
-			<div class="row">
-				<div class="col-xs-12">
-					<h1>Edit Dream "{{dream.title}}"</h1>
-				</div>
-			</div>
+{% endblock %}
 
-			<div class="row" id="formrow">
-				<div class="col-xs-12 formcol">
-					<form action="/dream/edit/{{dream.key().id()}}" method="post">
-						<!-- more editing abilities to come onsubmit="return validateEditDream();" -->
-						<div class="row multisection">
-							<div class="col-xs-12 col-onlymid-6">
+{% block pageContent %}
 
-								<div class="row section" id="editcontent">
-									<div class="col-xs-12 nopadding">
+	<div class="row">
+		<div class="col-xs-12">
+			<h1>Edit Dream "{{dream.title}}"</h1>
+		</div>
+	</div>
 
-										<span class="sectionheader">Content</span>
+	<div class="row" id="formrow">
+		<div class="col-xs-12 formcol">
+			<form action="/dream/edit/{{dream.key().id()}}" method="post">
+				<!-- more editing abilities to come onsubmit="return validateEditDream();" -->
+				<div class="row multisection">
+					<div class="col-xs-12 col-onlymid-6">
 
-										<div class="row">
-											<div class="col-xs-12 col-sm-6 question">
-												<div class="prompt">
-													<span>Edit Content:</span>
-												</div>			
-												<div class="input">
-													<textarea name="content" id="content" rows="10" autocomplete="off" placeholder="Content" oninput="resetMessage('content');">{% if dreamDict %}{{dreamDict["content"]}}{% else %}{{dream.content}}{% endif %}</textarea><span id="contentmessageprefix">{% if messages %}<br>{% endif %}</span><span id="contentmessage" {% if messages %}class="{{messages['content']['validity']}}"{% endif %}>{% if messages %}{{messages['content']['message']}}{% endif %}</span>
-												</div>
-											</div>
+						<div class="row section" id="editcontent">
+							<div class="col-xs-12 nopadding">
+
+								<span class="sectionheader">Content</span>
+
+								<div class="row">
+									<div class="col-xs-12 col-sm-6 question">
+										<div class="prompt">
+											<span>Edit Content:</span>
+										</div>			
+										<div class="input">
+											<textarea name="content" id="content" rows="10" autocomplete="off" placeholder="Content" oninput="resetMessage('content');">{% if dreamDict %}{{dreamDict["content"]}}{% else %}{{dream.content}}{% endif %}</textarea><span id="contentmessageprefix">{% if messages %}<br>{% endif %}</span><span id="contentmessage" {% if messages %}class="{{messages['content']['validity']}}"{% endif %}>{% if messages %}{{messages['content']['message']}}{% endif %}</span>
 										</div>
 									</div>
 								</div>
-
-								<div class="row section" id="edittocome">
-									<div class="col-xs-12 nopadding">
-
-										<span class="sectionheader">Other Editable Sections...</span>
-
-										<div class="row">
-											<div class="col-xs-12 col-sm-6 question">
-												<div class="prompt">
-													<span>Coming soon!</span>
-												</div>			
-												<div class="input">
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
 							</div>
 						</div>
 
-						<br>
-						<input class="submit" type="submit" value="Submit Edits to Dream">
+						<div class="row section" id="edittocome">
+							<div class="col-xs-12 nopadding">
 
-					</form>
+								<span class="sectionheader">Other Editable Sections...</span>
 
-				</div>
-			</div>
+								<div class="row">
+									<div class="col-xs-12 col-sm-6 question">
+										<div class="prompt">
+											<span>Coming soon!</span>
+										</div>			
+										<div class="input">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 
-			<div class="nondream">
-
-				<div class="row">
-					<div class="col-xs-12">
-						<h4 class="dreamheader">Menu</h4>
 					</div>
 				</div>
 
-				<div class="row">
-					<div class="col-xs-12">
-						<p>
-							<a class="dreamlink" href="{{url_for('index')}}">Home</a> | 
-							{% if username %}
-								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
-							{% else %}
-								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a class="dreamlink" href="{{url_for('signin')}}">Sign in to an existing account</a>
-							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
-						</p>
-					</div>
-				</div>
+				<br>
+				<input class="submit" type="submit" value="Submit Edits to Dream">
 
-			</div>
+			</form>
 
 		</div>
+	</div>
 
-	</body>
-</html>
+{% endblock %}
+

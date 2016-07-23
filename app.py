@@ -1824,6 +1824,9 @@ class Register(Handler):
 
 		username_cookie_val = make_secure_val(user.username)
 
+		print user
+		print user.username
+
 		response = redirect_to("home", page=1)
 		response.set_cookie("username", username_cookie_val)
 		return response

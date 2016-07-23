@@ -1,214 +1,191 @@
-<DOCTYPE !html>
-<html lang="en-US">
-	<head>
-		<meta charset="UTF-8">
-    	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    	<script src="/js/bootstrap.min.js"></script>
-       	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
-		<link type="text/css" rel="stylesheet" href="/stylesheets/dream.css">
-		<title>
-			View Dream
-		</title>
-	</head>
+{% extends "base.html" %}
 
-	<body>
-		<!-- start bootstrap container -->
-		<div class="container">
+{% block head %}
 
-			<div class="dream">
+	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="/js/bootstrap.min.js"></script>
+	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+	<link type="text/css" rel="stylesheet" href="/stylesheets/dream.css">
+	<title>
+		View Dream
+	</title>
 
-				<div class="row">
-					<div class="col-xs-12">
-						<h1 class="title">{{dream.title}}</h1>
-					</div>
+{% endblock %}
+
+{% block pageContent %}
+
+	<div class="dream">
+
+		<div class="row">
+			<div class="col-xs-12">
+				<h1 class="title">{{dream.title}}</h1>
+			</div>
+		</div>
+
+		<div class="row byline">
+			<div class="col-xs-12">
+				<p>
+					Dreamt by {% if username == dream.user.username %}you{% else %}{{dream.user.username}}{% endif %} on {{dream.date_dreamt}}.
+					<br>
+					Posted {{dream.date_posted}}.
+					{% if username == dream.user.username %}
+					<br>
+					<a class="dreamlink" href="{{url_for('editdream', id=dream.key().id()|string)}}">Edit dream</a> | <a class="dreamlink" href="{{url_for('deletedream', id=dream.key().id()|string)}}">Delete dream</a>
+					{% endif %}
+				</p>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<h4 class="dreamheader">Stats</h4>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<ul class="dreamstatslist">
+					<li class="lucidity">Dreamer {% if dream.lucidity %}{% if dream.lucid_reason == "WILD" %}entered the dream from directly from being awake without losing awareness/consciousness.  This is sometimes called a "Wake Induced Lucid Dream" (WILD).{% elif dream.lucid_reason == "reality check" %}became aware they were dreaming after performing a reality check that failed.{% elif dream.lucid_reason == "dream sign" %}became aware they were dreaming after recognizing a "dream sign" ("{{dream.dream_sign}}").{% endif %}  After becoming aware they were dreaming, Dreamer remained aware they were dreaming for {% if dream.lucid_length == "very short" %}{% elif dream.lucid_length == "in between" %}{% elif dream.lucid_length == "entire" %}the entire rest of the dream.{% endif %}{% else %}was never aware that they were dreaming during the dream.{% endif %}</li>
+					<li class="control">The dreamer rated their control level over their actions and surroundings during the dream as {{dream.control}}/10 (where 0/10 is "none", 5/10 is "some", and 10/10 is "complete")</li>
+					<li class="enjoyability">The dreamer rated this dream's enjoyability as {{dream.enjoyability}}/10 (where 0/10 is 'unenjoyable", 5/10 is "neutral", and 10/10 is "enjoyable").</li>
+					<li class="types">Dream "types" that describe this dream:
+						<br>
+						{% for type in tagGroupToName['type'] %}<span class="type tag">{{type.name.name}}</span> | {% endfor %}</li>
+					{% if tagGroupToName['being']|length > 0 %}
+					<li class="beings">Beings that appeared in this dream:
+						<br>{% for being in tagGroupToName['being'] %}<span class="being tag">({{being.identifier.type}}) {{being.name.name}}</span> | {% endfor %}</li>
+					{% endif %}
+					{% if tagGroupToName['place']|length > 0 %}
+					<li class="places">Places from this dream:
+						<br>
+						{% for place in tagGroupToName['place'] %}<span class="place tag">({{place.identifier.type}}) {{place.name.name}}</span> | {% endfor %}</li>
+					{% endif %}
+					{% if tagGroupToName['object']|length > 0 %}
+					<li class="objects">Objects that appeared in this dream:
+						<br>
+						{% for object in tagGroupToName['object'] %}<span class="object tag">({{object.identifier.type}}) {{object.name.name}}</span> | {% endfor %}</li>
+					{% endif %}
+					{% if tagGroupToName['emotion']|length > 0 %}
+					<li class="emotions">Emotions felt during dream:
+						<br>{% for emotion in tagGroupToName['emotion'] %}<span class="emotion tag">({{emotion.identifier.type}}) {{emotion.name.name}}</span> | {% endfor %}</li>
+					{% endif %}
+					{% if tagGroupToName['sensation']|length > 0 %}
+					<li class="sensations">Sensations perceived during this dream:
+						<br>{% for sensation in tagGroupToName['sensation'] %}<span class="sensation tag">{{sensation.name.name}}</span> | {% endfor %}</li>
+					{% endif %}
+				</ul>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<h4 class="dreamheader">Narrative</h4>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<p class="content">{{dream.content}}</p>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="awarenesslevel">
+					<a href="{{url_for('likedream', id=dream.key().id()|string)}}" id="awarenessbutton"><img class="likedream" id="awarenessicon" src="/images/awareness.svg" alt="[awareness.sgv]"></a>> <span id="awarenessnumber">{{dream.awareness_level}}</span> dreamers now more aware</span><br><a class="dreamlink" id="likedream" href="{{url_for('likedream', id=dream.key().id()|string)}}" id="awarenessupvote">+ awareness</a>
 				</div>
+			</div>
+		</div>
 
-				<div class="row byline">
-					<div class="col-xs-12">
-						<p>
-							Dreamt by {% if username == dream.user.username %}you{% else %}{{dream.user.username}}{% endif %} on {{dream.date_dreamt}}.
-							<br>
-							Posted {{dream.date_posted}}.
-							{% if username == dream.user.username %}
-							<br>
-							<a class="dreamlink" href="{{url_for('editdream', id=dream.key().id()|string)}}">Edit dream</a> | <a class="dreamlink" href="{{url_for('deletedream', id=dream.key().id()|string)}}">Delete dream</a>
-							{% endif %}
-						</p>
-					</div>
-				</div>
+		{% if username %}
 
-				<div class="row">
-					<div class="col-xs-12">
-						<h4 class="dreamheader">Stats</h4>
-					</div>
-				</div>
+		<br>
 
-				<div class="row">
-					<div class="col-xs-12">
-						<ul class="dreamstatslist">
-							<li class="lucidity">Dreamer {% if dream.lucidity %}{% if dream.lucid_reason == "WILD" %}entered the dream from directly from being awake without losing awareness/consciousness.  This is sometimes called a "Wake Induced Lucid Dream" (WILD).{% elif dream.lucid_reason == "reality check" %}became aware they were dreaming after performing a reality check that failed.{% elif dream.lucid_reason == "dream sign" %}became aware they were dreaming after recognizing a "dream sign" ("{{dream.dream_sign}}").{% endif %}  After becoming aware they were dreaming, Dreamer remained aware they were dreaming for {% if dream.lucid_length == "very short" %}{% elif dream.lucid_length == "in between" %}{% elif dream.lucid_length == "entire" %}the entire rest of the dream.{% endif %}{% else %}was never aware that they were dreaming during the dream.{% endif %}</li>
-							<li class="control">The dreamer rated their control level over their actions and surroundings during the dream as {{dream.control}}/10 (where 0/10 is "none", 5/10 is "some", and 10/10 is "complete")</li>
-							<li class="enjoyability">The dreamer rated this dream's enjoyability as {{dream.enjoyability}}/10 (where 0/10 is 'unenjoyable", 5/10 is "neutral", and 10/10 is "enjoyable").</li>
-							<li class="types">Dream "types" that describe this dream:
-								<br>
-								{% for type in tagGroupToName['type'] %}<span class="type tag">{{type.name.name}}</span> | {% endfor %}</li>
-							{% if tagGroupToName['being']|length > 0 %}
-							<li class="beings">Beings that appeared in this dream:
-								<br>{% for being in tagGroupToName['being'] %}<span class="being tag">({{being.identifier.type}}) {{being.name.name}}</span> | {% endfor %}</li>
-							{% endif %}
-							{% if tagGroupToName['place']|length > 0 %}
-							<li class="places">Places from this dream:
-								<br>
-								{% for place in tagGroupToName['place'] %}<span class="place tag">({{place.identifier.type}}) {{place.name.name}}</span> | {% endfor %}</li>
-							{% endif %}
-							{% if tagGroupToName['object']|length > 0 %}
-							<li class="objects">Objects that appeared in this dream:
-								<br>
-								{% for object in tagGroupToName['object'] %}<span class="object tag">({{object.identifier.type}}) {{object.name.name}}</span> | {% endfor %}</li>
-							{% endif %}
-							{% if tagGroupToName['emotion']|length > 0 %}
-							<li class="emotions">Emotions felt during dream:
-								<br>{% for emotion in tagGroupToName['emotion'] %}<span class="emotion tag">({{emotion.identifier.type}}) {{emotion.name.name}}</span> | {% endfor %}</li>
-							{% endif %}
-							{% if tagGroupToName['sensation']|length > 0 %}
-							<li class="sensations">Sensations perceived during this dream:
-								<br>{% for sensation in tagGroupToName['sensation'] %}<span class="sensation tag">{{sensation.name.name}}</span> | {% endfor %}</li>
-							{% endif %}
-						</ul>
-					</div>
-				</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<button id="addcommentbutton" value="none" onclick="toggleNewCommentForm();">Add Comment</button>
+			</div>
+		</div>
 
-				<div class="row">
-					<div class="col-xs-12">
-						<h4 class="dreamheader">Narrative</h4>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-xs-12">
-						<p class="content">{{dream.content}}</p>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-xs-12">
-						<div class="awarenesslevel">
-							<a href="{{url_for('likedream', id=dream.key().id()|string)}}" id="awarenessbutton"><img class="likedream" id="awarenessicon" src="/images/awareness.svg" alt="[awareness.sgv]"></a>> <span id="awarenessnumber">{{dream.awareness_level}}</span> dreamers now more aware</span><br><a class="dreamlink" id="likedream" href="{{url_for('likedream', id=dream.key().id()|string)}}" id="awarenessupvote">+ awareness</a>
-						</div>
-					</div>
-				</div>
-
-				{% if username %}
+		<div class="row displaynone" id="newcommentformrow">
+			<div class="col-xs-12 newcommentformcol">
 
 				<br>
 
-				<div class="row">
-					<div class="col-xs-12">
-						<button id="addcommentbutton" value="none" onclick="toggleNewCommentForm();">Add Comment</button>
+				<form role="form" action="/dream/view/{{dream.key().id()|string}}" method="post" onsubmit="return validateComment();">
+
+					<div>
+						<span>Write comment in box below (1,000 char limit).</span>
 					</div>
-				</div>
-
-				<div class="row displaynone" id="newcommentformrow">
-					<div class="col-xs-12 newcommentformcol">
-
-						<br>
-
-						<form role="form" action="/dream/view/{{dream.key().id()|string}}" method="post" onsubmit="return validateComment();">
-
-							<div>
-								<span>Write comment in box below (1,000 char limit).</span>
-							</div>
-							<div>
-								<textarea name="newcommentinput" id="newcommentinput" class="commentinput" rows="3" cols="30" autocomplete="off" placeholder="Comment" oninput="resetMessage('newcommentinput');">{% if inputComment %}{{inputComment}}{% endif %}</textarea><span id="newcommentinputmessageprefix">{% if inputComment %}<br>{% endif %}</span><span id="newcommentinputmessage" {% if inputComment %}class="invalid"{% endif %}>{% if inputComment %}Error posting comment. There is a 1,000 char limit.{% endif %}</span>
-							</div>
-
-							<div class="col-xs-12 commentbuttondiv">
-								<input class="submitcomment" type="submit" class="submit" value="Post Comment"></input>
-							</div>
-
-						</form>
-
-						<div class="col-xs-12 commentbuttondiv">
-							<button  class="cancelcomment" value="none" onclick="toggleNewCommentForm();">Cancel</button>
-						</div>
-
+					<div>
+						<textarea name="newcommentinput" id="newcommentinput" class="commentinput" rows="3" cols="30" autocomplete="off" placeholder="Comment" oninput="resetMessage('newcommentinput');">{% if inputComment %}{{inputComment}}{% endif %}</textarea><span id="newcommentinputmessageprefix">{% if inputComment %}<br>{% endif %}</span><span id="newcommentinputmessage" {% if inputComment %}class="invalid"{% endif %}>{% if inputComment %}Error posting comment. There is a 1,000 char limit.{% endif %}</span>
 					</div>
-				</div>
 
-				{% endif %}
-
-				<div class="row">
-					<div class="col-xs-12">
-						<h4 class="dreamheader">Comments</h4>
+					<div class="col-xs-12 commentbuttondiv">
+						<input class="submitcomment" type="submit" class="submit" value="Post Comment"></input>
 					</div>
-				</div>
 
-				<div class="commentcontent">
-
-				{% for comment in commentList %}
-				<div class="row commentrow">
-					<div class="col-xs-12">
-						<p class="commentcontenttext" id="comment{{comment.key().id()}}">> {{comment.content}}</p>
-						<!-- edit/delete comment box -->
-						<span class="displaynone" id="editcommentbox{{comment.key().id()}}">
-							<textarea class="commentinput" name="editcomment{{comment.key().id()}}" id="editcomment{{comment.key().id()}}" rows="3" cols="30" autocomplete="off" placeholder="Comment">{{comment.content}}</textarea><span id="comment{{comment.key().id()}}messageprefix">{% if editedComments %}{% if comment.key().id() in editedComments %}<br>{% endif %}{% endif %}</span><span id="comment{{comment.key().id()}}message" {% if editedComments %}{% if comment.key().id() in editedComments %}class="invalid"{% endif %}{% endif %}>{% if editedComments %}{% if comment.key().id() in editedComments %}Error editing comment. There is a 1,000 char limit.{% endif %}{% endif %}</span>
-
-							<br>
-
-							<div class="commentbuttondiv">
-								<button class="submitcomment" id="submitcommentedit{{comment.key().id()}}" value="none" onclick="submitCommentEdit({{comment.key().id()}})">Submit Edits</button>
-								<button class="cancelcomment" id="cancelcommentedit{{comment.key().id()}}" value="none" onclick="toggleEditComment({{comment.key().id()}});">Cancel</button>
-							</div>
-						</span>
-						<!-- end editcommentbox -->
-						<span class="commentbyline">by {{comment.user.username}} on {{comment.date_posted}}</span>
-
-						{% if comment.user.username == username %}
-						<br>
-						<span class="commentlinks" id="comment{{comment.key().id()}}links"><a class="dreamlink" href="javascript:;" onclick="toggleEditComment({{comment.key().id()}}); clearCommentEdits();">Edit comment</a> | <a class="dreamlink" href="javascript:;" onclick="deleteComment({{comment.key().id()}});">Delete comment</a></span>
-						{% endif %}
-					</div>
-				</div>
-				<br>
-				{% endfor %}
-
-				</div>
-
-				<!-- form that actually submits the comment edit/delete -->
-				<form role="form" class="displaynone" action="/dream/view/{{dream.key().id()|string}}" method="post" onsubmit="return validateCommentEdit();">
-					<input id="commenteditforminputcontent" name="commenteditforminputcontent" type="hidden" value="">
-					<input id="commenteditforminputid" name="commenteditforminputid" type="hidden" value="">
-					<input id="commenteditforminputdelete" name="commenteditforminputdelete" type="hidden" value="">
-					<input id="submitcommentedit" type="submit" class="submit" value="submit"></input>
 				</form>
 
-			</div>
-
-			<div class="nondream">
-
-				<div class="row">
-					<div class="col-xs-12">
-						<h4 class="dreamheader">Menu</h4>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-xs-12">
-						<p>
-							<a class="dreamlink" href="{{url_for('index')}}">Home</a> | 
-							{% if username %}
-								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
-							{% else %}
-								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a class="dreamlink" href="{{url_for('signin')}}">Sign in to an existing account</a>
-							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
-						</p>
-					</div>
+				<div class="col-xs-12 commentbuttondiv">
+					<button  class="cancelcomment" value="none" onclick="toggleNewCommentForm();">Cancel</button>
 				</div>
 
 			</div>
+		</div>
+
+		{% endif %}
+
+		<div class="row">
+			<div class="col-xs-12">
+				<h4 class="dreamheader">Comments</h4>
+			</div>
+		</div>
+
+		<div class="commentcontent">
+
+		{% for comment in commentList %}
+		<div class="row commentrow">
+			<div class="col-xs-12">
+				<p class="commentcontenttext" id="comment{{comment.key().id()}}">> {{comment.content}}</p>
+				<!-- edit/delete comment box -->
+				<span class="displaynone" id="editcommentbox{{comment.key().id()}}">
+					<textarea class="commentinput" name="editcomment{{comment.key().id()}}" id="editcomment{{comment.key().id()}}" rows="3" cols="30" autocomplete="off" placeholder="Comment">{{comment.content}}</textarea><span id="comment{{comment.key().id()}}messageprefix">{% if editedComments %}{% if comment.key().id() in editedComments %}<br>{% endif %}{% endif %}</span><span id="comment{{comment.key().id()}}message" {% if editedComments %}{% if comment.key().id() in editedComments %}class="invalid"{% endif %}{% endif %}>{% if editedComments %}{% if comment.key().id() in editedComments %}Error editing comment. There is a 1,000 char limit.{% endif %}{% endif %}</span>
+
+					<br>
+
+					<div class="commentbuttondiv">
+						<button class="submitcomment" id="submitcommentedit{{comment.key().id()}}" value="none" onclick="submitCommentEdit({{comment.key().id()}})">Submit Edits</button>
+						<button class="cancelcomment" id="cancelcommentedit{{comment.key().id()}}" value="none" onclick="toggleEditComment({{comment.key().id()}});">Cancel</button>
+					</div>
+				</span>
+				<!-- end editcommentbox -->
+				<span class="commentbyline">by {{comment.user.username}} on {{comment.date_posted}}</span>
+
+				{% if comment.user.username == username %}
+				<br>
+				<span class="commentlinks" id="comment{{comment.key().id()}}links"><a class="dreamlink" href="javascript:;" onclick="toggleEditComment({{comment.key().id()}}); clearCommentEdits();">Edit comment</a> | <a class="dreamlink" href="javascript:;" onclick="deleteComment({{comment.key().id()}});">Delete comment</a></span>
+				{% endif %}
+			</div>
+		</div>
+		<br>
+		{% endfor %}
 
 		</div>
-		<!-- end bootstrap container -->
+
+		<!-- form that actually submits the comment edit/delete -->
+		<form role="form" class="displaynone" action="/dream/view/{{dream.key().id()|string}}" method="post" onsubmit="return validateCommentEdit();">
+			<input id="commenteditforminputcontent" name="commenteditforminputcontent" type="hidden" value="">
+			<input id="commenteditforminputid" name="commenteditforminputid" type="hidden" value="">
+			<input id="commenteditforminputdelete" name="commenteditforminputdelete" type="hidden" value="">
+			<input id="submitcommentedit" type="submit" class="submit" value="submit"></input>
+		</form>
+
+	</div>
+
+{% endblock %}
+
+{% block scripts %}
 	<script src="/js/forms.js"></script>
-	</body>
-</html>
+{% endblock %}
+

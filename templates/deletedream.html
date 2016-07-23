@@ -1,86 +1,60 @@
-<DOCTYPE !html>
-<html lang="en-US">
-	<head>
-		<meta charset="UTF-8">
+{% extends "base.html" %}
+
+{% block head %}
+
        	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
 		<link type="text/css" rel="stylesheet" href="/stylesheets/forms.css">
 		<title>
 			Delete Dream
 		</title>
-	</head>
 
-	<body>
+{% endblock %}
 
-		<div class="container">
+{% block pageContent %}
 
-			<div class="row">
-				<div class="col-xs-12">
-					{% if dream %}
-					<h1>Delete Dream "{{dream.title}}"</h1>
-					{% else %}
-					<p> This dream no longer exists.</p>
-					{% endif %}
-				</div>
-			</div>
-
+	<div class="row">
+		<div class="col-xs-12">
 			{% if dream %}
-			<div class="row" id="formrow">
-				<div class="col-xs-12 formcol">
+			<h1>Delete Dream "{{dream.title}}"</h1>
+			{% else %}
+			<p> This dream no longer exists.</p>
+			{% endif %}
+		</div>
+	</div>
 
-					<form action="/dream/delete/{{dream.key().id()}}" method="post">
+	{% if dream %}
+	<div class="row" id="formrow">
+		<div class="col-xs-12 formcol">
 
-						<div class="row multisection">
-							<div class="col-xs-12 col-onlymid-6">
+			<form action="/dream/delete/{{dream.key().id()}}" method="post">
 
-								<div class="row section" id="deletedream">
-									<div class="col-xs-12 nopadding">
+				<div class="row multisection">
+					<div class="col-xs-12 col-onlymid-6">
 
-										<div class="row">
-											<div class="col-xs-12 col-sm-6 question">
-												<div class="prompt">
-													<span>Really delete dream "{{dream.title}}"?  This action cannot be undone.</span>
-												</div>			
-												<div class="input">
-													<input id="deletedreambutton" class="submit" type="submit" value="Yes, delete the dream">
-												</div>
-											</div>
+						<div class="row section" id="deletedream">
+							<div class="col-xs-12 nopadding">
+
+								<div class="row">
+									<div class="col-xs-12 col-sm-6 question">
+										<div class="prompt">
+											<span>Really delete dream "{{dream.title}}"?  This action cannot be undone.</span>
+										</div>			
+										<div class="input">
+											<input id="deletedreambutton" class="submit" type="submit" value="Yes, delete the dream">
 										</div>
 									</div>
 								</div>
-
 							</div>
 						</div>
 
-					</form>
-
-				</div>
-			</div>
-			{% endif %}
-
-			<div class="nondream">
-
-				<div class="row">
-					<div class="col-xs-12">
-						<h4 class="dreamheader">Menu</h4>
 					</div>
 				</div>
 
-				<div class="row">
-					<div class="col-xs-12">
-						<p>
-							<a class="dreamlink" href="{{url_for('index')}}">Home</a> | 
-							{% if username %}
-								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
-							{% else %}
-								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a class="dreamlink" href="{{url_for('signin')}}">Sign in to an existing account</a>
-							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
-						</p>
-					</div>
-				</div>
-
-			</div>
+			</form>
 
 		</div>
+	</div>
+	{% endif %}
 
-	</body>
-</html>
+{% endblock %}
+

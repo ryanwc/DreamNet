@@ -10,7 +10,17 @@ By understanding our subconscious, we understand a large contributor to the reas
 
 # Using the App
 
-To get started using the app, go to the following address:
+To get started using the app, you can go to the live website, or you can download this repo and run the program locally.
+
+To run the program locally, take the following steps:
+
+1. Ensure you have Python 2.7 installed.
+2. Download all of the files in this repo into the same directory.
+3. Navigate to that folder on the command line.
+4. At the command line, run the command `dev_appserver.py .`
+5. In a web browser, navigate to http://localhost:8080/home
+
+To visit the live website, go to the following address:
 
 http://dream-net-1380.appspot.com/home
 
