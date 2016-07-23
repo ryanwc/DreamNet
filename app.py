@@ -14,21 +14,31 @@ jinja_env.globals['url_for'] = webapp2.uri_for
 
 
 class Handler(webapp2.RequestHandler):
+	''' Handle HTTP requests and serve appropriate pages/code
+	'''
 	def write(self, *a, **kw):
+		''' Write a response
+		'''
 		self.response.out.write(*a, **kw)
 
 	def render_str(self, template, **params):
+		''' Render a jinja template
+		'''
 		t = jinja_env.get_template(template)
 		return t.render(params)
 
 	def render(self, template, **kw):
+		''' Render a jinja template to browser by writing it to response
+		'''
 		self.write(self.render_str(template, **kw))
 
 ## need to refactor this for modules
 # define entities
+# question: after udacity should i ditch datastore in favor of free RDB?
 
 class User(db.Model):
-	# what other properties?
+	''' Datastore model for an app "user"
+	'''
 	username = db.StringProperty(required = True)
 	lc_username = db.StringProperty(required = True)
 	password = db.StringProperty(required = True)
@@ -48,6 +58,8 @@ class User(db.Model):
 	useful_dreams = db.StringProperty(required = True, multiline = True)
 
 class Dream(db.Model):
+	''' Datastore model for a dream (a "post")
+	'''
 	# what other properties?
 	# do not need to record gender, nationality because those don't change
 	# (if someone has a sex change, 
@@ -83,10 +95,14 @@ class Dream(db.Model):
 
 	## maybe not right, idea is to render \n as HTML breaks
 	def render(self):
+		''' Render a dream with \n as line breaks
+		'''
 		self._render_text = self.content.replace("\n", "<br>")
 		return render_str(self._render_text)
 
 class Comment(db.Model):
+	''' Datastore model for a comment to a dream
+	'''
 	user = db.ReferenceProperty(User,
 								collection_name = "comments")
 	dream = db.ReferenceProperty(Dream,
@@ -96,14 +112,20 @@ class Comment(db.Model):
 
 # identifier ("a(n)", "my") for tags
 class Identifier(db.Model):
+	''' Datastore model for a identifier (e.g., "the") for a dream tag
+	'''
 	type = db.StringProperty(required = True)
 
 # types, places, beings, objects, emotions, sensations
 class TagGroup(db.Model):
+	''' Datastore model for a "kind" of dream tag
+	'''
 	name = db.StringProperty(required = True)
 	description = db.StringProperty()
 
 class TagName(db.Model):
+	''' Datastore model for the name of a dream tag
+	'''
 	name = db.StringProperty(required = True)
 	lc_name = db.StringProperty(required = True)
 	group = db.ReferenceProperty(TagGroup,
@@ -111,6 +133,8 @@ class TagName(db.Model):
 	description = db.StringProperty()
 
 class Tag(db.Model):
+	''' Datastore model for an instance of a dream tag
+	'''
 	dream = db.ReferenceProperty(Dream,
 								 collection_name = "tags")
 	name = db.ReferenceProperty(TagName,
@@ -120,11 +144,15 @@ class Tag(db.Model):
 
 # e.g., impossibility
 class RealityCheckMechanism(db.Model):
+	''' Datastore model for a reality check mechanism
+	'''
 	name = db.StringProperty(required = True)
 	description = db.StringProperty()
 
 # a specific user's unique dreamsigns
 class DreamSign(db.Model):
+	''' Datastore model for one dream sign for one user
+	'''
 	nickname = db.StringProperty(required = True)
 	mechanism = db.ReferenceProperty(RealityCheckMechanism,
 									 collection_name = "dream_signs")
@@ -138,6 +166,8 @@ class DreamSign(db.Model):
 
 # specific instance of a reality check, which could also be a dream sign
 class RealityCheck(db.Model):
+	''' Datastore model for a specific instance of a reality check
+	'''
 	tag = db.ReferenceProperty(Tag,
 							   collection_name = "reality_checks")
 	mechanism = db.ReferenceProperty(RealityCheckMechanism,
@@ -157,17 +187,114 @@ class RealityCheck(db.Model):
 
 ### some globals
 
-COUNTRIES = ["Afganistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bonaire", "Bosnia and Herzegovina", "Botswana", "Brazil", "British Indian Ocean Ter", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Canary Islands", "Cape Verde", "Cayman Islands", "Central African Republic", "Chad", "Channel Islands", "Chile", "China", "Christmas Island", "Cocos Island", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "Cote DIvoire", "Croatia", "Cuba", "Curaco", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Ter", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Great Britain", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guinea", "Guyana", "Haiti", "Hawaii", "Honduras", "Hong Kong", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea Sout", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macau", "Macedonia", "Madagascar", "Malaysia", "Malawi", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Midway Islands", "Moldova", "Monaco", "Mongolia", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Nambia", "Nauru", "Nepal", "Netherland Antilles", "Netherlands", "Nevis", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "Norway", "Oman", "Pakistan", "Palau Island", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Phillipines", "Pitcairn Island", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic of Montenegro", "Republic of Serbia", "Reunion", "Romania", "Russia", "Rwanda", "St Barthelemy", "St Eustatius", "St Helena", "St Kitts-Nevis", "St Lucia", "St Maarten", "St Pierre and Miquelon", "St Vincent and Grenadines", "Saipan", "Samoa", "Samoa American", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Tahiti", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks and Caicos Is", "Tuvalu", "Uganda", "Ukraine", "United Arab Erimates", "United Kingdom", "United States of America", "Uraguay", "Uzbekistan", "Vanuatu", "Vatican City State", "Venezuela", "Vietnam", "Virgin Islands (Brit)", "Virgin Islands (USA)", "Wake Island", "Wallis and Futana Is", "Yemen", "Zaire", "Zambia", "Zimbabwe"]
+COUNTRIES = ["Afganistan", "Albania", "Algeria", "American Samoa", "Andorra", 
+	"Angola", "Anguilla", "Antigua and Barbuda", "Argentina", "Armenia", 
+	"Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", 
+	"Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", 
+	"Bermuda", "Bhutan", "Bolivia", "Bonaire", "Bosnia and Herzegovina", 
+	"Botswana", "Brazil", "British Indian Ocean Ter", "Brunei", "Bulgaria", 
+	"Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", 
+	"Canary Islands", "Cape Verde", "Cayman Islands", 
+	"Central African Republic", "Chad", "Channel Islands", "Chile", "China", 
+	"Christmas Island", "Cocos Island", "Colombia", "Comoros", "Congo", 
+	"Cook Islands", "Costa Rica", "Cote DIvoire", "Croatia", "Cuba", "Curaco", 
+	"Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", 
+	"Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", 
+	"Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Falkland Islands", 
+	"Faroe Islands", "Fiji", "Finland", "France", "French Guiana", 
+	"French Polynesia", "French Southern Ter", "Gabon", "Gambia", "Georgia", 
+	"Germany", "Ghana", "Gibraltar", "Great Britain", "Greece", "Greenland", 
+	"Grenada", "Guadeloupe", "Guam", "Guatemala", "Guinea", "Guyana", "Haiti", 
+	"Hawaii", "Honduras", "Hong Kong", "Hungary", "Iceland", "India", 
+	"Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", 
+	"Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", 
+	"Korea North", "Korea Sout", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", 
+	"Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", 
+	"Luxembourg", "Macau", "Macedonia", "Madagascar", "Malaysia", "Malawi", 
+	"Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", 
+	"Mauritania", "Mauritius", "Mayotte", "Mexico", "Midway Islands", 
+	"Moldova", "Monaco", "Mongolia", "Montserrat", "Morocco", "Mozambique", 
+	"Myanmar", "Nambia", "Nauru", "Nepal", "Netherland Antilles", 
+	"Netherlands", "Nevis", "New Caledonia", "New Zealand", "Nicaragua", 
+	"Niger", "Nigeria", "Niue", "Norfolk Island", "Norway", "Oman", "Pakistan", 
+	"Palau Island", "Palestine", "Panama", "Papua New Guinea", 
+	"Paraguay", "Peru", "Phillipines", "Pitcairn Island", "Poland", 
+	"Portugal", "Puerto Rico", "Qatar", "Republic of Montenegro", 
+	"Republic of Serbia", "Reunion", "Romania", "Russia", "Rwanda", 
+	"St Barthelemy", "St Eustatius", "St Helena", "St Kitts-Nevis", 
+	"St Lucia", "St Maarten", "St Pierre and Miquelon", 
+	"St Vincent and Grenadines", "Saipan", "Samoa", "Samoa American", 
+	"San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", 
+	"Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", 
+	"Slovenia", "Solomon Islands", "Somalia", "South Africa", "Spain", 
+	"Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", 
+	"Syria", "Tahiti", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", 
+	"Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", 
+	"Turkmenistan", "Turks and Caicos Is", "Tuvalu", "Uganda", "Ukraine", 
+	"United Arab Erimates", "United Kingdom", "United States of America", 
+	"Uraguay", "Uzbekistan", "Vanuatu", "Vatican City State", "Venezuela", 
+	"Vietnam", "Virgin Islands (Brit)", "Virgin Islands (USA)", "Wake Island", 
+	"Wallis and Futana Is", "Yemen", "Zaire", "Zambia", "Zimbabwe"]
+
 AREAS = ["Rural/Small Town", "Small/Medium City", "Large City"]
 
-INDUSTRIES = ["Agriculture, Forestry, Fishing, and Hunting", "Automotive", "Arts, Entertainment, and Recreation", "Business Services - Administrative Support", "Business Services - Excluding Admin Support", "Construction", "Educational Services", "Finance/Banking", "Food Services and Drinking Establishments", "Health Services", "Hospitals", "Hospitality", "Insurance", "Manufacturing - Durable Goods", "Manufacturing - Nondurable Goods", "Museums/Historical Sites/Similar Institutions", "Natural Resources - Excluding Oil and Gas", "Natural Resources - Oil and Gas", "Other Information Services", "Postal Service", "Private Households", "Retail - Food and Beverage", "Retail - Household", "Retail - General", "Retail - Sporting, Hobby, or Leisure", "Scientific and Technical Services", "Publishing/Broadcasting - Excluding Internet", "Publishing/Broadcasting - Internet", "Real Estate", "Religious Institutions and Services", "Rental and Leasing Services", "Repair and Maintenance", "Social Assistance", "Telecommunications", "Transportation - Bulk Materials/Goods", "Transportation - Passengers", "Utilities", "Warehousing and Storage", "Waste Management and Remediation Services", "Wholesalers - Durable Goods", "Wholesalers - Nondurable Goods"]
+INDUSTRIES = ["Agriculture, Forestry, Fishing, and Hunting", "Automotive", 
+	"Arts, Entertainment, and Recreation", 
+	"Business Services - Administrative Support", 
+	"Business Services - Excluding Admin Support", "Construction", 
+	"Educational Services", "Finance/Banking", 
+	"Food Services and Drinking Establishments", 
+	"Health Services", "Hospitals", "Hospitality", 
+	"Insurance", "Manufacturing - Durable Goods", 
+	"Manufacturing - Nondurable Goods", 
+	"Museums/Historical Sites/Similar Institutions", 
+	"Natural Resources - Excluding Oil and Gas", 
+	"Natural Resources - Oil and Gas", "Other Information Services", 
+	"Postal Service", "Private Households", "Retail - Food and Beverage", 
+	"Retail - Household", "Retail - General", 
+	"Retail - Sporting, Hobby, or Leisure", 
+	"Scientific and Technical Services", 
+	"Publishing/Broadcasting - Excluding Internet", 
+	"Publishing/Broadcasting - Internet", "Real Estate", 
+	"Religious Institutions and Services", "Rental and Leasing Services", 
+	"Repair and Maintenance", "Social Assistance", "Telecommunications", 
+	"Transportation - Bulk Materials/Goods", "Transportation - Passengers", 
+	"Utilities", "Warehousing and Storage", 
+	"Waste Management and Remediation Services", 
+	"Wholesalers - Durable Goods", "Wholesalers - Nondurable Goods"]
+
 SECTORS = ["Public", "Private", "Military"]
-PROFESSIONS = ["Advertiser", "Accountant", "Actuary", "Administrative support professional", "Administrator", "Architect", "Artist", "Buying/purchasing professional", "Caretaker", "Clergy", "Corporate governance professional", "Corrections officer", "Designer", "Distribution/logistics professional", "Engineer", "Finance professional", "Human resources professional", "Information technology professional", "Judge", "Legislator", "Laborer", "Lawyer", "Lobbyist", "Manager", "Marketer", "Mathemetician", "Medical doctor", "Nurse", "Quality control professional", "Performer", "Politician", "Police officer", "Professor", "Psychologist / counseler", "Public relations professional", "Researcher", "Retired", "Salesperon", "Scientist", "Security professional", "Senior executive", "Skilled tradesperson", "Social worker", "Strategist", "Student", "Surveyor", "Teacher", "Translator", "Unemployed"]
+PROFESSIONS = ["Advertiser", "Accountant", "Actuary", 
+	"Administrative support professional", "Administrator", "Architect", 
+	"Artist", "Buying/purchasing professional", "Caretaker", "Clergy", 
+	"Corporate governance professional", "Corrections officer", "Designer", 
+	"Distribution/logistics professional", "Engineer", "Finance professional", 
+	"Human resources professional", "Information technology professional", 
+	"Judge", "Legislator", "Laborer", "Lawyer", "Lobbyist", "Manager", 
+	"Marketer", "Mathemetician", "Medical doctor", "Nurse", 
+	"Quality control professional", "Performer", "Politician", 
+	"Police officer", "Professor", "Psychologist / counseler", 
+	"Public relations professional", "Researcher", "Retired", "Salesperon", 
+	"Scientist", "Security professional", "Senior executive", 
+	"Skilled tradesperson", "Social worker", "Strategist", "Student", 
+	"Surveyor", "Teacher", "Translator", "Unemployed"]
+
 NO_INDUSTRY_PROFESSIONS = ["Student", "Retired", "Unemployed"]
 NO_SECTOR_PROFESSIONS = ["Retired", "Unemployed"]
-EDUCATION_LEVELS = ["Have not graduated high school", "High school graduate or equivalent", "Trade school graduate", "College graduate", "Master's Degree", "Doctorate"]
+EDUCATION_LEVELS = ["Have not graduated high school", 
+	"High school graduate or equivalent", "Trade school graduate", 
+	"College graduate", "Master's Degree", "Doctorate"]
 
-SATISFACTION_AREAS = [{"name": "Career","code":"carsat"},{"name": "Finances","code":"finsat"}, {"name": "Mental Health","code":"mensat"}, {"name":"Physical Health","code":"physat"}, {"name":"Friends","code":"frisat"}, {"name":"Family","code":"famsat"}, {"name":"Significant Other / Romance","code":"romsat"}, {"name":"Personal Growth","code":"grosat"}, {"name":"Fun and Recreation","code":"funsat"}, {"name":"Physical Environment","code":"envsat"}]
+SATISFACTION_AREAS = [{"name": "Career","code":"carsat"},
+	{"name": "Finances","code":"finsat"}, 
+	{"name": "Mental Health","code":"mensat"}, 
+	{"name":"Physical Health","code":"physat"}, 
+	{"name":"Friends","code":"frisat"}, 
+	{"name":"Family","code":"famsat"}, 
+	{"name":"Significant Other / Romance","code":"romsat"}, 
+	{"name":"Personal Growth","code":"grosat"}, 
+	{"name":"Fun and Recreation","code":"funsat"}, 
+	{"name":"Physical Environment","code":"envsat"}]
 
 GENDERS = ["Male", "Female", "Non-binary"]
 
@@ -180,9 +307,10 @@ IDENTIFIERS = ["possesive", "indefinite", "definite", "none"]
 # set some initial tags
 TAGS = {}
 
-TYPES = ["flying", "superhero-like", "falling", "nudity", "sexual", "nightmarish", "being chased",
-		 "paralysis", "being trapped", "difficulty moving", "difficulty breathing", "eating", "death",
-		 "violence", "testing/school exams", "aquatic", "demonic"]
+TYPES = ["flying", "superhero-like", "falling", "nudity", "sexual", 
+	"nightmarish", "being chased", "paralysis", "being trapped", 
+	"difficulty moving", "difficulty breathing", "eating", "death", "violence", 
+	"testing/school exams", "aquatic", "demonic"]
 '''
 "religious", "angelic", "heavenly", "fantasy", "sci-fi", "romance", "comedy",
 "being late", "missed appointment/event", "hellish",
@@ -209,9 +337,10 @@ BEINGS = ["mother", "father", "brother", "sister", "aunt", "uncle",
 '''
 
 PLACES = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
-		  "bedroom", "livingroom", "bathroom", "hallway", "ruins", "religious building",
-		  "military base", "heaven", "hell", "beach", "house", "road/highway",
-		  "ocean", "lake", "river", "swamp", "desert", "glacier", "rainforest"]
+		  "bedroom", "livingroom", "bathroom", "hallway", "ruins", 
+		  "religious building", "military base", "heaven", "hell", "beach", 
+		  "house", "road/highway", "ocean", "lake", "river", "swamp", 
+		  "desert", "glacier", "rainforest"]
 '''
 "forest", "boat", "cave", "office building", "abandoned building",
 "stadium", "open field", "farm", "mountain", "airport", "school",
@@ -223,8 +352,9 @@ PLACES = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
 
 OBJECTS = ["bowl", "door", "hat", "chair",
 		  "staircase", "flag", "gun", "knife", "car",
-		  "boat", "airplane", "spoon", "fork", "table", "wall", "present",
-		  "strawberry", "food", "blueberry", "analog timepiece", "digital timepiece"]
+		  "boat", "airplane", "spoon", "fork", "table", "wall", 
+		  "present", "strawberry", "food", "blueberry", "analog timepiece", 
+		  "digital timepiece"]
 '''
 "light switch", "lightbulb", "mirror", "book",
 "window", "train", "elevator", "escalator", 
@@ -269,28 +399,38 @@ TAGS['sensation'] = SENSATIONS
 ### helper functions
 
 def make_salt():
-    return ''.join(random.choice(string.letters) for x in xrange(5))
+	''' Create salt for a hashed password
+	'''
+	return ''.join(random.choice(string.letters) for x in xrange(5))
 
 def make_pw_hash(name, pw, salt=None):
+	''' Create a salted hash for a password
+	'''
 	if not salt:
 		salt = make_salt()
 	h = hashlib.sha256(name + pw + salt).hexdigest()
 	return '%s,%s' % (h, salt)
 
 def correct_pw(name, pw, h):
+	''' Check if given password matches the hashed password for a user
+	'''
 	salt = h.split(",")[1]
 	return h == make_pw_hash(name, pw, salt)
 
 # set signin regexes and validators
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
-    return USER_RE.match(username)
+	''' Determine whether valid username
+	'''
+	return USER_RE.match(username)
 
 SPECIAL_CHAR_RE = re.compile(r"[\!@\#\$%\^&\*]")
 NUMBER_RE = re.compile(r"[0-9]")
 LOWER_CASE_RE = re.compile(r"[a-z]")
 UPPER_CASE_RE = re.compile(r"[A-Z]")
 def valid_password(password):
+	''' Determine whether valid password
+	'''
 
 	if len(password) < 6:
 		return False
@@ -314,34 +454,46 @@ def valid_password(password):
 
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 def valid_email(email):
+	''' Determine whether valid email
+	'''
 	return EMAIL_RE.match(email)
 
 SECRET = 'examplesecret'
+# i wonder if it's best practice to update the "secret" regularly?
 def hash_str(s):
-    return hmac.new(SECRET, s).hexdigest()
+	''' Return string hashed with a secret
+	'''
+	return hmac.new(SECRET, s).hexdigest()
 
 def make_secure_val(s):
+	''' Create secure value from a string to hash(string+secret)
+	'''
 	return "%s|%s" % (s, hash_str(s))
 
 # allows for '|' in the value
 def check_secure_val(h):
-    li = h.split("|")
-    HASH = li[len(li)-1]
-    s = ""
+	''' Check if a value holds a string and hash(string+secret)
+	Would mean this value is (basically) 
+	secure if we know we kept the secret between us and client/user
+	'''
+	li = h.split("|")
+	HASH = li[len(li)-1]
+	s = ""
 
-    for x in range(len(li)-1):
-        s += li[x]
+	for x in range(len(li)-1):
+		s += li[x]
 
-        if x < (len(li)-2):
-            s += "|"
+		if x < (len(li)-2):
+			s += "|"
 
-    if hash_str(s) == HASH:
-        return s
-    else:
-        return None
+	if hash_str(s) == HASH:
+		return s
+	else:
+		return None
 
 def getUserFromSecureCookie(username_cookie_val):
-
+	''' Check if "user logged in" cookie is secure
+	'''
 	username = None
 
 	if username_cookie_val:
@@ -352,7 +504,9 @@ def getUserFromSecureCookie(username_cookie_val):
 	return username
 
 def get_valid_date(date):
-
+	''' Return Python datetime.date for a string with year-month-day
+	format, where the "-" separator could be any character other than number
+	'''
 	date_string = str(date)
 	date_array = re.split(r"[^0-9]", date_string)
 
@@ -365,8 +519,14 @@ def get_valid_date(date):
 
 # define template servers
 class Home(Handler):
+	''' Serve the homepage
+	'''
 	def get(self, page=1):
-		username = getUserFromSecureCookie(self.request.cookies.get("username"))
+		''' Respond to get request and render the homepage
+		TO-DO: Make multiple pages, so for example only 10 dreams per page
+		'''
+		username = getUserFromSecureCookie(self.request.\
+			cookies.get("username"))
 
 		'''
 		#
@@ -376,7 +536,8 @@ class Home(Handler):
 			group = TagGroup(name=group)
 			group.put()
 			for tagname in TAGS[group.name]:
-				tag = TagName(name=tagname, lc_name=tagname.lower(), group=group)
+				tag = TagName(name=tagname, lc_name=tagname.lower(), 
+					group=group)
 				tag.put()
 
 		for identifier in IDENTIFIERS:
@@ -414,7 +575,11 @@ class Home(Handler):
 		self.render("home.html", username=username, dreams=dreams)
 
 class NewDream(Handler):
+	''' Serve form to record/post a new dream
+	'''
 	def get(self):
+		''' Respond to get request and render the new dream form
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
 		if not username:
@@ -449,6 +614,11 @@ class NewDream(Handler):
 					userDreamsigns=userDreamsigns, username=username)
 
 	def post(self):
+		''' Respond to post request and either create a new dream and redirect
+		to view the dream, or, if there is a problem, re-render the dream 
+		form with all input still in place and messages indicating 
+		if the input is valid or not
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		users = User.all()
 		users.filter("username =", username)
@@ -473,21 +643,24 @@ class NewDream(Handler):
 			try:
 				date_dreamt = get_valid_date(dreamDict["date_dreamt"])
 			except ValueError:
-				messages["date_dreamt"] = {"message": "Please fix the date formatting (mm/dd/yyyy)",
-							 	 	       "validity": "invalid"}
+				messages["date_dreamt"] = {"message": 
+					"Please fix the date formatting (mm/dd/yyyy)",
+					"validity": "invalid"}
 
 			if date_dreamt:
 				dreamDict["date_dreamt"] = date_dreamt
 
 				if dreamDict["date_dreamt"] > datetime.date.today():
-					messages["date_dreamt"] = {"message": "Date dreamt cannot be in the future",
-								 	 	       "validity": "invalid"}
+					messages["date_dreamt"] = {"message": 
+						"Date dreamt cannot be in the future",
+						"validity": "invalid"}
 				else:
 					messages["date_dreamt"] = {"message": "Date dreamt OK",
 				 	 	     "validity": "valid"}
 		else:
-			messages["date_dreamt"] = {"message": "Please provide the day you had the dream",
-							 	 	   "validity": "invalid"}		
+			messages["date_dreamt"] = {"message": 
+				"Please provide the day you had the dream",
+				"validity": "invalid"}		
 
 		dreamDict["date_posted"] = datetime.datetime.now()
 		messages["date_posted"] = {"message": "Date posted OK",
@@ -507,60 +680,72 @@ class NewDream(Handler):
 
 			if dreamDict["lucidity"] == "True":
 
-				dreamDict["lucid_reason"] = bleach.clean(self.request.get("lucidreason"))
+				dreamDict["lucid_reason"] = bleach.\
+					clean(self.request.get("lucidreason"))
 
-				# would it be best to have the forms return the text instead of a number code?
-				# originally thought code best so backend could be independent of front end text
 				if (dreamDict["lucid_reason"] == "-1" or 
 					dreamDict["lucid_reason"] == None or
 					dreamDict["lucid_reason"] == ""):
 
-					messages["lucid_reason"] = {"message": "Please enter how you became aware you were dreaming",
-							 	 	    		"validity": "invalid"}	
+					messages["lucid_reason"] = {"message": 
+						"Please enter how you became aware you were dreaming",
+						"validity": "invalid"}	
 				elif (dreamDict["lucid_reason"] == "WILD" or 
 					  dreamDict["lucid_reason"] == "reality check" or
 					  dreamDict["lucid_reason"] == "dream sign" or
 					  dreamDict["lucid_reason"] == "off" or
 					  dreamDict["lucid_reason"] == "something else"):
 
-					messages["lucid_reason"] = {"message": "Reason selection OK",
-							 	 	    		"validity": "valid"}	
+					messages["lucid_reason"] = {"message": 
+						"Reason selection OK",
+						"validity": "valid"}	
 		else:
-			messages["lucidity"] = {"message": "Please indicate whether you were aware you were dreaming at any point during the dream",
-							 	 	"validity": "invalid"}	
+			messages["lucidity"] = {"message": 
+				"Please indicate whether you were aware " +\
+				"you were dreaming at any point during the dream",
+				"validity": "invalid"}	
 
-		# validate dreamsign bool and optional reality check description, if appropriate
+		# validate dreamsign bool and optional reality check description
+		# (if appropriate)
 		realityCheckTagNameObj = None
 		if ("lucid_reason" in dreamDict and
 			dreamDict["lucid_reason"] == "reality check"):
 
 			dreamDict["reality_check_description"] = bleach.\
 				clean(self.request.get("realitycheckdescription"))
-			messages["reality_check_description"] = {"message": "Awareness description OK",
-				 	 	    					 	 "validity": "valid"}	
+			messages["reality_check_description"] = {"message": 
+				"Awareness description OK",
+				"validity": "valid"}	
 			if dreamDict["reality_check_description"]:
 
 				if len(dreamDict["reality_check_description"]) > 1000:
-					messages["reality_check_description"] = {"message": "Awareness description has 1000 char limit",
-				 	 	    					 			 "validity": "invalid"}			
+					messages["reality_check_description"] = {"message": 
+						"Awareness description has 1000 char limit",
+				 	 	"validity": "invalid"}			
 
-			dreamDict["dream_sign_bool"] = bleach.clean(self.request.get("dreamsignbool"))
+			dreamDict["dream_sign_bool"] = bleach.\
+				clean(self.request.get("dreamsignbool"))
 
 			if (dreamDict["dream_sign_bool"] == "False" or
 				dreamDict["dream_sign_bool"] == "True"):
 				
-				messages["dream_sign_bool"] = {"message": "Dream sign response OK",
-				 	 	    			 "validity": "valid"}
+				messages["dream_sign_bool"] = {"message": 
+					"Dream sign response OK",
+				 	"validity": "valid"}
 			else:
-				messages["dream_sign_bool"] = {"message": "Please indicate whether or not the specific thing that made you aware you were dreaming was one of your dream signs",
-				 	 	    			 "validity": "valid"}				
+				messages["dream_sign_bool"] = {"message": 
+					"Please indicate whether or not the specific thing " +\
+					"that made you aware you were dreaming was " +\
+					"one of your dream signs",
+				 	"validity": "valid"}				
 
 		# validate dream sign or reality check mechanism, if appropriate
 		if ("dream_sign_bool" in dreamDict and
 			dreamDict["dream_sign_bool"] == "False"):
 			# just a regular reality check
 			# need to validate these: 
-			# mechanism, if identifier, if objectmalfunction, if allcheck, if endidentifier
+			# mechanism, if identifier, if objectmalfunction, 
+			# if allcheck, if endidentifier
 			dreamDict["mechanism"] = bleach.clean(self.request.get("mechanism"))
 			if dreamDict["mechanism"]:
 
@@ -569,11 +754,15 @@ class NewDream(Handler):
 					messages["mechanism"] = {"message": "Mechanism OK",
 											 "validity": "valid"}
 			 	else:
-					messages["mechanism"] = {"message": "Select a mechanism that helped you become aware you were dreaming",
-			 	 	    				 	 "validity": "invalid"}						 										
+					messages["mechanism"] = {"message": 
+						"Select a mechanism that helped you " +\
+						"become aware you were dreaming",
+			 	 	    "validity": "invalid"}						 										
 			else:
-				messages["mechanism"] = {"message": "Select a mechanism that helped you become aware you were dreaming",
-			 	 	    				 "validity": "invalid"}
+				messages["mechanism"] = {"message": 
+					"Select a mechanism that helped you " +\
+					"become aware you were dreaming",
+			 	 	"validity": "invalid"}
 		elif ("dream_sign_bool" in dreamDict and
 			  dreamDict["dream_sign_bool"] == "True"):
 			# dream sign so check if input in user's dream signs
@@ -591,8 +780,9 @@ class NewDream(Handler):
 				messages["dream_sign"] = {"message": "Dream sign OK",
 			 	 	    				  "validity": "valid"}	
 			else:
-				messages["dream_sign"] = {"message": "Select one of your dream signs from the list",
-			 	 	    				  "validity": "invalid"}	
+				messages["dream_sign"] = {"message": 
+					"Select one of your dream signs from the list",
+			 	 	"validity": "invalid"}	
 
 		# validate reality check tag, if appropriate
 		realityCheckGroupName = None
@@ -619,27 +809,38 @@ class NewDream(Handler):
 
 				if dreamDict["mechanism"] == "malfunction":
 					
-					if dreamDict["reality_check_tag_name_obj"].group.name == "object":
+					if dreamDict["reality_check_tag_name_obj"].\
+						group.name == "object":
 
- 						messages["reality_check_tag"] = {"message": "Awareness object OK",
- 												 	 	 "validity": "valid"}
+ 						messages["reality_check_tag"] = {"message": 
+ 							"Awareness object OK",
+ 							"validity": "valid"}
  					else:
- 	 					messages["reality_check_tag"] = {"message": "Select an object that made you become aware you were dreaming",
- 	 											 		 "validity": "invalid"}
+ 	 					messages["reality_check_tag"] = {"message": 
+ 	 						"Select an object that made you become aware " +\
+ 	 						"you were dreaming",
+ 	 						"validity": "invalid"}
 	 	 		elif dreamDict["mechanism"] in MECHANISMS:
 
-	 	 			if dreamDict["reality_check_tag_name_obj"].group.name in TAGS:
+	 	 			if dreamDict["reality_check_tag_name_obj"].\
+	 	 				group.name in TAGS:
 
-						messages["reality_check_tag"] = {"message": "Awareness object OK",
-														 "validity": "valid"}
+						messages["reality_check_tag"] = {"message": 
+							"Awareness object OK",
+							"validity": "valid"}
 		 	 		else:
-		 	 			messages["reality_check_tag"] = {"message": "Select the phenomenon that made you become aware you were dreaming",
-		 	 										 	 "validity": "invalid"}
+		 	 			messages["reality_check_tag"] = {"message": 
+		 	 				"Select the phenomenon that made you become " +\
+		 	 				"aware you were dreaming",
+		 	 				"validity": "invalid"}
 		 	 	# set the group name for validating identifier
-		 	 	realityCheckGroupName = dreamDict["reality_check_tag_name_obj"].group.name
+		 	 	realityCheckGroupName=dreamDict["reality_check_tag_name_obj"].\
+		 	 		group.name
 		 	else:
- 	 			messages["reality_check_tag"] = {"message": "Select the phenomenon that made you become aware you were dreaming",
- 	 										 	 "validity": "invalid"}		 		
+ 	 			messages["reality_check_tag"] = {"message": 
+ 	 				"Select the phenomenon that made you become aware " +\
+ 	 				"you were dreaming",
+ 	 				"validity": "invalid"}		 		
 
 		# validate identifier, if appropriate
 		''' 
@@ -664,26 +865,34 @@ class NewDream(Handler):
 				if (dreamDict["reality_check_end_identifier"] in IDENTIFIERS and
 					dreamDict["reality_check_end_identifier"] != "none"):
 
-					messages["identifier"] = {"message": "Awareness object identifier OK",
-											  "validity": "valid"}
+					messages["identifier"] = {"message": 
+						"Awareness object identifier OK",
+						"validity": "valid"}
 				else:
-					messages["identifier"] = {"message": "Please select a valid identifier for the awareness object",
-											  "validity": "invalid"}	
+					messages["identifier"] = {"message": 
+						"Please select a valid identifier for the " +\
+						"awareness object",
+						"validity": "invalid"}	
 			else:
 				# case 3 above
-				dreamDict["reality_check_identifier"] = bleach.clean(self.request.get("identifier"))
+				dreamDict["reality_check_identifier"] = bleach.\
+					clean(self.request.get("identifier"))
 
 				if (dreamDict["reality_check_identifier"] in IDENTIFIERS and
 					dreamDict["reality_check_identifier"] != "none"):
 
-					messages["identifier"] = {"message": "Awareness identifier OK",
-											  "validity": "valid"}	
+					messages["identifier"] = {"message": 
+						"Awareness identifier OK",
+						"validity": "valid"}	
 				else:
-					messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon",
-											  "validity": "invalid"}
+					messages["identifier"] = {"message": 
+						"Please select an identifier for the " +\
+						"awareness phenomenon",
+						"validity": "invalid"}
 		elif realityCheckGroupName == "emotion":
 			# case 4 above
-			dreamDict["reality_check_end_identifier"] = bleach.clean(self.request.get("endidentifier"))
+			dreamDict["reality_check_end_identifier"] = bleach.\
+				clean(self.request.get("endidentifier"))
 
 			if (dreamDict["reality_check_end_identifier"] in IDENTIFIERS and 
 				dreamDict["reality_check_end_identifier"] != "definite" and
@@ -692,11 +901,13 @@ class NewDream(Handler):
 				messages["identifier"] = {"message": "Awareness identifier OK",
 										  "validity": "valid"}		
 			else:
-				messages["identifier"] = {"message": "Please select an identifier for the awareness phenomenon",
-										  "validity": "invalid"}
+				messages["identifier"] = {"message": 
+					"Please select an identifier for the awareness phenomenon",
+					"validity": "invalid"}
 		elif (realityCheckGroupName == "type" or
 			  realityCheckGroupName == "sensation"):
-			# do not validate, just assign.  maybe leads to confusion on user part if there is a bug in
+			# do not validate, just assign.  
+			# maybe leads to confusion on user part if there is a bug in
 			# what options are displayed on screen.
 			dreamDict["assigned_reality_check_identifier"] = "none"
  	    # do not need "else" because if none of above logic is true,
@@ -705,23 +916,30 @@ class NewDream(Handler):
 		if ("lucid_reason" in dreamDict and
 			dreamDict["lucid_reason"] == "something else"):
 
-			dreamDict["something_else"] = bleach.clean(self.request.get("somethingelse"))
+			dreamDict["something_else"] = bleach.\
+				clean(self.request.get("somethingelse"))
 
 			if dreamDict["something_else"]:
 				if len(dreamDict["something_else"]) < 301:
-					messages["something_else"] = {"message": "Custom reason for awareness OK",
-					 	 	    			  	  "validity": "valid"}			
+					messages["something_else"] = {"message": 
+						"Custom reason for awareness OK",
+					 	"validity": "valid"}			
 				else:
-					messages["something_else"] = {"message": "Custom reason for awareness is too long (300 char max)",
-					 	 	    			  	  "validity": "invalid"}			
+					messages["something_else"] = {"message": 
+						"Custom reason for awareness is too " +\
+						"long (300 char max)",
+					 	"validity": "invalid"}			
 			else:
-				messages["something_else"] = {"message": "Please enter your custom reason for becomming aware that you were dreaming",
-					 	 	    			  "validity": "invalid"}		
+				messages["something_else"] = {"message": 
+					"Please enter your custom reason for becomming " +\
+					"aware that you were dreaming",
+					"validity": "invalid"}		
 
 		# validate lucid length, if appropriate
 		if dreamDict["lucidity"] == "True":
 
-			dreamDict["lucid_length"] = bleach.clean(self.request.get("lucidlength"))
+			dreamDict["lucid_length"] = bleach.\
+				clean(self.request.get("lucidlength"))
 
 			if (dreamDict["lucid_length"] == "very short" or 
 				dreamDict["lucid_length"] == "in between" or
@@ -731,8 +949,10 @@ class NewDream(Handler):
 						 	 	    		"validity": "valid"}
 			else:
 
-				messages["lucid_length"] = {"message": "Please indicate how long you remained aware you were dreaming after becoming aware",
-						 	 	    		"validity": "invalid"}	
+				messages["lucid_length"] = {"message": 
+					"Please indicate how long you remained aware " +\
+					"you were dreaming after becoming aware",
+					"validity": "invalid"}	
 
 		dreamDict["control"] = bleach.clean(self.request.get("control"))
 		if dreamDict["control"]:
@@ -744,20 +964,27 @@ class NewDream(Handler):
 				if (control < 0 or
 					control > 10):
 
-					messages["control"] = {"message": "Control level was invalid.  Use the slider to set control level",
-							 		 	   "validity": "invalid"}
+					messages["control"] = {"message": 
+						"Control level was invalid.  Use the slider " +\
+						"to set control level",
+						"validity": "invalid"}
 				else:
 					messages["control"] = {"message": "Control level OK.",
 							 		 	   "validity": "valid"}
 			except ValueError:
 
-				messages["control"] = {"message": "Control level was invalid.  Use the slider to set control level",
-							 	 	   "validity": "invalid"}	
+				messages["control"] = {"message": 
+					"Control level was invalid.  Use the slider to " +\
+					"set control level",
+					"validity": "invalid"}	
 		else:
-			messages["control"] = {"message": "Please use the slider to set the level of control you felt you had during the dream",
-							 	   "validity": "invalid"}	
+			messages["control"] = {"message": 
+				"Please use the slider to set the level of control " +\
+				"you felt you had during the dream",
+				"validity": "invalid"}	
 
-		dreamDict["enjoyability"] = bleach.clean(self.request.get("enjoyability"))
+		dreamDict["enjoyability"] = bleach.\
+			clean(self.request.get("enjoyability"))
 		if dreamDict["enjoyability"]:
 
 			try:
@@ -767,19 +994,25 @@ class NewDream(Handler):
 				if (enjoyability < 0 or
 					enjoyability > 10):
 
-					messages["enjoyability"] = {"message": "Enjoyability was invalid.  Use the slider to set enjoyability",
-							 		 	        "validity": "invalid"}
+					messages["enjoyability"] = {"message": 
+						"Enjoyability was invalid.  " +\
+						"Use the slider to set enjoyability",
+						"validity": "invalid"}
 				else:
 					messages["enjoyability"] = {"message": "Enjoyability OK",
 							 		 	        "validity": "valid"}
 
 			except ValueError:
 
-				messages["enjoyability"] = {"message": "Enjoyability level was invalid.  Use the slider to set enjoyability level",
-							 	 	        "validity": "invalid"}	
+				messages["enjoyability"] = {"message": 
+					"Enjoyability level was invalid.  " +\
+					"Use the slider to set enjoyability level",
+					"validity": "invalid"}	
 		else:
-			messages["enjoyability"] = {"message": "Please use the slider to enter how enjoyable you think the dream was",
-							 	 		"validity": "invalid"}			
+			messages["enjoyability"] = {"message": 
+				"Please use the slider to enter how enjoyable " +\
+				"you think the dream was",
+				"validity": "invalid"}			
 		
 		dreamDict["title"] = bleach.clean(self.request.get("title"))
 		if dreamDict["title"]:
@@ -788,24 +1021,29 @@ class NewDream(Handler):
 				messages["title"] = {"message": "Title OK",
 							 	 	 "validity": "valid"}	
 			else:
-				messages["title"] = {"message": "Title was too long (50 char max)",
-							 	 	 "validity": "invalid"}		
+				messages["title"] = {"message": 
+					"Title was too long (50 char max)",
+					"validity": "invalid"}		
 		else:
-			messages["title"] = {"message": "Please enter a title for the dream",
-							 	 "validity": "invalid"}	
+			messages["title"] = {"message": 
+				"Please enter a title for the dream",
+				"validity": "invalid"}	
 
-		dreamDict["description"] = bleach.clean(self.request.get("description"))
+		dreamDict["description"] = bleach.\
+			clean(self.request.get("description"))
 		if dreamDict["description"]:
 
 			if len(dreamDict["description"]) < 301:
 				messages["description"] = {"message": "Description OK",
 							 	 	 	   "validity": "valid"}	
 			else:
-				messages["description"] = {"message": "Description was too long (301 char max)",
-							 	 	 		"validity": "invalid"}		
+				messages["description"] = {"message": 
+					"Description was too long (301 char max)",
+					"validity": "invalid"}		
 		else:
-			messages["description"] = {"message": "Please enter a description for the dream",
-							 	 	   "validity": "invalid"}
+			messages["description"] = {"message": 
+				"Please enter a description for the dream",
+				"validity": "invalid"}
 
 		inputTags = bleach.clean(self.request.get("dreamtags"))
 		### get dream tags with regexes (values of each button)
@@ -815,8 +1053,10 @@ class NewDream(Handler):
 
 			inputTags_array = inputTags.split(",")
 
-			# validate each tagName|tagIdentifier@tagGroup pair, stopping before last array entry 
-			# due to "," being the last character in inputTags when splitting on ","
+			# validate each tagName|tagIdentifier@tagGroup pair, 
+			# stopping before last array entry 
+			# due to "," being the last character in 
+			# inputTags when splitting on ","
 			for i in range(0, len(inputTags_array)-1):
 
 				inputTag = inputTags_array[i]
@@ -824,8 +1064,9 @@ class NewDream(Handler):
 				name_identifiergroup = inputTag.split("|")
 
 				if len(name_identifiergroup) != 2:
-					messages["dream_tags"] = {"message": "One of the tags contains an illegal '|' character",
-							 	 	 		  "validity": "invalid"}
+					messages["dream_tags"] = {"message": 
+						"One of the tags contains an illegal '|' character",
+						"validity": "invalid"}
 					break
 
 				tag_name = name_identifiergroup[0]
@@ -836,45 +1077,60 @@ class NewDream(Handler):
 				tag_group = identifier_group[1]
 
 				# check if already exists (but do not add yet)
-				# think have to all() each time thru for loop but not sure, playing safe
+				# think have to all() each time thru for loop but not sure, 
+				# playing safe
 				existingTagNames = TagName.all()
-				existingTagName = existingTagNames.filter("name =", tag_name).get()
+				existingTagName = existingTagNames.\
+					filter("name =", tag_name).get()
 				if existingTagName:
 					if tag_group != existingTagName.group.name:
-						messages["dream_tags"] = {"message": "Tag '"+tag_name+"' has the wrong tag kind.  Try removing and re-adding it.",
-							 	 	 			  "validity": "invalid"}
+						messages["dream_tags"] = {"message": 
+							"Tag '"+tag_name+"' has the wrong tag kind.  " +\
+							"Try removing and re-adding it.",
+							"validity": "invalid"}
 						break				
 
 				# validate name
 				if len(tag_name) < 1:
-					messages["dream_tags"] = {"message": "One of the tags has no name",
-							 	 	 			"validity": "invalid"}
+					messages["dream_tags"] = {"message": 
+						"One of the tags has no name",
+						"validity": "invalid"}
 					break
 				elif len(tag_name) > 50:
-					messages["dream_tags"] = {"message": "tag '"+tag_name+"' name is too long (max 50 chars)",
-		 	 	 							  "validity": "invalid"}
+					messages["dream_tags"] = {"message": 
+						"tag '"+tag_name+"' name is too long (max 50 chars)",
+		 	 	 		"validity": "invalid"}
 					break
-				elif (re.search(r'[1234567890~!@#\$\+=%\^&\*\()<>,\./\?;:\[\]\{}\|_\\]', tag_name)):
-					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an illegal character",
-		 	 	 							  "validity": "invalid"}
+				elif (re.search(r'[1234567890~!@#\$\+=%\^&\*\()<>,\./\?;:\[\]\{}\|_\\]', 
+						tag_name)):
+					messages["dream_tags"] = {"message": 
+						"tag '"+tag_name+"' has an illegal character",
+		 	 	 		"validity": "invalid"}
 					break
 				elif (re.search(r'  ', tag_name)):
-					messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot contain two spaces in a row",
-		 	 	 							  "validity": "invalid"}
+					messages["dream_tags"] = {"message": 
+						"tag '"+tag_name+"' cannot contain two spaces in a row",
+		 	 	 		"validity": "invalid"}
 					break
 				elif (re.search(r"''", tag_name)):
-					messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot contain two apostrophes in a row",
-		 	 	 							  "validity": "invalid"}
+					messages["dream_tags"] = {"message": 
+						"tag '"+tag_name+"' cannot contain two " +\
+						"apostrophes in a row",
+		 	 	 		"validity": "invalid"}
 					break
 				elif (re.search(r'--', tag_name)):
-					messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot contain two hyphens in a row",
-		 	 	 							  "validity": "invalid"}
+					messages["dream_tags"] = {"message": 
+						"tag '"+tag_name+"' cannot contain two " +\
+						"hyphens in a row",
+		 	 	 		"validity": "invalid"}
 					break
 
 				# validate group
 				if (tag_group not in TAGS):
-					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an invalid tag group ('"+tag_group+"')",
-		 	 	 							  "validity": "invalid"}
+					messages["dream_tags"] = {"message": 
+						"tag '"+tag_name+"' has an invalid tag " +\
+						"group ('"+tag_group+"')",
+		 	 	 		"validity": "invalid"}
 		 	 	 	break
 				elif tag_group == "type":
 					hasTypeTag = True
@@ -887,37 +1143,47 @@ class NewDream(Handler):
 		 	 			
 		 	 			if tag_identifier != "none":
 
-		 	 				messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot have an identifier because it is a(n) "+tag_group,
-		 	 	 							  "validity": "invalid"}
+		 	 				messages["dream_tags"] = {"message": 
+		 	 					"tag '"+tag_name+"' cannot have an " +\
+		 	 					"identifier because it is a(n) "+tag_group,
+		 	 	 				"validity": "invalid"}
 		 	 	 	elif tag_group == "emotion":
 
 		 	 	 		 if tag_identifier == "definite":
 
-		 	 				messages["dream_tags"] = {"message": "tag '"+tag_name+"' cannot have a definite identifier because it is an emotion",
-		 	 	 							  "validity": "invalid"}	
+		 	 				messages["dream_tags"] = {"message": 
+		 	 					"tag '"+tag_name+"' cannot have a " +\
+		 	 					"definite identifier because it is an emotion",
+		 	 	 				"validity": "invalid"}	
 		 	 	 	else:
 
 		 	 	 		if tag_identifier == "none":
 
-		 	 				messages["dream_tags"] = {"message": "tag '"+tag_name+"' must have an identifier",
-		 	 	 							  "validity": "invalid"} 		 	 	 	
+		 	 				messages["dream_tags"] = {"message": 
+		 	 					"tag '"+tag_name+"' must have an identifier",
+		 	 	 				"validity": "invalid"} 		 	 	 	
 		 	 	else:
-					messages["dream_tags"] = {"message": "tag '"+tag_name+"' has an invalid identifier ('"+tag_identifier+"')",
-		 	 	 							  "validity": "invalid"}
+					messages["dream_tags"] = {"message": 
+						"tag '"+tag_name+"' has an invalid " +\
+						"identifier ('"+tag_identifier+"')",
+		 	 	 		"validity": "invalid"}
 
-				dreamDict["dream_tags"][tag_name] = {"group":tag_group, "identifier":tag_identifier}
+				dreamDict["dream_tags"][tag_name] = {"group":tag_group, 
+					"identifier":tag_identifier}
 
 		 	if not hasTypeTag:
-				messages["dream_tags"] = {"message": "Please enter at least one 'type' tag",
-							 	 	  	  "validity": "invalid"}	
+				messages["dream_tags"] = {"message": 
+					"Please enter at least one 'type' tag",
+					"validity": "invalid"}	
 			
 			# if made it this far without setting the message, the tags are valid
 			if "dream_tags" not in messages:
 				messages["dream_tags"] = {"message": "Dream tags OK",
 	 	 	 							  "validity": "valid"}			 		
 		else:
-			messages["dream_tags"] = {"message": "Please enter some tags, including at least one 'type' tag",
-							 	 	  "validity": "invalid"}			
+			messages["dream_tags"] = {"message": 
+				"Please enter some tags, including at least one 'type' tag",
+				"validity": "invalid"}			
 
 		dreamDict["content"] = bleach.clean(self.request.get("content"))
 		if dreamDict["content"]:
@@ -925,11 +1191,13 @@ class NewDream(Handler):
 				messages["content"] = {"message": "Dream narrative OK",
 						 			   "validity": "valid"}
 			else:
-				messages["content"] = {"message": "Dream narrative too long (50000 char max)",
-						 			   "validity": "invalid"}	
+				messages["content"] = {"message": 
+					"Dream narrative too long (50000 char max)",
+					"validity": "invalid"}	
 		else:
-			messages["content"] = {"message": "Please provide a narrative of what happened in the dream",
-								   "validity": "invalid"}
+			messages["content"] = {"message": 
+				"Please provide a narrative of what happened in the dream",
+				"validity": "invalid"}
 
 		dreamDict["extras"] = bleach.clean(self.request.get("extras"))
 		if dreamDict["extras"]:
@@ -937,14 +1205,16 @@ class NewDream(Handler):
 				messages["extras"] = {"message": "Extras OK",
 						 			   "validity": "valid"}	
 			else:
-				messages["extras"] = {"message": "Extras too long (5000 char max)",
-						 			   "validity": "invalid"}
+				messages["extras"] = {"message": 
+					"Extras too long (5000 char max)",
+					"validity": "invalid"}
 		else:
 				dreamDict["extras"] = None
 				messages["extras"] = {"message": "Extras OK",
 						 			   "validity": "valid"}	
 
-		dreamDict["interruption"] = bleach.clean(self.request.get("interruption"))
+		dreamDict["interruption"] = bleach.\
+			clean(self.request.get("interruption"))
 		if dreamDict["interruption"]:
 			
 			if (dreamDict["interruption"] != "True" and 
@@ -956,8 +1226,11 @@ class NewDream(Handler):
 				messages["interruption"] = {"message": "Interruption answer OK",
 							 	 	    "validity": "valid"}
 		else:
-				messages["interruption"] = {"message": "Please indicate whether your sleep was interrupted (for example, whether you woke up during the middle of the night) the night you had the dream",
-							 	 	   	    "validity": "invalid"}		
+				messages["interruption"] = {"message": 
+					"Please indicate whether your sleep was interrupted " +\
+					"(for example, whether you woke up during the middle " +\
+					"of the night) the night you had the dream",
+					"validity": "invalid"}		
 
 		# these cant be anything yet
 		dreamDict["awareness_level"] = 0
@@ -991,9 +1264,11 @@ class NewDream(Handler):
 						userDreamsigns.append(dreamsign.nickname)
 
 					return self.render("newdream.html", dreamDict=dreamDict, 
-						messages=messages, tagGroupToNames=json.dumps(tagGroupToNames),
+						messages=messages, 
+						tagGroupToNames=json.dumps(tagGroupToNames),
 						tagNameToGroup=json.dumps(tagNameToGroup),
-						userDreamsigns=userDreamsigns, realityChecks=tagGroupToNames,
+						userDreamsigns=userDreamsigns, 
+						realityChecks=tagGroupToNames,
 						username=username)
 
 		# set values for datastore (some cannot be string)
@@ -1028,7 +1303,8 @@ class NewDream(Handler):
 		dream.put()
 
 		# create each dream tag object
-		# (consists of an id, a reference to a dream, and a reference to a tag name)
+		# (consists of an id, a reference to a dream, 
+		# and a reference to a tag name)
 		for tag_name in dreamDict["dream_tags"]:
 			#print tag_name
 			existingTagName = TagName.all().filter("name =", tag_name).get()
@@ -1039,7 +1315,8 @@ class NewDream(Handler):
 			#print tag_identifier
 
 			tagGroupObj = TagGroup.all().filter("name =", tag_group).get()
-			identifierObj = Identifier.all().filter("type =", tag_identifier).get()
+			identifierObj = Identifier.all().filter("type =", 
+				tag_identifier).get()
 
 			assert tagGroupObj
 			assert identifierObj
@@ -1051,7 +1328,8 @@ class NewDream(Handler):
 			else:
 				tagNameObj = existingTagName
 
-			dreamTag = Tag(dream=dream, name=tagNameObj, identifier=identifierObj)
+			dreamTag = Tag(dream=dream, name=tagNameObj, 
+				identifier=identifierObj)
 			dreamTag.put()
 			#print dreamTag.name.name
 			#print dreamTag.name.group.name
@@ -1074,7 +1352,8 @@ class NewDream(Handler):
 			else:
 				thisIdentifier = dreamDict["assigned_reality_check_identifier"]
 
-			thisIdentifierObj = Identifier.all().filter("type =", thisIdentifier).get()
+			thisIdentifierObj = Identifier.all().filter("type =", 
+				thisIdentifier).get()
 
 			realityCheckTagObj = Tag(dream=dream,
 							  	  tag=dreamDict["reality_check_tag_name_obj"],
@@ -1084,7 +1363,8 @@ class NewDream(Handler):
 
 			thisMechanism = dreamDict["mechanism"]
 
-			mechanismObj = RealityCheckMechanism.all().filter("name =", thisMechanism).get()		
+			mechanismObj = RealityCheckMechanism.all().filter("name =", 
+				thisMechanism).get()		
 
 			assert mechanismObj
 
@@ -1113,27 +1393,38 @@ class NewDream(Handler):
 		return redirect_to("viewdream", id=str(dream.key().id()))
 
 class Register(Handler):
+	''' Serve form for registering a new user
+	'''
 	def get(self):
-
+		''' Handle get request and render register form
+		'''
+		# should these be assignments?  
+		# i read sorted() does not work in place? seems to work though
 		sorted(COUNTRIES, key=lambda s: s.lower())
 		sorted(INDUSTRIES, key=lambda s: s.lower())
 		sorted(PROFESSIONS, key=lambda s: s.lower())
 		sorted(EDUCATION_LEVELS, key=lambda s: s.lower())
 		sorted(SECTORS, key=lambda s: s.lower())
 
-		self.render("register.html", countries=COUNTRIES, industries=INDUSTRIES,
-			professions=PROFESSIONS, educationLevels=EDUCATION_LEVELS, sectors=SECTORS,
+		self.render("register.html", countries=COUNTRIES, 
+			industries=INDUSTRIES, professions=PROFESSIONS, 
+			educationLevels=EDUCATION_LEVELS, sectors=SECTORS,
 			satisfactionAreas=SATISFACTION_AREAS, satisfactionRatings=None,
 			values=None, messages=None)
 
 	def post(self):
-
-		# use userDict to pass values to User constructor or to form if an input is not valid
+		''' Handle post request and create new user, redirecting to home page.
+		If there is a problem, re-render form with all input still in place
+		and messages to user about input validity.
+		'''
+		# use userDict to pass values to User constructor 
+		# or to form if an input is not valid
 		values = {}
 
 		values['username'] = bleach.clean(self.request.get("username"))
 		values['password'] = bleach.clean(self.request.get("password"))
-		values['verify_password'] = bleach.clean(self.request.get("verifypassword"))
+		values['verify_password'] = bleach.\
+			clean(self.request.get("verifypassword"))
 		values['email'] = bleach.clean(self.request.get("email"))
 		values['birthdate'] = bleach.clean(self.request.get("birthdate"))
 		values['gender'] = bleach.clean(self.request.get("gender"))
@@ -1141,7 +1432,8 @@ class Register(Handler):
 		values['residence'] = bleach.clean(self.request.get("residence"))
 		values['area'] = bleach.clean(self.request.get("area"))
 		values['profession'] = bleach.clean(self.request.get("profession"))
-		values['education_level'] = bleach.clean(self.request.get("educationlevel"))
+		values['education_level'] = bleach.\
+			clean(self.request.get("educationlevel"))
 		values['isCommitted'] = bleach.clean(self.request.get("iscommitted"))
 		values['isParent'] = bleach.clean(self.request.get("isparent"))
 
@@ -1155,7 +1447,8 @@ class Register(Handler):
 		satisfactionRatings = {}
 		for SATISFACTION_AREA in SATISFACTION_AREAS:
 
-			thisAreaRating = bleach.clean(self.request.get(SATISFACTION_AREA['code']))
+			thisAreaRating = bleach.\
+				clean(self.request.get(SATISFACTION_AREA['code']))
 
 			if thisAreaRating:
 
@@ -1166,20 +1459,25 @@ class Register(Handler):
 					if (thisAreaRating < 0 or
 						thisAreaRating > 10):
 
-						messages[SATISFACTION_AREA['code']] = {"message": SATISFACTION_AREA['name'] + " invalid.",
-								 		 	          "validity": "invalid"}
+						messages[SATISFACTION_AREA['code']] = {"message": 
+							SATISFACTION_AREA['name'] + " invalid.",
+							"validity": "invalid"}
 						hasInvalid = True
 					else:
-						messages[SATISFACTION_AREA['code']] = {"message": SATISFACTION_AREA['name'] + " valid",
-								 		 	          "validity": "valid"}
+						messages[SATISFACTION_AREA['code']] = {"message": 
+							SATISFACTION_AREA['name'] + " valid",
+							"validity": "valid"}
 				except ValueError:
 
-					messages[satisfactionArea['code']] = {"message": SATISFACTION_AREA['name'] + " invalid.",
-								 	 	          "validity": "invalid"}	
+					messages[satisfactionArea['code']] = {"message": 
+						SATISFACTION_AREA['name'] + " invalid.",
+						"validity": "invalid"}	
 					hasInvalid = True	
 			else:
-				messages[satisfactionArea['code']] = {"message": "Please provide a satisfaction level for " + SATISFACTION_AREA['name'],
-											  "validity": "invalid"}
+				messages[satisfactionArea['code']] = {"message": 
+					"Please provide a satisfaction level for " + \
+					SATISFACTION_AREA['name'],
+					"validity": "invalid"}
 				hasInvalid = True
 
 			satisfactionRatings[SATISFACTION_AREA['code']] = thisAreaRating
@@ -1248,16 +1546,18 @@ class Register(Handler):
 			try:
 				birthdate = get_valid_date(values['birthdate'])
 			except ValueError:
-				messages["birthdate"] = {"message": "Please fix the date formatting (mm/dd/yyyy)",
-							 	 	       "validity": "invalid"}
+				messages["birthdate"] = {"message": 
+					"Please fix the date formatting (mm/dd/yyyy)",
+					"validity": "invalid"}
 				hasInvalid = True
 
 			if birthdate:
 				values["birthdate"] = birthdate
 
 				if values["birthdate"] > datetime.date.today():
-					messages["birthdate"] = {"message": "Birthdate cannot be in the future",
-								 	 	       "validity": "invalid"}
+					messages["birthdate"] = {"message": 
+						"Birthdate cannot be in the future",
+						"validity": "invalid"}
 					hasInvalid = True
 				else:
 					messages["birthdate"] = {"message": "Birthdate OK",
@@ -1289,8 +1589,9 @@ class Register(Handler):
 									 	 "validity": "invalid"}
 				hasInvalid = True
 		else:
-			messages["nationality"] = {"message": "Please provide a nationality",
-								 "validity": "invalid"}	
+			messages["nationality"] = {"message": 
+				"Please provide a nationality",
+				"validity": "invalid"}	
 			hasInvalid = True
 
 		if values['residence']:
@@ -1302,8 +1603,9 @@ class Register(Handler):
 									 	 "validity": "invalid"}
 				hasInvalid = True
 		else:
-			messages["residence"] = {"message": "Please provide a current country of residence",
-								 "validity": "invalid"}	
+			messages["residence"] = {"message": 
+				"Please provide a current country of residence",
+				"validity": "invalid"}	
 			hasInvalid = True
 
 		if values['area']:
@@ -1315,8 +1617,9 @@ class Register(Handler):
 									 	 "validity": "invalid"}
 				hasInvalid = True
 		else:
-			messages["area"] = {"message": "Please pick the option that best describes where you live",
-								 "validity": "invalid"}	
+			messages["area"] = {"message": 
+				"Please pick the option that best describes where you live",
+				"validity": "invalid"}	
 			hasInvalid = True
 
 		if values['education_level']:
@@ -1324,12 +1627,14 @@ class Register(Handler):
 				messages["education_level"] = {"message": "Education level OK",
 									 	 "validity": "valid"}
 			else:
-				messages["education_level"] = {"message": "Education is invalid",
-									 	 "validity": "invalid"}
+				messages["education_level"] = {"message": 
+					"Education is invalid",
+					"validity": "invalid"}
 				hasInvalid = True
 		else:
-			messages["education_level"] = {"message": "Please provide an education level",
-								 "validity": "invalid"}
+			messages["education_level"] = {"message": 
+				"Please provide an education level",
+				"validity": "invalid"}
 			hasInvalid = True
 
 		if values['profession']:
@@ -1339,19 +1644,22 @@ class Register(Handler):
 
 				if values['profession'] not in NO_INDUSTRY_PROFESSIONS:
 
-					values['industry'] = bleach.clean(self.request.get("industry"))
+					values['industry'] = bleach.\
+						clean(self.request.get("industry"))
 
 					if values['industry']:
 						if values['industry'] in INDUSTRIES:
 							messages["industry"] = {"message": "Industry OK",
 												 	 "validity": "valid"}
 						else:
-							messages["industry"] = {"message": "Industry is invalid",
-												 	 "validity": "invalid"}
+							messages["industry"] = {"message": 
+								"Industry is invalid",
+								"validity": "invalid"}
 							hasInvalid = True
 					else:
-						messages["industry"] = {"message": "Please provide an industry",
-											 "validity": "invalid"}	
+						messages["industry"] = {"message": 
+							"Please provide an industry",
+							"validity": "invalid"}	
 						hasInvalid = True
 				else:
 					values['industry'] = None
@@ -1365,12 +1673,14 @@ class Register(Handler):
 							messages["sector"] = {"message": "Sector OK",
 												 	 "validity": "valid"}
 						else:
-							messages["sector"] = {"message": "Sector is invalid",
-												 	 "validity": "invalid"}
+							messages["sector"] = {"message": 
+								"Sector is invalid",
+								"validity": "invalid"}
 							hasInvalid = True
 					else:
-						messages["sector"] = {"message": "Please provide a sector",
-											 "validity": "invalid"}	
+						messages["sector"] = {"message": 
+							"Please provide a sector",
+							"validity": "invalid"}	
 						hasInvalid = True
 				else:
 					values['sector'] = None
@@ -1398,8 +1708,9 @@ class Register(Handler):
 									 	 "validity": "invalid"}
 				hasInvalid = True
 		else:
-			messages["isParent"] = {"message": "Please indicate whether you are a parent",
-								 "validity": "invalid"}
+			messages["isParent"] = {"message": 
+				"Please indicate whether you are a parent",
+				"validity": "invalid"}
 			hasInvalid = True
 
 		if values['isCommitted']:
@@ -1413,12 +1724,14 @@ class Register(Handler):
 				else:
 					values["isCommitted"] = False
 			else:
-				messages["isCommitted"] = {"message": "Committed status is invalid",
-									 	 "validity": "invalid"}
+				messages["isCommitted"] = {"message": 
+					"Committed status is invalid",
+					"validity": "invalid"}
 				hasInvalid = True
 		else:
-			messages["isCommitted"] = {"message": "Please indicate whether you are in a committed relationship",
-								 "validity": "invalid"}
+			messages["isCommitted"] = {"message": 
+				"Please indicate whether you are in a committed relationship",
+				"validity": "invalid"}
 			hasInvalid = True
 
 		saltedpasshash = make_pw_hash(values['username'], values['password'])
@@ -1459,9 +1772,12 @@ class Register(Handler):
 
 		# if more than one with this email or user name, delete this one
 		# and return invalid. hacky workaround of seemingly bad google 
-		# datastore support for unique entity values (username and email should be unique)
-		# if we tested before while verifying name, then when we get to point of User creation
-		# someone else could have used the name.  this way, that is not possible
+		# datastore support for unique entity values 
+		# (username and email should be unique)
+		# if we tested before while verifying name, 
+		# then when we get to point of User creation
+		# someone else could have used the name.  
+		# this way, that is not possible
 		duplicate = False
 
 		users = User.all()
@@ -1513,7 +1829,11 @@ class Register(Handler):
 		return response
 
 class Signin(Handler):
+	''' Serve signin page
+	'''
 	def get(self):
+		''' Handle get request and render form to sign in
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
 		if username:
@@ -1522,6 +1842,10 @@ class Signin(Handler):
 		self.render("signin.html", values=None, messages=None, username=None)
 
 	def post(self):
+		''' Handle post request, signing user in and redirecting to homepage
+		if successful and re-rendering sign-in page with validitiy messages
+		if unsuccessful.
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
 		if username:
@@ -1580,7 +1904,11 @@ class Signin(Handler):
 		return response
 
 class ViewDream(Handler):
+	''' Serve pages that show specific dreams
+	'''
 	def get(self, id=None):
+		''' Handle get request; render a specific dream for viewing
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
@@ -1610,6 +1938,11 @@ class ViewDream(Handler):
 			tagGroupToName=tagGroupToName, commentList = commentList)
 
 	def post(self, id=None):
+		''' Handle a post request; if the post is a valid comment (either a 
+		new comment, edited comment, or deleted comment), re-render with 
+		the changes.  If invalid, re-render with no changes and messages to
+		user about validitiy.
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
@@ -1651,14 +1984,16 @@ class ViewDream(Handler):
 			if username != commentToEdit.user.username:
 				containsError = True
 
-		deletionStatus = bleach.clean(self.request.get("commenteditforminputdelete"))
+		deletionStatus = bleach.\
+			clean(self.request.get("commenteditforminputdelete"))
 
 		isDeletion = False
 		if deletionStatus:
 			if deletionStatus == "yes":
 				isDeletion = True
 
-		editedComment = bleach.clean(self.request.get("commenteditforminputcontent"))
+		editedComment = bleach.\
+			clean(self.request.get("commenteditforminputcontent"))
 
 		if editedComment:
 			# it was an edited comment
@@ -1676,8 +2011,9 @@ class ViewDream(Handler):
 
 			commentList = []
 
-			# google datastore is very bad at making updates immediately available,
-			# so have to do some trickery. not sure if would break down on scaling
+			# google datastore is very bad at making 
+			# updates immediately available, so have to do some trickery. 
+			# not sure if would break down on scaling
 			if isDeletion:
 
 				deletedID = commentToEdit.key().id()
@@ -1690,7 +2026,8 @@ class ViewDream(Handler):
 				# add comment and re-render dream
 				user = User.all().filter("username =", username).get()
 
-				newComment = Comment(user=user, dream=dream, content=inputComment)
+				newComment = Comment(user=user, dream=dream, 
+					content=inputComment)
 				newComment.put()
 
 				for comment in dream.comments:
@@ -1715,7 +2052,11 @@ class ViewDream(Handler):
 				tagGroupToName=tagGroupToName, commentList=commentList)
 
 class EditDream(Handler):
+	''' Serve form to edit a specific dream
+	'''
 	def get(self, id=None):
+		''' Handle get request; render form.
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
@@ -1724,9 +2065,13 @@ class EditDream(Handler):
 		elif username != dream.user.username:
 			return redirect_to("home", page=1)
 
-		self.render("editdream.html", dream=dream, dreamDict=None, username=username)
+		self.render("editdream.html", dream=dream, dreamDict=None, 
+			username=username)
 
 	def post(self, id=None):
+		''' Handle post request; redirect to view the dream with changes if 
+		successful, re-render form with validity messages if unsuccessful.
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
@@ -1744,11 +2089,13 @@ class EditDream(Handler):
 				messages["content"] = {"message": "Dream narrative OK",
 						 			   "validity": "valid"}
 			else:
-				messages["content"] = {"message": "Dream narrative too long (50000 char max)",
-						 			   "validity": "invalid"}	
+				messages["content"] = {"message": 
+					"Dream narrative too long (50000 char max)",
+					"validity": "invalid"}	
 		else:
-			messages["content"] = {"message": "Please provide a narrative of what happened in the dream",
-								   "validity": "invalid"}
+			messages["content"] = {"message": 
+				"Please provide a narrative of what happened in the dream",
+				"validity": "invalid"}
 
 		for attr in dreamDict:
 			#print attr
@@ -1771,7 +2118,11 @@ class EditDream(Handler):
 		return redirect_to("viewdream", id=id)
 
 class DeleteDream(Handler):
+	''' Serve form to delete a dream
+	'''
 	def get(self, id=None):
+		''' Handle post request; render form to delete dream
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
@@ -1784,7 +2135,9 @@ class DeleteDream(Handler):
 		self.render("deletedream.html", dream=dream, username=username)
 
 	def post(self, id=None):
-
+		''' Handle post request; redirect to homepage if dream successfully 
+		deleted
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		dream = Dream.get_by_id(int(id))
 
@@ -1798,7 +2151,12 @@ class DeleteDream(Handler):
 		return redirect_to("deletedream", id=id)
 
 class LikeDream(Handler):
+	''' Handle requests related to "liking" a dream
+	'''
 	def get(self, id=None):
+		''' Handle get request; increase "likes" if appropriate or re-direct
+		or do nothing if not appropriate
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 		users = User.all()
 		user = users.filter("username =", username).get()
@@ -1830,21 +2188,34 @@ class LikeDream(Handler):
 		return redirect_to("viewdream", id=id)
 
 class About(Handler):
+	''' Serve about DreamNet page
+	'''
 	def get(self):
+		''' Handle get request; render about page
+		'''
 		username = getUserFromSecureCookie(self.request.cookies.get("username"))
 
 		self.render("about.html", username=username)
 
 class Logout(Handler):
+	''' Handle requests related to logging out
+	'''
 	def get(self):
+		''' Handle get request; redirect to signin page, delete signin cookie
+		'''
 		response = redirect_to("signin")
 		response.set_cookie("username", "")
 		return response
 
 # Ajax handlers
 
+# self-question: do i even need this?
 class TagHandler(Handler):
-    def post(self):
+	''' Ajax endpoint for getting all tags from datastore
+	'''
+	def post(self):
+		''' Handle post reques; return JSON with all tags
+		'''
 		existingTagsQ = Tag.all()
 		existingTagsQ.order("name")
 		existingTags = []
@@ -1863,10 +2234,14 @@ app = webapp2.WSGIApplication(
 		 webapp2.Route("/register", handler=Register, name="register"),
 		 webapp2.Route("/signin", handler=Signin, name="signin"),
 		 webapp2.Route("/logout", handler=Logout, name="logout"),
-		 webapp2.Route("/dream/view/<id>", handler=ViewDream, name="viewdream"),
-		 webapp2.Route("/dream/like/<id>", handler=LikeDream, name="likedream"),
-		 webapp2.Route("/dream/edit/<id>", handler=EditDream, name="editdream"),
-		 webapp2.Route("/dream/delete/<id>", handler=DeleteDream, name="deletedream"),
+		 webapp2.Route("/dream/view/<id>", 
+		 	handler=ViewDream, name="viewdream"),
+		 webapp2.Route("/dream/like/<id>", 
+		 	handler=LikeDream, name="likedream"),
+		 webapp2.Route("/dream/edit/<id>", 
+		 	handler=EditDream, name="editdream"),
+		 webapp2.Route("/dream/delete/<id>", 
+		 	handler=DeleteDream, name="deletedream"),
 		 webapp2.Route("/dream/new", handler=NewDream, name="newdream")],
 		debug=True)
 
