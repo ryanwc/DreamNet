@@ -59,8 +59,8 @@ class Dream(db.Model):
 	user_residence = db.StringProperty(required = True)
 	user_education_level = db.StringProperty(required = True)
 	user_profession = db.StringProperty(required = True)
-	user_sector = db.StringProperty(required = True)
-	user_industry = db.StringProperty(required = True)
+	user_sector = db.StringProperty()
+	user_industry = db.StringProperty()
 	user_isParent = db.BooleanProperty(required = True)
 	user_isCommitted = db.BooleanProperty(required = True)
 	user_satsifaction_ratings = db.StringProperty(required = True, 
@@ -182,69 +182,81 @@ TAGS = {}
 
 TYPES = ["flying", "superhero-like", "falling", "nudity", "sexual", "nightmarish", "being chased",
 		 "paralysis", "being trapped", "difficulty moving", "difficulty breathing", "eating", "death",
-		 "violence", "testing/school exams", "aquatic", "demonic",
-		 "religious", "angelic", "heavenly", "fantasy", "sci-fi", "romance", "comedy",
-		 "being late", "missed appointment/event", "hellish",
-		 "being in a hurry", "travel", "futuristic", "in the past", "light", "darkness",
-		 "video game-like", "continuity error", "colorful", "black and white", "sepia",
-		 "recurring", "magical", "extra ability", "illness", "medical", "floating",
-		 "low gravity", "superpower", "driving", "peeing", "pooping"]
+		 "violence", "testing/school exams", "aquatic", "demonic"]
+'''
+"religious", "angelic", "heavenly", "fantasy", "sci-fi", "romance", "comedy",
+"being late", "missed appointment/event", "hellish",
+"being in a hurry", "travel", "futuristic", "in the past", "light", "darkness",
+"video game-like", "continuity error", "colorful", "black and white", "sepia",
+"recurring", "magical", "extra ability", "illness", "medical", "floating",
+"low gravity", "superpower", "driving", "peeing", "pooping"]
+'''
 
 BEINGS = ["mother", "father", "brother", "sister", "aunt", "uncle",
 		  "son", "daughter", "neice", "nephew", "cousin", "grandfather",
-    	  "grandmother", "grandson", "granddaughter", "mother-in-law",
-		  "father-in-law", "brother-in-law", "sister-in-law", "son-in-law",
-		  "daughter-in-law", "boss/manager", "direct report", "employee", 
-		  "coworker", "wife", "girlfriend", "husband", "boyfriend", 
-		  "best friend", "friend", "aquaintance", "business partner", "crush",
-		  "person from childhood", "person from highschool", "lover", "cat"
-		  "person from college", "teacher/professor", "specific fictional character",
-		  "ghost", "caterpillar", "dog", "vampire", "angel", "demon", "spider",
-		  "alien", "unicorn", "horse", "tiger", "lion", "bear", "God", "elf", "dwarf",
-		  "orc", "wizard", "witch", "William Shakespeare", "Adolf Hitler",
-		  "Jesus of Nazareth", "Christiano Ronaldo", "Barack Obama", "Michael Jordan"]
+    	  "grandmother", "grandson", "granddaughter", "mother-in-law"]
+'''
+"father-in-law", "brother-in-law", "sister-in-law", "son-in-law",
+"daughter-in-law", "boss/manager", "direct report", "employee", 
+"coworker", "wife", "girlfriend", "husband", "boyfriend", 
+"best friend", "friend", "aquaintance", "business partner", "crush",
+"person from childhood", "person from highschool", "lover", "cat"
+"person from college", "teacher/professor", "specific fictional character",
+"ghost", "caterpillar", "dog", "vampire", "angel", "demon", "spider",
+"alien", "unicorn", "horse", "tiger", "lion", "bear", "God", "elf", "dwarf",
+"orc", "wizard", "witch", "William Shakespeare", "Adolf Hitler",
+"Jesus of Nazareth", "Christiano Ronaldo", "Barack Obama", "Michael Jordan"]
+'''
 
 PLACES = ["vaccuum/emptiness", "foreign country", "countryside", "kitchen",
 		  "bedroom", "livingroom", "bathroom", "hallway", "ruins", "religious building",
 		  "military base", "heaven", "hell", "beach", "house", "road/highway",
-		  "ocean", "lake", "river", "swamp", "desert", "glacier", "rainforest",
-		  "forest", "boat", "cave", "office building", "abandoned building",
-		  "stadium", "open field", "farm", "mountain", "airport", "school",
-		  "classroom", "hospital", "doctor's office", "science facility",
-		  "outer space", "alien world", "Paris", "New York City", "Africa",
-		  "USA", "France", "Germany", "Thailand", "Kuala Lumpur", "Bangkok", "Berlin",
-		  "England", "London", "golf course", "Paris"]
+		  "ocean", "lake", "river", "swamp", "desert", "glacier", "rainforest"]
+'''
+"forest", "boat", "cave", "office building", "abandoned building",
+"stadium", "open field", "farm", "mountain", "airport", "school",
+"classroom", "hospital", "doctor's office", "science facility",
+"outer space", "alien world", "Paris", "New York City", "Africa",
+"USA", "France", "Germany", "Thailand", "Kuala Lumpur", "Bangkok", "Berlin",
+"England", "London", "golf course", "Paris"]
+'''
 
 OBJECTS = ["bowl", "door", "hat", "chair",
 		  "staircase", "flag", "gun", "knife", "car",
 		  "boat", "airplane", "spoon", "fork", "table", "wall", "present",
-		  "strawberry", "food", "blueberry", "analog timepiece", "digital timepiece", 
-		  "light switch", "lightbulb", "mirror", "book",
-		  "window", "train", "elevator", "escalator", 
-		  "pants", "shirt", "dress", "skirt", 
-		  "shoes", "cell phone", "laptop computer", "desktop computer", 
-		  "tablet (computer)", "camera", "radio", "video player", "music player",
-		  "spaceship", "teeth", "plate", "box", "can", "napkin", "video game console",
-		  "physical video game", "banana", "hand", "face", "hair", "arm", "leg", "eye",
-		  "ear", "nose", "mouth", "foot", "finger", "toe", "shoulder", "stomach"
-		  "back", "wrist", "elbow", "knee", "ankle", "penis", "vagina", "testicle", 
-		  "scalp", "skin", "neck", "butt", "calf", "hamstring", "bicep", "tricep",
-		  "heel", "finger nail", "toenail", "scrotum", "bladder", "liver", "heart",
-		  "brain", "gums", "tongue", "floss", "toothbrush", "toothpaste", "skull", "bone",
-		  "gift", "money", "wallet", "chest", "breast", "spine", "glass"]
+		  "strawberry", "food", "blueberry", "analog timepiece", "digital timepiece"]
+'''
+"light switch", "lightbulb", "mirror", "book",
+"window", "train", "elevator", "escalator", 
+"pants", "shirt", "dress", "skirt", 
+"shoes", "cell phone", "laptop computer", "desktop computer", 
+"tablet (computer)", "camera", "radio", "video player", "music player",
+"spaceship", "teeth", "plate", "box", "can", "napkin", "video game console",
+"physical video game", "banana", "hand", "face", "hair", "arm", "leg", "eye",
+"ear", "nose", "mouth", "foot", "finger", "toe", "shoulder", "stomach"
+"back", "wrist", "elbow", "knee", "ankle", "penis", "vagina", "testicle", 
+"scalp", "skin", "neck", "butt", "calf", "hamstring", "bicep", "tricep",
+"heel", "finger nail", "toenail", "scrotum", "bladder", "liver", "heart",
+"brain", "gums", "tongue", "floss", "toothbrush", "toothpaste", "skull", "bone",
+"gift", "money", "wallet", "chest", "breast", "spine", "glass"]
+'''
 
 EMOTIONS = ["happiness", "ecstacy", "sadness", "sorrow/grief", "depression",
 			"fear", "terror", "disgust", "anger", "indignation", "hatred",
-			"love", "anxiety", "relief", "shame", "pride", "envy", "goodwill", 
-			"confusion", "clarity", "stress", "relaxation", "caution", 
-			"rashness", "kindness", "pity", "cruelty", "courage", "cowardice",
-			"wonder", "boredom"]
+			"love", "anxiety", "relief", "shame", "pride", "envy", "goodwill"]
+'''
+"confusion", "clarity", "stress", "relaxation", "caution", 
+"rashness", "kindness", "pity", "cruelty", "courage", "cowardice",
+"wonder", "boredom"]
+'''
 
 SENSATIONS = ["pain", "discomfort", "pleasure", "orgasm", "taste", "color",
-			  "red", "yellow", "green", "blue", "white", "black", "violet", 
-			  "orange", "pink", "brown", "purple", "sour", "sweet", "salty",
-			  "bitter", "umami", "comfort", "heat", "cold", "numbness",
-			  "thirst", "hunger"]
+			  "red", "yellow", "green", "blue", "white", "black", "violet"]
+'''
+"orange", "pink", "brown", "purple", "sour", "sweet", "salty",
+"bitter", "umami", "comfort", "heat", "cold", "numbness",
+"thirst", "hunger"]
+'''
 
 TAGS['type'] = TYPES
 TAGS['being'] = BEINGS
