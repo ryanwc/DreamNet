@@ -12,7 +12,7 @@ By understanding our subconscious, we understand a large contributor to the reas
 
 To get started using the app, go to the following address:
 
-[http://dream-net.appspot.com/home]
+http://dream-net-1380.appspot.com/home
 
 Beware, this is in "Alpha" testing phase, and I can't make guarantees your data will be saved.
 
