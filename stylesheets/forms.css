@@ -1,8 +1,14 @@
+html {
+	position: relative;
+	min-height: 100%;
+}
+
 .container {
 	max-width: 800px;
 }
 
 body {
+	margin-bottom: 60px;
 	background-color: #8080ff;
 	text-shadow: 1px 1px #000000;
 	color: white;
@@ -521,3 +527,14 @@ a {
 	padding-top: 5px;
 }
 
+/* footer should stick to bottom */
+.footer {
+  position: absolute;
+  text-align: center;
+  bottom: 0;
+  width: 100%;
+  padding-left: 15px;
+  padding-right: 15px;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+}

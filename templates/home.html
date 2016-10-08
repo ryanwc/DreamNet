@@ -67,7 +67,7 @@
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row lastelement">
 			<div class="col-xs-12">
 				<div class="awarenesslevel">
 					<a href="{{url_for('likedream', id=dream.key().id()|string)}}" id="awarenessbutton"><img class="likedream" id="awarenessicon" src="/images/awareness.svg" alt="[awareness.sgv]"></a>
@@ -83,6 +83,16 @@
 {% endblock %}
 
 {% block footer %}
-<!-- no footer -->
+
+	<div class="footer">
+
+		<p>
+			Created by <a href="https://github.com/ryanwc">Ryan William Connor</a> in July 2016.
+			<br>
+			Copyright © 2016 Ryan William Connor. All rights reserved.
+		</p>
+
+	</div>
+
 {% endblock %}
 

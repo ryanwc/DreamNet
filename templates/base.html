@@ -5,11 +5,11 @@
 
 		{% block head %}
 
+		<!-- ensure CSS media queries match the dimensions of the actual device, not the "zoomed out" device as the device zooms out to try and show everything at once -->
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
        	<link type="text/css" rel="stylesheet" href="/stylesheets/bootstrap.min.css">
 		<link type="text/css" rel="stylesheet" href="/stylesheets/home.css">
-		<title>
-			Base Template
-		</title>
 
 		{% endblock %}
 	</head>
@@ -25,35 +25,35 @@
 			{% endblock %}
 			<!-- end block for main page content -->
 
-			<!-- start footer -->
-			{% block footer %}
-			<div class="nondream">
-
-				<div class="row">
-					<div class="col-xs-12">
-						<h4 class="dreamheader">Menu</h4>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-xs-12">
-						<p>
-							<a class="dreamlink" href="{{url_for('index')}}">Home</a> | 
-							{% if username %}
-								<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
-							{% else %}
-								<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a class="dreamlink" href="{{url_for('signin')}}">Sign in to an existing account</a>
-							{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
-						</p>
-					</div>
-				</div>
-
-			</div>
-			{% endblock %}
-			<!-- end footer -->
-
 		</div>
 		<!-- end bootstrap container -->
+
+			<!-- start footer -->
+			{% block footer %}
+
+				<div class="footer">
+
+					<h4 class="dreamheader">Menu</h4>
+
+					<p>
+						<a class="dreamlink" href="{{url_for('index')}}">Home</a> | 
+						{% if username %}
+							<a class="dreamlink" href="{{url_for('logout')}}">Sign out</a>
+						{% else %}
+							<a class="dreamlink" href="{{url_for('register')}}">Register a new account</a> | <a class="dreamlink" href="{{url_for('signin')}}">Sign in to an existing account</a>
+						{% endif %} | <a class="dreamlink" href="{{url_for('about')}}">About DreamNet</a>
+					</p>
+
+					<p>
+						Created by <a href="https://github.com/ryanwc">Ryan William Connor</a> in July 2016.
+						<br>
+						Copyright © 2016 Ryan William Connor. All rights reserved.
+					</p>
+
+				</div>
+
+			{% endblock %}
+			<!-- end footer -->
 
 		{% block scripts %}
 

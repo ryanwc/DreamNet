@@ -1,6 +1,12 @@
 /* globals */
 
+html {
+	position: relative;
+	min-height: 100%;
+}
+
 body {
+	margin-bottom: 60px;
 	background-color: #8080ff;
 	color: white;
 	text-shadow: 1px 1px #000000;
@@ -180,3 +186,14 @@ a {
 	display: none !important;
 }
 
+/* footer should stick to bottom */
+.footer {
+  position: absolute;
+  text-align: center;
+  bottom: 0;
+  width: 100%;
+  padding-left: 15px;
+  padding-right: 15px;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+}

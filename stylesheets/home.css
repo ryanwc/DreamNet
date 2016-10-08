@@ -1,9 +1,23 @@
 /* globals */
 
+html {
+	position: relative;
+	min-height: 100%;
+}
+
 body {
+	margin-bottom: 60px;
 	background-color: black;
 	color: white;
 	font-family: "Garamond";
+}
+
+#containerwrapper {
+	min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    /* Negative indent footer by it's height */
+    margin: 0 auto -30px;
 }
 
 a {
@@ -129,4 +143,16 @@ a {
 #headerlogoicon {
 	width: 120px;
 
+}
+
+/* footer should stick to bottom */
+.footer {
+  position: absolute;
+  text-align: center;
+  bottom: 0;
+  width: 100%;
+  padding-left: 15px;
+  padding-right: 15px;
+  /* Set the fixed height of the footer here */
+  height: 60px;
 }
